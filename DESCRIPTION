@@ -1,8 +1,8 @@
 Package: cvtmleAUC
-Title: Competing Risk Ensembles Through Meta Learning
+Title: Cross-validated TML estimates of cross-validated area under the receiver operating characteristic curve
 Version: 0.0.0.9000
 Authors@R: person("David", "Benkeser", email = "benkeser@emory.edu", role = c("aut", "cre"))
-Description: Creates ensemble predictions for outcomes in settings with competing risks through meta learning. 
+Description: Cross-validated targeted minimum loss-based estimates of cross-validated area under the receiver operating characteristic curve (TO DO: add citations)
 Depends: 
 	R (>= 3.2.0),
 	SuperLearner,
