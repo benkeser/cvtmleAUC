@@ -1,0 +1,12 @@
+Package: cvtmleAUC
+Title: Competing Risk Ensembles Through Meta Learning
+Version: 0.0.0.9000
+Authors@R: person("David", "Benkeser", email = "benkeser@emory.edu", role = c("aut", "cre"))
+Description: Creates ensemble predictions for outcomes in settings with competing risks through meta learning. 
+Depends: 
+	R (>= 3.2.0),
+	SuperLearner,
+	cvAUC
+License: MIT
+Encoding: UTF-8
+LazyData: true
