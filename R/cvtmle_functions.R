@@ -163,6 +163,7 @@ cvauc_cvtmle <- function(Y, X, K, learner = "glm_wrapper",
     # format output
     out <- list()
     out$est <- tmle_auc[iter]
+    out$iter <- iter
     out$est_trace <- tmle_auc
     out$se <- sqrt(var(ic)/n)
     out$est_init <- init_auc

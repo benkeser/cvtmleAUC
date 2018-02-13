@@ -21,7 +21,7 @@ if(length(args) < 1){
 ns <- c(100,200,500,1000)
 bigB <- 500
 K <- c(5,10,20,30)
-
+p <- 200
 parm <- expand.grid(seed=1:bigB,
                     n=ns, K = K)
 
@@ -43,7 +43,7 @@ if (args[1] == 'listsize') {
 if (args[1] == 'prepare') {
   for(i in 1:nrow(parm)){
      set.seed(parm$seed[i])
-     dat <- makeData(n = parm$n[i], p = 20)
+     dat <- makeData(n = parm$n[i], p = p)
      save(dat, file=paste0("~/cvtmleauc/scratch/dataList",
                            "_n=",parm$n[i],
                            "_K=",parm$K[i],
@@ -71,9 +71,20 @@ if (args[1] == 'run') {
     # set seed
     set.seed(parm$seed[i])
 
+    # get tmle and regular estimates
     fit <- cvauc_cvtmle(Y = dat$Y, X = dat$X, K = parm$K[i], 
                         learner = "glmnet_wrapper")
-    
+    # get truth
+    N <- 5e5
+    bigdat <- makeData(n = N, p = p)
+    big_valid_pred_list <- lapply(fit$models, function(x){
+      predict(x, newx = bigdat$X, type = "response")
+    })
+    big_label_list <- rep(list(bigdat$Y), parm$K[i])
+    true_cvauc <- mean(cvAUC::AUC(predictions = big_valid_pred_list,
+                            labels = big_label_list))
+
+    out <- 
 
     # save output 
     save(out, file = paste0("~/cvtmleauc/out/out_n=",
