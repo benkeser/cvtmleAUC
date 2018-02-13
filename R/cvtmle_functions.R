@@ -375,7 +375,7 @@ F_nBn_star <- function(psi_x, y, Psi_nBn_0, Y_Bn, epsilon = 0){
 #' @param Y The outcome
 #' @param X The predictors
 #' @param K The number of folds
-#' @parallel Whether to compute things in parallel using future
+#' @param parallel Whether to compute things in parallel using future
 #' 
 #' @return A list of the result of the wrapper executed in each fold
 .getPredictions <- function(learner, Y, X, K, folds, parallel){

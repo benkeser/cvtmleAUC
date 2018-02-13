@@ -18,6 +18,7 @@ glm_wrapper <- function(train, test){
                 model = glm_fit, train_y = train$Y, test_y = test$Y))
 }
 
+#' Wrapper for fitting lasso 
 #' @param train ...
 #' @param test ...
 #' @return A list

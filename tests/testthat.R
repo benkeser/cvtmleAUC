@@ -1,4 +1,4 @@
 library(testthat)
-library(survtmle)
+library(cvtmleAUC)
 
-test_check("survtmle")
+test_check("cvtmleAUC")
