@@ -67,83 +67,23 @@ devtools::install_github("benkeser/cvtmleAUC", ref = "develop")
 If you encounter any bugs or have any specific feature requests, please [file an
 issue](https://github.com/benkeser/cvtmleAUC/issues).
 
----
-<!-- 
+
 ## Example
-
-This minimal example shows how to use `cvtmleAUC` to obtain cumulative incidence
-estimates with a very simple, simulated data set.
-
-```{r example, fig.align='center'}
-# simulate data
-set.seed(341796)
-n <- 100
-t_0 <- 10
-W <- data.frame(W1 = runif(n), W2 = rbinom(n, 1, 0.5))
-A <- rbinom(n, 1, 0.5)
-T <- rgeom(n,plogis(-4 + W$W1 * W$W2 - A)) + 1
-C <- rgeom(n, plogis(-6 + W$W1)) + 1
-ftime <- pmin(T, C)
-ftype <- as.numeric(ftime == T)
-
-# load the package
-library(cvtmleAUC)
-
-# apply cvtmleAUC for estimation
-fit <- cvtmleAUC(ftime = ftime, ftype = ftype,
-                trt = A, adjustVars = W,
-                glm.trt = "1",
-                glm.ftime = "I(W1*W2) + trt + t",
-                glm.ctime = "W1 + t", method = "hazard",
-                t0 = t_0)
-
-# extract cumulative incidence at each timepoint
-tpfit <- timepoints(fit, times = seq_len(t_0))
-
-# examine output object produced by the timepoints function
-tpfit
-
-# examine plot of cumulative incidences
-plot(tpfit)
-```
 
 ---
 
 ## Contributions
 
-Contributions are very welcome. Interested contributors can consult our [`contribution guidelines`](https://github.com/benkeser/cvtmleAUC/blob/master/CONTRIBUTING.md) prior to submitting a pull request.
+Interested contributors can consult our [`contribution guidelines`](https://github.com/benkeser/cvtmleAUC/blob/master/CONTRIBUTING.md) prior to submitting a pull request.
 
 ---
 
-## Citation
-
-After using the `cvtmleAUC` R package, please cite both of the following:
-
-        @misc{benkeser2017cvtmleAUC,
-          author = {Benkeser, David C and Hejazi, Nima S},
-          title = {{cvtmleAUC}: Targeted Minimum Loss-Based Estimation for
-                   Survival Analysis in {R}},
-          year  = {2017},
-          howpublished = {\url{https://github.com/benkeser/cvtmleAUC}},
-          url = {http://dx.doi.org/10.5281/zenodo.835868},
-          doi = {10.5281/zenodo.835868}
-        }
-
-        @article{benkeser2017improved,
-          author = {Benkeser, David C and Carone, Marco and Gilbert, Peter B},
-          title = {Improved estimation of the cumulative incidence of rare
-                   outcomes},
-          journal = {Statistics in Medicine},
-          publisher = {Wiley-Blackwell},
-          year  = {2017},
-          doi = {10.1002/sim.7337}
-        }
-
+## Citation 
 --- -->
 
 ## License
 
-&copy; 2016-2017 [David C. Benkeser](http://www.benkeserstatistics.com)
+&copy; 2016-2018 [David C. Benkeser](http://www.benkeserstatistics.com)
 
 The contents of this repository are distributed under the MIT license. See
 below for details:
