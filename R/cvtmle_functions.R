@@ -28,7 +28,7 @@ cvauc_cvtmle <- function(Y, X, K, learner = "glm_wrapper",
                          ...){
   n <- length(Y)
   set.seed(seed)
-  folds <- SuperLearner::CVFolds(N = n, id = 1:n, Y = Y, 
+  folds <- SuperLearner::CVFolds(N = n, id = NULL, Y = Y, 
                                  cvControl = list(V = K, stratifyCV = TRUE, 
                                     shuffle = TRUE, validRows = NULL))
   prediction_list <- .getPredictions(learner = learner, Y = Y, X = X, 
