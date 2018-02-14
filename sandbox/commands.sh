@@ -11,7 +11,7 @@ scp cent.R sce.sh makeData.R dbenkese@rhino.fhcrc.org:~/cvtmleauc
 ssh dbenkese@rhino.fhcrc.org
 cd cvtmleauc
 chmod +x cent* sce*
-./sce.sh ./cent.R noboot_v4
+./sce.sh ./cent.R run_v5
 
 #-----------------------------------------
 # commands to get into rhino and load R

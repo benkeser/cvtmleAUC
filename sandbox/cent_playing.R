@@ -18,12 +18,16 @@ if(length(args) < 1){
   stop("Not enough arguments. Please use args 'listsize', 'prepare', 'run <itemsize>' or 'merge'")
 }
 
-ns <- c(100,200,500,1000)
-bigB <- 500
-K <- c(5,10,20,30)
+# ns <- c(100,200,500,1000)
+# bigB <- 500
+# K <- c(5,10,20,30)
+ns <- c(200)
+bigB <- 10
+K <- 20
 p <- 50
 parm <- expand.grid(seed=1:bigB,
                     n=ns, K = K)
+i <- 1
 
 # parm <- parm[1,,drop=FALSE]
 # source in simulation Functions
@@ -64,11 +68,13 @@ if (args[1] == 'run') {
     print(parm[i,])
     
     # load data
-    load(paste0("~/cvtmleauc/scratch/dataList_n=",parm$n[i],
-                "_seed=",parm$seed[i], ".RData"))
-    
+    # load(paste0("~/cvtmleauc/scratch/dataList_n=",parm$n[i],
+    #             "_seed=",parm$seed[i], ".RData"))
+    do.one <- function(){
     # set seed
-    set.seed(parm$seed[i])
+    # set.seed(parm$seed[i])
+
+    dat <- makeData(n = parm$n[i], p = p)
 
     # get tmle and regular estimates
     fit <- cvauc_cvtmle(Y = dat$Y, X = dat$X, K = parm$K[i], 
@@ -90,6 +96,10 @@ if (args[1] == 'run') {
 
     out <- c(fit$est, fit$se, fit$iter, fit$est_init, 
              fit$est_empirical, true_cvauc, true_auc_fullmodel)
+    return(out)
+    }
+    system.time(do.one())
+    rslt <- replicate(10, do.one)
 
     # save output 
     save(out, file = paste0("~/cvtmleauc/out/out_n=",

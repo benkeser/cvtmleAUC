@@ -45,14 +45,17 @@ cvauc_cvtmle <- function(Y, X, K, learner = "glm_wrapper",
   # full_long_data$logit_Fn <- SuperLearner::trimLogit(full_long_data$Fn, .Machine$double.neg.eps)
   
   # targeting
-  PnDstar <- Inf
   epsilon_0 <- rep(0, maxIter)
   epsilon_1 <- rep(0, maxIter)
   iter <- 0
   update_long_data_list <- long_data_list
   # combine list into data frame
   full_long_data <- Reduce(rbind, update_long_data_list)
-  
+  # compute mean of EIF
+  D1 <- .Dy(full_long_data, y = 1)
+  D0 <- .Dy(full_long_data, y = 0)
+  ic <- D1 + D0 
+  PnDstar <- mean(ic)
 
   # compute initial estimate of cvAUC
   # compute estimated cv-AUC 
@@ -64,9 +67,10 @@ cvauc_cvtmle <- function(Y, X, K, learner = "glm_wrapper",
   # get AUC
   init_auc <- mean(mapply(FUN = .getAUC, dist_y0 = dist_psix_y0_star, 
                      dist_y1 = dist_psix_y1_star))
+  est_onestep <- init_auc + PnDstar
 
   tmle_auc <- rep(NA, maxIter)
-
+  PnDstar <- Inf
   while(PnDstar > icTol & iter < maxIter){
     iter <- iter + 1
     # targeting with different epsilon
@@ -168,6 +172,7 @@ cvauc_cvtmle <- function(Y, X, K, learner = "glm_wrapper",
     out$se <- sqrt(var(ic)/n)
     out$est_init <- init_auc
     out$est_empirical <- regular_cvauc
+    out$est_onestep <- est_onestep
     out$models <- lapply(prediction_list, "[[", "model")
     return(out)
 }
@@ -178,7 +183,7 @@ cvauc_cvtmle <- function(Y, X, K, learner = "glm_wrapper",
 #' @return Vector of EIF
 .Dy <- function(full_long_data, y){
   by(full_long_data, full_long_data$id, function(x){
-    sum(as.numeric(x$Y == y)/(x$gn) * (x$outcome - x$Fn) * x$dFn)
+    sum((-1)^y * as.numeric(x$Y == y)/(x$gn) * (x$outcome - x$Fn) * x$dFn)
   })
 }
 
