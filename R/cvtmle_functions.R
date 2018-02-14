@@ -12,7 +12,7 @@
 #' efficient influence function is less than \code{icTol}
 #' @param ... other arguments, not currently used
 #' @importFrom SuperLearner CVFolds
-#' @importFrom cvAUC AUC
+#' @importFrom cvAUC ci.cvAUC
 #' @export
 #' @return A list
 #' @examples
@@ -68,7 +68,7 @@ cvauc_cvtmle <- function(Y, X, K, learner = "glm_wrapper",
   init_auc <- mean(mapply(FUN = .getAUC, dist_y0 = dist_psix_y0_star, 
                      dist_y1 = dist_psix_y1_star))
   est_onestep <- init_auc + PnDstar
-
+  se_onestep <- sqrt(var(ic)/n)
   tmle_auc <- rep(NA, maxIter)
   PnDstar <- Inf
   while(PnDstar > icTol & iter < maxIter){
@@ -148,9 +148,10 @@ cvauc_cvtmle <- function(Y, X, K, learner = "glm_wrapper",
     # compute regular cvAUC
     valid_pred_list <- lapply(prediction_list, "[[", "psi_nBn_testx")
     valid_label_list <- lapply(prediction_list, "[[", "test_y")
-    regular_cvauc <- mean(cvAUC::AUC(predictions = valid_pred_list,
+    regular_cvauc <- mean(cvAUC::ci.cvAUC(predictions = valid_pred_list,
                                 labels = valid_label_list))
-
+    est_empirical <- regular_cvauc$cvAUC
+    se_empirical <- regular_cvauc$se
     # # true CV AUC
     # N <- 1e5
     # p <- 100
@@ -171,8 +172,11 @@ cvauc_cvtmle <- function(Y, X, K, learner = "glm_wrapper",
     out$est_trace <- tmle_auc
     out$se <- sqrt(var(ic)/n)
     out$est_init <- init_auc
-    out$est_empirical <- regular_cvauc
+    out$est_empirical <- est_empirical
+    out$se_empirical <- se_empirical
     out$est_onestep <- est_onestep
+    out$se_onestep <- se_onestep
+
     out$models <- lapply(prediction_list, "[[", "model")
     return(out)
 }
