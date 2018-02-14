@@ -148,8 +148,8 @@ cvauc_cvtmle <- function(Y, X, K, learner = "glm_wrapper",
     # compute regular cvAUC
     valid_pred_list <- lapply(prediction_list, "[[", "psi_nBn_testx")
     valid_label_list <- lapply(prediction_list, "[[", "test_y")
-    regular_cvauc <- mean(cvAUC::ci.cvAUC(predictions = valid_pred_list,
-                                labels = valid_label_list))
+    regular_cvauc <- cvAUC::ci.cvAUC(predictions = valid_pred_list,
+                                labels = valid_label_list)
     est_empirical <- regular_cvauc$cvAUC
     se_empirical <- regular_cvauc$se
     # # true CV AUC

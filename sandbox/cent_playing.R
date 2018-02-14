@@ -24,7 +24,7 @@ if(length(args) < 1){
 ns <- c(200)
 bigB <- 10
 K <- 20
-p <- 50
+p <- 30
 parm <- expand.grid(seed=1:bigB,
                     n=ns, K = K)
 i <- 1
