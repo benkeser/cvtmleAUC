@@ -4,6 +4,32 @@
 #' @param test ...
 #' @return A list
 #' @export
+#' @importFrom SuperLearner SuperLearner 
+#' @importFrom stats predict
+#' @examples
+#' # TO DO: Add
+superlearner_wrapper <- function(train, test,
+                                 SL.library = c("SL.glm","SL.mean","SL.randomForest"), 
+                                 ...){
+    sl_fit <- SuperLearner::SuperLearner(Y = train$Y, 
+                                         X = train$X, SL.library = SL.library,
+                                         newX = rbind(test$X,train$X),
+                                         family = binomial())
+    all_pred <- sl_fit$SL.pred
+    ntest <- length(test$Y)
+    ntrain <- length(train$Y)
+    psi_nBn_testx <- all_pred[1:ntest]
+    psi_nBn_trainx <- all_pred[(ntest+1):(ntest+ntrain)]
+    return(list(psi_nBn_trainx = psi_nBn_trainx, psi_nBn_testx = psi_nBn_testx,
+                model = sl_fit, train_y = train$Y, test_y = test$Y))
+}
+
+#' Wrapper for fitting a main terms random forest
+#' 
+#' @param train ...
+#' @param test ...
+#' @return A list
+#' @export
 #' @importFrom randomForest randomForest 
 #' @importFrom stats predict
 #' @examples
