@@ -13,6 +13,7 @@
 #' @param ... other arguments, not currently used
 #' @importFrom SuperLearner CVFolds
 #' @importFrom cvAUC ci.cvAUC
+#' @importFrom stats uniroot
 #' @export
 #' @return A list
 #' @examples
@@ -35,8 +36,8 @@ cvauc_cvtmle <- function(Y, X, K, learner = "glm_wrapper",
                                  K = K, folds=folds, parallel = FALSE)
 
   # initial distributions of psi in training samples
-  dist_psix_y0 <- lapply(prediction_list, .getPsiDistribution, y = 0)
-  dist_psix_y1 <- lapply(prediction_list, .getPsiDistribution, y = 1)
+  # dist_psix_y0 <- lapply(prediction_list, .getPsiDistribution, y = 0)
+  # dist_psix_y1 <- lapply(prediction_list, .getPsiDistribution, y = 1)
   
   # make long data for targeting step
   long_data_list <- lapply(prediction_list, .makeLongData, gn = mean(Y))
@@ -69,9 +70,15 @@ cvauc_cvtmle <- function(Y, X, K, learner = "glm_wrapper",
                      dist_y1 = dist_psix_y1_star))
   est_onestep <- init_auc + PnDstar
   se_onestep <- sqrt(var(ic)/n)
+
+  # estimating equations
+  est_esteq <- stats::uniroot(.estimatingFn, interval = c(0, 1), 
+                   prediction_list = prediction_list, gn = mean(Y))$root
+  se_esteq <- se_onestep
+
   tmle_auc <- rep(NA, maxIter)
   PnDstar <- Inf
-  while(PnDstar > icTol & iter < maxIter){
+  while(abs(PnDstar) > icTol & iter < maxIter){
     iter <- iter + 1
     # targeting with different epsilon
     # if(TRUE){
@@ -88,8 +95,22 @@ cvauc_cvtmle <- function(Y, X, K, learner = "glm_wrapper",
                         weights = full_long_data$targeting_weight_0[full_long_data$Yi == 0],
                         start = 0)
     )
-    # update values in long_data_list
     epsilon_0[iter] <- as.numeric(fluc_mod_0$coef[1])
+    # if unstable glm fit refit using optim
+    coef_tol <- 1e2
+    if(abs(fluc_mod_0$coef) > coef_tol){
+      # try a grid search
+      eps_seq <- seq(-coef_tol, coef_tol, length = 1000)
+      llik0 <- sapply(eps_seq, fluc_mod_optim_0, fld = full_long_data[full_long_data$Yi == 0,])
+      idx_min <- which.min(llik0)
+      epsilon_0[iter] <- eps_seq[idx_min]      
+      # fluc_mod_0 <- optim(fluc_mod_optim_0, method = "Brent", par = 0, 
+      #         fld = full_long_data[full_long_data$Yi == 0,],
+      #         lower = -coef_tol, upper = coef_tol, 
+      #         control = list(reltol = 1e-14))
+      # epsilon_0[iter] <- as.numeric(fluc_mod_0$par)
+    }
+    # update values in long_data_list
     update_long_data_list <- lapply(prediction_list, .makeLongData, gn = mean(Y),
                              epsilon_0 = epsilon_0, epsilon_1 = epsilon_1,
                              update = TRUE)
@@ -111,6 +132,17 @@ cvauc_cvtmle <- function(Y, X, K, learner = "glm_wrapper",
     )
     # update values in long_data_list
     epsilon_1[iter] <- as.numeric(fluc_mod_1$coef[1])
+    if(abs(fluc_mod_1$coef) > coef_tol){
+      eps_seq <- seq(-coef_tol, coef_tol, length = 1000)
+      llik1 <- sapply(eps_seq, fluc_mod_optim_1, fld = full_long_data[full_long_data$Yi == 1,])
+      idx_min <- which.min(llik1)
+      epsilon_1[iter] <- eps_seq[idx_min] 
+      # fluc_mod_1 <- optim(fluc_mod_optim_1, method = "Brent", par = 0, 
+      #         fld = full_long_data[full_long_data$Yi == 1,],
+      #         lower = -coef_tol, upper = coef_tol, 
+      #         control = list(reltol = 1e-14))
+      # epsilon_1[iter] <- as.numeric(fluc_mod_1$par)
+    }
     update_long_data_list <- lapply(prediction_list, .makeLongData, gn = mean(Y),
                              epsilon_0 = epsilon_0, epsilon_1 = epsilon_1,
                              update = TRUE)
@@ -167,19 +199,68 @@ cvauc_cvtmle <- function(Y, X, K, learner = "glm_wrapper",
 
     # format output
     out <- list()
-    out$est <- tmle_auc[iter]
-    out$iter <- iter
-    out$est_trace <- tmle_auc
-    out$se <- sqrt(var(ic)/n)
+    out$est_cvtmle <- tmle_auc[iter]
+    out$iter_cvtmle <- iter
+    out$cvtmle_trace <- tmle_auc
+    out$se_cvtmle <- sqrt(var(ic)/n)
     out$est_init <- init_auc
     out$est_empirical <- est_empirical
     out$se_empirical <- se_empirical
     out$est_onestep <- est_onestep
     out$se_onestep <- se_onestep
+    out$est_esteq <- est_esteq
+    out$se_esteq <- se_esteq
 
     out$models <- lapply(prediction_list, "[[", "model")
+    class(out) <- "cvauc"
     return(out)
 }
+
+#' Alternative fluctuation routine 
+#' @param epsilon Fluctuation parameter 
+#' @param fld full_long_data_list
+fluc_mod_optim_0 <- function(epsilon, fld, tol = 1e-3){
+  p_eps <- plogis(fld$logit_Fn + epsilon)
+  p_eps[p_eps == 1] <- 1 - tol
+  p_eps[p_eps == 0] <- tol
+  loglik <- -sum(fld$targeting_weight_0 * (fld$outcome * log(p_eps) + (1-fld$outcome) * log(1 - p_eps)))
+  return(loglik)
+}
+#' Alternative fluctuation routine 
+#' @param epsilon Fluctuation parameter 
+#' @param fld full_long_data_list
+fluc_mod_optim_1 <- function(epsilon, fld, tol = 1e-3){
+  p_eps <- plogis(fld$logit_Fn + epsilon)
+  p_eps[p_eps == 1] <- 1 - tol
+  p_eps[p_eps == 0] <- tol
+  loglik <- -sum(fld$targeting_weight_1 * (fld$outcome * log(p_eps) + (1-fld$outcome) * log(1 - p_eps)))
+  return(loglik)
+}
+
+#' An estimating function for cvAUC
+#' @param auc The value of auc to find root for
+#' @param prediction_list Entry in prediction_list
+#' @param gn Marginal probability of outcome
+.estimatingFn <- function(auc = 0.5, prediction_list, gn){
+  # get first influence function piece for everyone
+  ic_1 <- 
+  Reduce("c",lapply(prediction_list, function(x){
+    thisFn <- sapply(1:length(x$test_y), function(i){
+      ifelse(x$test_y[i] == 1, 
+             F_nBn_star(x$psi_nBn_testx[i], y = 0, Psi_nBn_0 = x$psi_nBn_trainx,
+                        Y_Bn = x$train_y)/ gn , 
+             (1 - F_nBn_star(x$psi_nBn_testx[i], y = 1, Psi_nBn_0 = x$psi_nBn_trainx,
+                        Y_Bn = x$train_y))/(1 - gn))
+    })
+  }))
+  all_y <- unlist(lapply(prediction_list, "[[", "test_y"))
+  ic_2 <- rep(0, length(all_y))
+  ic_2[all_y == 0] <- - auc / (1 - gn)
+  ic_2[all_y == 1] <- - auc / gn
+  return(mean(ic_1 + ic_2))
+}
+
+# uniroot(.estimatingFn, interval = c(0, 1), prediction_list = prediction_list, gn = mean(Y))
 
 #' Compute a portion of the efficient influence function
 #' @param full_long_data A long form data set
@@ -198,8 +279,11 @@ cvauc_cvtmle <- function(Y, X, K, learner = "glm_wrapper",
 #' @param Y_Bn Values of Y from training sample
 #' @param epsilon Vector of fluctuation parameter estimates
 #' @return Numeric value of CDF
-F_nBn_star <- function(psi_x, y, Psi_nBn_0, Y_Bn, epsilon = 0){
-  plogis(SuperLearner::trimLogit(mean(Psi_nBn_0[Y_Bn == y] <= psi_x), .Machine$double.neg.eps) +
+F_nBn_star <- function(psi_x, y, Psi_nBn_0, Y_Bn, epsilon = 0, 
+                       # tol = .Machine$double.neg.eps
+                       tol = 1e-3
+                       ){
+  plogis(SuperLearner::trimLogit(mean(Psi_nBn_0[Y_Bn %in% y] <= psi_x), tol) +
           sum(epsilon))
 }
 
@@ -228,7 +312,10 @@ F_nBn_star <- function(psi_x, y, Psi_nBn_0, Y_Bn, epsilon = 0){
 #' that psix <= u), logit_Fn (the cdf estimate on the logit scale, needed for 
 #' offset in targeting model).
 
-.makeLongData <- function(x, gn, update = FALSE, epsilon_0 = 0, epsilon_1 = 0){
+.makeLongData <- function(x, gn, update = FALSE, epsilon_0 = 0, epsilon_1 = 0,
+                          # tol = .Machine$double.neg.eps, 
+                          tol = 1e-3
+                          ){
   # first the dumb way, writing a loop over x$psi_nBn_testx
   uniq_train_psi_y0 <- sort(unique(x$psi_nBn_trainx[x$train_y == 0]))
   uniq_train_psi_y1 <- sort(unique(x$psi_nBn_trainx[x$train_y == 1]))
@@ -238,11 +325,13 @@ F_nBn_star <- function(psi_x, y, Psi_nBn_0, Y_Bn, epsilon = 0){
   n_valid <- length(x$psi_nBn_testx)
   n_train <- length(x$psi_nBn_trainx)
   n1_train <- sum(x$train_y)
+  n1_uniq_train <- length(uniq_train_psi_y1)
   n0_train <- n_train - n1_train
+  n0_uniq_train <- length(uniq_train_psi_y0)
   n1_valid <- sum(x$test_y)
   n0_valid <- n_valid - n1_valid
   valid_ids <- as.numeric(names(x$psi_nBn_testx))
-  tot_length <- n1_valid * n0_train + n0_valid * n1_train
+  tot_length <- n1_valid * n0_uniq_train + n0_valid * n1_uniq_train
 
   idVec <- rep(NA, tot_length)
   uVec <- rep(NA, tot_length)
@@ -290,7 +379,7 @@ F_nBn_star <- function(psi_x, y, Psi_nBn_0, Y_Bn, epsilon = 0){
   cur_start <- 1
   for(i in seq_len(n_valid)){
     if(x$test_y[i] == 0){
-      cur_end <- cur_start + n1_train - 1
+      cur_end <- cur_start + n1_uniq_train - 1
       idVec[cur_start:cur_end] <- x$valid_ids[i]
       # ordered unique values of psi in training | y = 1
       uVec[cur_start:cur_end] <- uniq_train_psi_y1
@@ -303,7 +392,7 @@ F_nBn_star <- function(psi_x, y, Psi_nBn_0, Y_Bn, epsilon = 0){
       # vector of this psi
       psiVec[cur_start:cur_end] <- x$psi_nBn_testx[i]
     }else{
-      cur_end <- cur_start + n0_train - 1
+      cur_end <- cur_start + n0_uniq_train - 1
       idVec[cur_start:cur_end] <- x$valid_ids[i]
       # ordered unique values of psi in training | y = 0
       uVec[cur_start:cur_end] <- uniq_train_psi_y0
@@ -330,7 +419,7 @@ F_nBn_star <- function(psi_x, y, Psi_nBn_0, Y_Bn, epsilon = 0){
   # add in "outcome"
   out$outcome <- as.numeric(out$psi <= out$u)
   # add in logit(Fn)
-  out$logit_Fn <- SuperLearner::trimLogit(out$Fn, .Machine$double.neg.eps)
+  out$logit_Fn <- SuperLearner::trimLogit(out$Fn, tol)
   return(out)
 }
 

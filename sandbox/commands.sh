@@ -11,7 +11,7 @@ scp cent.R sce.sh makeData.R dbenkese@rhino.fhcrc.org:~/cvtmleauc
 ssh dbenkese@rhino.fhcrc.org
 cd cvtmleauc
 chmod +x cent* sce*
-./sce.sh ./cent.R run_v5
+./sce.sh ./cent.R run_v9
 
 #-----------------------------------------
 # commands to get into rhino and load R
@@ -31,7 +31,7 @@ scp allOut.RData dbenkese@snail.fhcrc.org:~/cvtmleauc
 	# enter snail password
  	# ctrl + shift + t to open up new term
 # scp to snail
-cd ~/Dropbox/Emory/cvtmleaucSieve/simulation
+cd ~/Dropbox/R/cvtmleauc/sandbox/simulation
 scp dbenkese@snail.fhcrc.org:~/cvtmleauc/allOut.RData . 
 
 #-----------------------------------------

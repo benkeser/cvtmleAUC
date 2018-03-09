@@ -21,10 +21,10 @@ if(length(args) < 1){
 # ns <- c(100,200,500,1000)
 # bigB <- 500
 # K <- c(5,10,20,30)
-ns <- c(200)
+ns <- c(100)
 bigB <- 10
 K <- 20
-p <- 30
+p <- 10
 parm <- expand.grid(seed=1:bigB,
                     n=ns, K = K)
 i <- 1
@@ -73,33 +73,37 @@ if (args[1] == 'run') {
     do.one <- function(){
     # set seed
     # set.seed(parm$seed[i])
+      rslt <- matrix(NA, nrow = 50, ncol = 10)
+    for(j in 1:50){
+          set.seed(j)
 
     dat <- makeData(n = parm$n[i], p = p)
 
     # get tmle and regular estimates
     fit <- cvauc_cvtmle(Y = dat$Y, X = dat$X, K = parm$K[i], 
-                        learner = "glmnet_wrapper")
+                        learner = "glm_wrapper")
     # get true cvAUC
-    N <- 5e5
+    N <- 1e4
     bigdat <- makeData(n = N, p = p)
     big_valid_pred_list <- lapply(fit$models, function(x){
-      predict(x, newx = bigdat$X, type = "response")
+      predict(x, newdata = bigdat$X, type = "response")
     })
     big_label_list <- rep(list(bigdat$Y), parm$K[i])
     true_cvauc <- mean(cvAUC::AUC(predictions = big_valid_pred_list,
                             labels = big_label_list))
 
     # now get auc of \hat{\Psi(P_n)}
-    full_model <- glmnet_wrapper(train = dat, test = dat)
-    big_valid_pred <- predict(full_model$model, newx = bigdat$X, type = "response")
+    full_model <- glm_wrapper(train = dat, test = dat)
+    big_valid_pred <- predict(full_model$model, newdata = bigdat$X, type = "response")
     true_auc_fullmodel <- cvAUC::AUC(predictions = big_valid_pred, labels = bigdat$Y)
 
     out <- c(fit$est, fit$se, fit$iter, fit$est_init, 
-             fit$est_empirical, true_cvauc, true_auc_fullmodel)
-    return(out)
+             fit$est_onestep, fit$se_onestep,
+             fit$est_empirical, fit$se_empirical, true_cvauc, true_auc_fullmodel)
+     rslt[j,] <- out
     }
-    system.time(do.one())
-    rslt <- replicate(10, do.one)
+    # system.time(do.one())
+    rslt <- replicate(10, do.one())
 
     # save output 
     save(out, file = paste0("~/cvtmleauc/out/out_n=",

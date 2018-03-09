@@ -1,3 +1,29 @@
+#' Wrapper for fitting a main terms random forest
+#' 
+#' @param train ...
+#' @param test ...
+#' @return A list
+#' @export
+#' @importFrom randomForest randomForest 
+#' @importFrom stats predict
+#' @examples
+#' # TO DO: Add
+randomforest_wrapper <- function(train, test,
+                                 mtry = floor(sqrt(ncol(train$X))), 
+    ntree = 1000, nodesize = 1, maxnodes = NULL, importance = FALSE,...){
+    rf_fit <- randomForest::randomForest(y = as.factor(train$Y), 
+            x = train$X, ntree = ntree, xtest = rbind(test$X, train$X), 
+            keep.forest = TRUE, mtry = mtry, nodesize = nodesize, 
+            maxnodes = maxnodes, importance = importance, ...)
+    all_psi <- rf_fit$test$votes[,2]
+    ntest <- length(test$Y)
+    ntrain <- length(train$Y)
+    psi_nBn_testx <- all_psi[1:ntest]
+    psi_nBn_trainx <- all_psi[(ntest+1):(ntest+ntrain)]
+    return(list(psi_nBn_trainx = psi_nBn_trainx, psi_nBn_testx = psi_nBn_testx,
+                model = rf_fit, train_y = train$Y, test_y = test$Y))
+}
+
 #' Wrapper for fitting a main terms GLM
 #' 
 #' @param train ...

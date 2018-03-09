@@ -4,7 +4,7 @@
 \alias{F_nBn_star}
 \title{Compute the (CV)TMLE cumulative dist at psi_x}
 \usage{
-F_nBn_star(psi_x, y, Psi_nBn_0, Y_Bn, epsilon = 0)
+F_nBn_star(psi_x, y, Psi_nBn_0, Y_Bn, epsilon = 0, tol = 0.001)
 }
 \arguments{
 \item{psi_x}{Value to compute conditional (on Y=y) cdf of Psi}

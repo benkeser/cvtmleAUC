@@ -80,7 +80,7 @@ if (args[1] == 'run') {
     N <- 1e5
     bigdat <- makeData(n = N, p = p)
     big_valid_pred_list <- lapply(fit$models, function(x){
-      predict(x, newdata = bigdat$X, type = "response")
+      predict(x, newdata = bigdat$X, type = "vote")[,2]
     })
     big_label_list <- rep(list(bigdat$Y), parm$K[i])
     true_cvauc <- mean(cvAUC::AUC(predictions = big_valid_pred_list,
