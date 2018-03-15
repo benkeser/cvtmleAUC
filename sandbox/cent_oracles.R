@@ -21,11 +21,9 @@ if(length(args) < 1){
 ns <- c(100, 200, 1000)
 bigB <- 500
 K <- c(5,10,20,40)
-wrappers <- c("glm_wrapper", "stepglm_wrapper", "randomforest_wrapper", "glmnet_wrapper")
 p <- 10
 parm <- expand.grid(seed = 1:bigB,
                     n = ns, K = K, 
-                    wrapper = wrappers,
                     stringsAsFactors = FALSE)
 
 # parm <- parm[1,,drop=FALSE]
@@ -44,12 +42,12 @@ if (args[1] == 'listsize') {
 
 # execute prepare job ##################
 if (args[1] == 'prepare') {
-  parm_red <- parm[parm$K == parm$K[1] & parm$wrapper == parm$wrapper[1]]
   for(i in 1:nrow(parm)){
      set.seed(parm$seed[i])
      dat <- makeData(n = parm$n[i], p = p)
      save(dat, file=paste0("~/cvtmleauc/scratch/dataList",
                            "_n=",parm$n[i],
+                           "_K=",parm$K[i],
                            "_seed=",parm$seed[i],".RData"))
    }
    print(paste0('initial datasets saved to: ~/cvtmleauc/scratch/dataList ... .RData'))
@@ -68,10 +66,18 @@ if (args[1] == 'run') {
     print(parm[i,])
     
     # load data
-    load(paste0("~/cvtmleauc/scratch/dataList_",
-                "n=",parm$n[i],
+    suffix <- paste0("n=",parm$n[i],
+                "_K=",parm$K[i],
                 "_seed=",parm$seed[i], 
                 ".RData"))
+
+    load(paste0("~/cvtmleauc/scratch/dataList_", suffix))
+
+    # load results for each wrapper
+    wrappers <- c("glm", "stepglm", "randomforest", "glmnet")
+    for(w in wrappers){
+      eval(parse(text = paste0("out_",w," <- get(load())")))
+    }
     
     # set seed
     set.seed(parm$seed[i])

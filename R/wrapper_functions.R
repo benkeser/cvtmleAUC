@@ -108,7 +108,7 @@ stepglm_wrapper <- function(train, test){
 #' @examples
 #' # TO DO: Add
 glmnet_wrapper <- function(train, test){
-    glmnet_fit <- glmnet::cv.glmnet(x = train$X, y = train$Y,
+    glmnet_fit <- glmnet::cv.glmnet(x = data.matrix(train$X), y = train$Y,
         lambda = NULL, type.measure = "deviance", nfolds = 5, 
         family = "binomial", alpha = 1, nlambda = 100)
     Psi_nBn_0 <- function(x){
