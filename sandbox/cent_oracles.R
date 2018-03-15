@@ -18,10 +18,10 @@ if(length(args) < 1){
   stop("Not enough arguments. Please use args 'listsize', 'prepare', 'run <itemsize>' or 'merge'")
 }
 
-ns <- c(100, 200, 1000)
+ns <- c(100, 250, 500, 750)
 bigB <- 500
 K <- c(5,10,20,40)
-p <- 10
+
 parm <- expand.grid(seed = 1:bigB,
                     n = ns, K = K, 
                     stringsAsFactors = FALSE)
@@ -66,19 +66,78 @@ if (args[1] == 'run') {
     print(parm[i,])
     
     # load data
-    suffix <- paste0("n=",parm$n[i],
-                "_K=",parm$K[i],
+    data_suffix <- paste0("n=",parm$n[i],
                 "_seed=",parm$seed[i], 
-                ".RData"))
+                ".RData")
 
-    load(paste0("~/cvtmleauc/scratch/dataList_", suffix))
+    out_suffix <- paste0("n=", parm$n[i],
+                            "_seed=",parm$seed[i],
+                            "_K=",parm$K[i],
+                            "_wrapper=",parm$wrapper[i],
+                            ".RData")
 
+    load(paste0("~/cvtmleauc/scratch/dataList_", data_suffix))
+
+    N <- 1e4
+    bigdat <- makeData(n = N, p = p)
+    my_predict <- function(x, newdata){
+      if("glm" %in% class(x$model)){
+        predict(x$model, newdata = newdata, type = "response")
+      }else if("randomForest" %in% class(x$model)){
+        predict(x$model, newdata = newdata, type = "vote")[, 2]
+      }else if("cv.glmnet" %in% class(x$model)){
+        predict(x$model, newx = data.matrix(newdata), type = "response", s = "lambda.min")
+      }
+    }
     # load results for each wrapper
     wrappers <- c("glm", "stepglm", "randomforest", "glmnet")
+    rslt <- NULL
     for(w in wrappers){
-      eval(parse(text = paste0("out_",w," <- get(load())")))
+      # load wrapper results
+      eval(parse(text = paste0("out_",w," <- get(load(paste0('~/cvtmleauc/out/out_',",
+                               paste0("'n=", parm$n[i],"',"),
+                                paste0("'_seed=",parm$seed[i],"',"),
+                                paste0("'_K=",parm$K[i],"',"),
+                                paste0("'_wrapper=",paste0(w,"_wrapper"),"',"),
+                                paste0("'.RData","'"),
+                               ")))")))
+      # fit to full data
+      tmp <- do.call(paste0(w,"_wrapper"), args = list(test = dat, train = dat))
+      # compute AUC of Psi(P_n)
+      big_pred <- my_predict(x = tmp, newdata = bigdat$X)
+      true_cvauc <- mean(cvAUC::AUC(predictions = big_pred,
+                        labels = bigdat$Y))
+      rslt <- rbind(rslt, c(out, true_cvauc))
     }
+    rslt <- cbind(wrappers, data.frame(rslt))
+    colnames(rslt) <- c("learner","est_dcvtmle", "se_dcvtmle", "iter_dcvtmle",
+                        "est_dinit", "est_donestep", "se_donestep",
+                        "est_desteq","se_desteq","est_cvtmle","se_cvtmle",
+                        "iter_cvtmle","est_init", "est_onestep", "se_onestep",
+                        "est_esteq","se_esteq","est_emp","se_emp","true_cvauc",
+                        "true_dcvauc","true_auc")
+
+    est <- c("dcvtmle","donestep","desteq","cvtmle","onestep","esteq","emp")
+    cvauc_cv_select <- rep(NA, length(est))
+    bestcvauc_cv_select <- rep(NA, length(est))
+    auc_cv_select <- rep(NA, length(est))
+    bestauc_cv_select <- rep(NA, length(est))
+    ct <- 0
+    for(e in est){
+      ct <- ct + 1
+      bestcvauc <- which.max(rslt$true_cvauc)
+      bestauc <- which.max(rslt$true_auc)
+      cv_select_idx <- which.max(rslt[,paste0("est_",e)])
+      cvauc_cv_select[ct] <- rslt$true_cvauc[cv_select_idx]
+      auc_cv_select[ct] <- rslt$true_auc[cv_select_idx]
+      bestcvauc_cv_select[ct] <- as.numeric(cv_select_idx == bestcvauc)
+      bestauc_cv_select[ct] <- as.numeric(cv_select_idx == bestauc)
+    }
+
+
+
     
+
     # set seed
     set.seed(parm$seed[i])
 

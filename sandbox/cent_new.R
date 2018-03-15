@@ -18,7 +18,7 @@ if(length(args) < 1){
   stop("Not enough arguments. Please use args 'listsize', 'prepare', 'run <itemsize>' or 'merge'")
 }
 
-ns <- c(100, 200, 1000)
+ns <- c(100, 250, 500, 750)
 bigB <- 500
 K <- c(5,10,20,40)
 wrappers <- c("glm_wrapper", "stepglm_wrapper", "randomforest_wrapper", "glmnet_wrapper")
@@ -33,7 +33,7 @@ parm <- expand.grid(seed = 1:bigB,
 source("~/cvtmleauc/makeData.R")
 # load drinf
 # library(glmnet)
-devtools::install_github("benkeser/cvtmleAUC")
+# devtools::install_github("benkeser/cvtmleAUC")
 library(cvtmleAUC, lib.loc = "/home/dbenkese/R/x86_64-pc-linux-gnu-library/3.4")
 library(SuperLearner, lib.loc = '/home/dbenkese/R/x86_64-pc-linux-gnu-library/3.4')
 
@@ -44,13 +44,13 @@ if (args[1] == 'listsize') {
 
 # execute prepare job ##################
 if (args[1] == 'prepare') {
-  parm_red <- parm[parm$K == parm$K[1] & parm$wrapper == parm$wrapper[1]]
-  for(i in 1:nrow(parm)){
-     set.seed(parm$seed[i])
-     dat <- makeData(n = parm$n[i], p = p)
+  parm_red <- parm[parm$K == parm$K[1] & parm$wrapper == parm$wrapper[1],]
+  for(i in 1:nrow(parm_red)){
+     set.seed(parm_red$seed[i])
+     dat <- makeData(n = parm_red$n[i], p = p)
      save(dat, file=paste0("~/cvtmleauc/scratch/dataList",
-                           "_n=",parm$n[i],
-                           "_seed=",parm$seed[i],".RData"))
+                           "_n=",parm_red$n[i],
+                           "_seed=",parm_red$seed[i],".RData"))
    }
    print(paste0('initial datasets saved to: ~/cvtmleauc/scratch/dataList ... .RData'))
 }
@@ -97,8 +97,8 @@ if (args[1] == 'run') {
         predict(x$model, newdata = newdata, type = "response")
       }else if("randomForest" %in% class(x$model)){
         predict(x$model, newdata = newdata, type = "vote")[, 2]
-      }else if("glmnet" %in% class(x$model)){
-        predict(x$model, newx = newdata, type = "response", s = "lambda.min")
+      }else if("cv.glmnet" %in% class(x$model)){
+        predict(x$model, newx = data.matrix(newdata), type = "response", s = "lambda.min")
       }
     }
     # predictions for outer layer of CV for cvauc
