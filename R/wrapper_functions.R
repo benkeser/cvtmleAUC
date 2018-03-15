@@ -112,7 +112,7 @@ glmnet_wrapper <- function(train, test){
         lambda = NULL, type.measure = "deviance", nfolds = 5, 
         family = "binomial", alpha = 1, nlambda = 100)
     Psi_nBn_0 <- function(x){
-      stats::predict(glmnet_fit, newx = x, type = "response", s = "lambda.min")
+      stats::predict(glmnet_fit, newx = data.matrix(x), type = "response", s = "lambda.min")
     }
     psi_nBn_trainx <- Psi_nBn_0(train$X)
     psi_nBn_testx <- Psi_nBn_0(test$X)
