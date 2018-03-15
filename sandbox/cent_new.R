@@ -20,10 +20,12 @@ if(length(args) < 1){
 
 ns <- c(100, 200, 1000)
 bigB <- 500
-K <- c(5,20,50)
+K <- c(5,10,20,40)
+wrappers <- c("glm_wrapper", "stepglm_wrapper", "randomforest_wrapper", "glmnet_wrapper")
 p <- 10
-parm <- expand.grid(seed=1:bigB,
-                    n=ns, K = K)
+parm <- expand.grid(seed = 1:bigB,
+                    n = ns, K = K, 
+                    wrapper = wrappers)
 
 # parm <- parm[1,,drop=FALSE]
 # source in simulation Functions
@@ -73,57 +75,91 @@ if (args[1] == 'run') {
     # set seed
     set.seed(parm$seed[i])
 
-    # get tmle and regular estimates
-    fit <- cvauc_cvtmle(Y = dat$Y, X = dat$X, K = parm$K[i], 
-                        learner = "randomforest_wrapper")
+    # get estimates of dcvauc
+    fit_dcvauc <- cvauc_cvtmle(Y = dat$Y, X = dat$X, K = parm$K[i], 
+                        learner = parm$wrapper[i], nested_cv = TRUE)
+    # get estimates of cvauc
+    fit_cvauc <- cvauc_cvtmle(Y = dat$Y, X = dat$X, K = parm$K[i], 
+                        learner = parm$wrapper[i], nested_cv = FALSE,
+                        prediction_list = fit$prediction_list[1:parm$K[i]])
     # get true cvAUC
-    N <- 1e5
+    N <- 1e4
     bigdat <- makeData(n = N, p = p)
-    big_valid_pred_list <- lapply(fit$models, function(x){
-      predict(x, newdata = bigdat$X, type = "response")
-    })
-    big_label_list <- rep(list(bigdat$Y), parm$K[i])
-    true_cvauc <- mean(cvAUC::AUC(predictions = big_valid_pred_list,
-                            labels = big_label_list))
 
-    # now get auc of \hat{\Psi(P_n)}
-    full_model <- glm_wrapper(train = dat, test = dat)
-    big_valid_pred <- predict(full_model$model, newdata = bigdat$X, type = "response")
-    true_auc_fullmodel <- cvAUC::AUC(predictions = big_valid_pred, labels = bigdat$Y)
+    #--------------------------------
+    # get predictions from all fits
+    #--------------------------------
+    # first write a function that gets predictions back from each type
+    # of wrapper considered
+    my_predict <- function(x, newdata){
+      if("glm" %in% class(x$model)){
+        predict(x$model, newdata = newdata, type = "response")
+      }else if("randomForest" %in% class(x$model)){
+        predict(x$model, newdata = newdata, type = "vote")[, 2]
+      }else if("glmnet" %in% class(x$model)){
+        predict(x$model, newx = newdata, type = "response", s = "lambda.min")
+      }
+    }
+    # predictions for outer layer of CV for cvauc
+    preds_for_cvauc <- lapply(fit_cvauc$prediction_list, my_predict)
+    # predictions for inner layers of CV for dcvauc
+    preds_for_dcvauc <- lapply(fit_dcvauc$prediction_list[-(1:parm$K[i])], my_predict)
+    # list of outcome labels for cvauc -- should be of length K
+    labels_for_cvauc <- rep(list(bigdat$Y), parm$K[i])
+    # list of outcome labels for dcvauc -- should be of length choose(K, K-2)
+    labels_for_dcvauc <- rep(list(bigdat$Y), choose(parm$K[i], 2))
+    # compute true cvauc
+    true_cvauc <- mean(cvAUC::AUC(predictions = preds_for_cvauc,
+                            labels = labels_for_cvauc))
+    # compute true dcvauc
+    true_dcvauc <- mean(cvAUC::AUC(predictions = preds_for_dcvauc,
+                            labels = labels_for_dcvauc))
 
-    out <- c(fit$est, fit$se, fit$iter, fit$est_init, 
-             fit$est_onestep, fit$se_onestep,
-             fit$est_empirical, fit$se_empirical, true_cvauc, 
-             true_auc_fullmodel)
+    # c together output
+    out <- c( # cvtmle estimates of dcvauc
+             fit_dcvauc$est, fit_dcvauc$se,
+             # iterations of cvtmle for dcvauc
+             fit_dcvauc$iter, 
+             # initial plug-in estimate of dcvauc
+             fit_dcvauc$est_init, 
+             # one-step estimate of dcvauc
+             fit_dcvauc$est_onestep, fit_dcvauc$se_onestep,
+             # estimating eqn estimate of dcvauc
+             fit_dcvauc$est_esteq, fit_dcvauc$se_esteq,
+             # cvtmle estimate of cvauc
+             fit_cvauc$est, fit_cvauc$se, 
+             # iterations of cvtmle for cvauc
+             fit_cvauc$iter, fit_cvauc$est_init, 
+             # one-step estimate of cvauc
+             fit_cvauc$est_onestep, fit_cvauc$se_onestep,
+             # estimating eqn estimate of cvauc
+             fit_cvauc$est_esteq, fit_cvauc$se_esteq,
+             # full sample split estimate of cvauc
+             fit_dcvauc$est_empirical, fit_dcvauc$se_empirical, 
+             # true cv auc 
+             true_cvauc, 
+             # true dcvauc
+             true_dcvauc)
 
     # save output 
     save(out, file = paste0("~/cvtmleauc/out/out_",
                             "n=", parm$n[i],
                             "_seed=",parm$seed[i],
                             "_K=",parm$K[i],
+                            "_wrapper=",parm$wrapper[i],
                             ".RData.tmp"))
     file.rename(paste0("~/cvtmleauc/out/out_",
                             "n=", parm$n[i],
                             "_seed=",parm$seed[i],
                             "_K=",parm$K[i],
+                            "_wrapper=",parm$wrapper[i],                            
                             ".RData.tmp"),
                 paste0("~/cvtmleauc/out/out_",
                             "n=", parm$n[i],
                             "_seed=",parm$seed[i],
                             "_K=",parm$K[i],
-                            ".RData"))    
-    # save(fit$models, file = paste0("~/cvtmleauc/out/models_n=",
-    #                         parm$n[i],"_seed=",parm$seed[i],
-    #                         "_Q=",parm$Q[i],"_g=",parm$g[i],
-    #                         "_cvFolds=",parm$cv[i],".RData.tmp"))
-    # file.rename(paste0("~/cvtmleauc/out/models_n=",
-    #                    parm$n[i],"_seed=",parm$seed[i],
-    #                    "_Q=",parm$Q[i],"_g=",parm$g[i],"_cvFolds=",parm$cv[i],
-    #                    ".RData.tmp"),
-    #             paste0("~/cvtmleauc/out/models_n=",
-    #                    parm$n[i],"_seed=",parm$seed[i],
-    #                    "_Q=",parm$Q[i],"_g=",parm$g[i],"_cvFolds=",parm$cv[i],
-    #                    ".RData"))
+                            "_wrapper=",parm$wrapper[i],
+                            ".RData"))
   }
 }
 

@@ -1,12 +1,16 @@
 set.seed(124)
 n <- 100
-p <- 30
-X <- matrix(rnorm(n*p), nrow = n, ncol = p)
-Y <- rbinom(n, 1, plogis(10*X[,1] + 20*X[,10]))
+p <- 10
+X <- data.frame(matrix(rnorm(n*p), nrow = n, ncol = p))
+Y <- rbinom(n, 1, plogis(X[,1] + X[,10] + X[,2]*X[,3]))
 K <- 5
-learner <- "glm_wrapper"
+learner <- "randomforest_wrapper"
 debug(cvauc_cvtmle)
-fit <- cvauc_cvtmle(Y = Y, X = X, K = 5, learner = "glmnet_wrapper") 
+# debug(.makeLongDataNestedCV)
+fit <- cvauc_cvtmle(Y = Y, X = X, K = 3, learner = "superlearner_wrapper",
+					nested_cv = TRUE) 
+
+
 
 
 

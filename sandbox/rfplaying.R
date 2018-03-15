@@ -1,5 +1,6 @@
 # playing around with random forests
-# install.packages("~/Dropbox/R/cvtmleAUC", repos = NULL, type = "source")
+install.packages("~/Dropbox/R/cvtmleAUC", repos = NULL, type = "source")
+q("no")
 
 library(cvtmleAUC)
 
@@ -13,12 +14,24 @@ makeData <- function(n, p){
 	return(list(X = data.frame(X), Y = Y))
 }
 n <- 100
-K <- 10
+K <- 20
+p <- 10
 
-dat <- makeData(n = n, p = 10)
-# set seed
-set.seed(1234)
+set.seed(123)
+dat <- makeData(n = n, p = p)
 
 # get tmle and regular estimates
-fit <- cvauc_cvtmle(Y = dat$Y, X = dat$X, K = K, 
-                    learner = "randomforest_wrapper")
+fit <- cvauc_cvtmle(Y = dat$Y, X = dat$X, K = 10, 
+                    learner = "superlearner_wrapper")
+
+N <- 1e5
+bigdat <- makeData(n = N, p = p)
+big_valid_pred_list <- lapply(fit$models, function(x){
+  predict(x, newdata = bigdat$X)[[1]]
+})
+big_label_list <- rep(list(bigdat$Y), K)
+true_cvauc <- mean(cvAUC::AUC(predictions = big_valid_pred_list,
+                        labels = big_label_list))
+
+
+
