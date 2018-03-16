@@ -168,6 +168,7 @@ bart_wrapper <- function(train, test, sigest = NA, sigdf = 3,
         keepcall = keepcall, verbose = verbose)
     ntest <- length(test$Y)
     ntrain <- length(train$Y)
+    all_psi <- colMeans(pnorm(model$yhat.test))
     psi_nBn_testx <- all_psi[1:ntest]
     psi_nBn_trainx <- all_psi[(ntest+1):(ntest+ntrain)]
 
