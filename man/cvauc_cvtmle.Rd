@@ -5,7 +5,8 @@
 \title{Compute CVTML estimates of cross-validated AUC}
 \usage{
 cvauc_cvtmle(Y, X, K, learner = "glm_wrapper", seed = 1234,
-  parallel = FALSE, maxIter = 10, icTol = 1/length(Y), ...)
+  nested_cv = FALSE, parallel = FALSE, maxIter = 10,
+  icTol = 1/length(Y), prediction_list = NULL, ...)
 }
 \arguments{
 \item{Y}{The outcome}

@@ -108,7 +108,7 @@ stepglm_wrapper <- function(train, test){
 #' @examples
 #' # TO DO: Add
 glmnet_wrapper <- function(train, test, lambda.select = "ncoef", ncoef = 5){
-    x <- model.matrix(~ -1 + . data = train$x)
+    x <- model.matrix(~ -1 + ., data = train$x)
     if(lambda.select == "cv"){
         glmnet_fit <- glmnet::cv.glmnet(x = x, y = train$Y,
             lambda = NULL, type.measure = "deviance", nfolds = 5, 
@@ -159,7 +159,7 @@ bart_wrapper <- function(train, test, sigest = NA, sigdf = 3,
     printcutoffs = 0, nthread = 1, keepcall = TRUE, verbose = FALSE){
     
     bart_fit <- dbarts::bart(x.train = train$X, y.train = train$Y, 
-        x.test = rbind(trainX$, test$X), sigest = sigest, sigdf = sigdf, 
+        x.test = rbind(train$X, test$X), sigest = sigest, sigdf = sigdf, 
         sigquant = sigquant, k = k, power = power, base = base, 
         binaryOffset = binaryOffset, weights = obsWeights, ntree = ntree, 
         ndpost = ndpost, nskip = nskip, printevery = printevery, 
