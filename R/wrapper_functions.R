@@ -107,15 +107,70 @@ stepglm_wrapper <- function(train, test){
 #' @importFrom glmnet cv.glmnet
 #' @examples
 #' # TO DO: Add
-glmnet_wrapper <- function(train, test){
-    glmnet_fit <- glmnet::cv.glmnet(x = data.matrix(train$X), y = train$Y,
-        lambda = NULL, type.measure = "deviance", nfolds = 5, 
-        family = "binomial", alpha = 1, nlambda = 100)
-    Psi_nBn_0 <- function(x){
-      stats::predict(glmnet_fit, newx = data.matrix(x), type = "response", s = "lambda.min")
+glmnet_wrapper <- function(train, test, lambda.select = "ncoef", ncoef = 5){
+    x <- model.matrix(~ -1 + . data = train$x)
+    if(lambda.select == "cv"){
+        glmnet_fit <- glmnet::cv.glmnet(x = x, y = train$Y,
+            lambda = NULL, type.measure = "deviance", nfolds = 5, 
+            family = "binomial", alpha = 1, nlambda = 100)
+        Psi_nBn_0 <- function(x){
+          newx <- model.matrix(~ -1 + ., data = x)
+          stats::predict(glmnet_fit, newx = newx, type = "response", s = "lambda.min")
+        }
+    }else if (lambda.select == "ncoef"){
+        glmnet_fit <- glmnet::glmnet(x = x, y = train$Y,
+            lambda = NULL, family = "binomial", alpha = 1, nlambda = 100)
+        n_nonzero_coef <- apply(glmnet_fit$beta, 2, function(x){ sum(abs(x) > 0) })
+        lambda_idx <- which(n_nonzero_coef == ncoef)[1]
+        lambda_select <- glmnet_fit$lambda[lambda_idx]
+        glmnet_fit$my_lambda <- lambda_select
+        Psi_nBn_0 <- function(x){
+          newx <- model.matrix(~ -1 + ., data = x)
+          stats::predict(glmnet_fit, newx = data.matrix(x), type = "response", s = lambda_select)
+        }
     }
     psi_nBn_trainx <- Psi_nBn_0(train$X)
     psi_nBn_testx <- Psi_nBn_0(test$X)
     return(list(psi_nBn_trainx = psi_nBn_trainx, psi_nBn_testx = psi_nBn_testx,
                 model = glmnet_fit, train_y = train$Y, test_y = test$Y))
+}
+
+
+#' Wrapper for fitting dbarts
+#' 
+#' @param train ...
+#' @param test ...
+#' @return A list
+#' @export
+#' @importFrom stats glm predict
+#' @examples
+#' # TO DO: Add
+#' #' @param train ...
+#' @param test ...
+#' @return A list
+#' @export
+#' @importFrom dbarts bart
+#' @examples
+#' # TO DO: Add
+bart_wrapper <- function(train, test, sigest = NA, sigdf = 3, 
+    sigquant = 0.9, k = 2, power = 2, base = 0.95, binaryOffset = 0, 
+    ntree = 200, ndpost = 1000, nskip = 100, printevery = 100, 
+    keepevery = 1, keeptrainfits = TRUE, usequants = FALSE, numcut = 100, 
+    printcutoffs = 0, nthread = 1, keepcall = TRUE, verbose = FALSE){
+    
+    bart_fit <- dbarts::bart(x.train = train$X, y.train = train$Y, 
+        x.test = rbind(trainX$, test$X), sigest = sigest, sigdf = sigdf, 
+        sigquant = sigquant, k = k, power = power, base = base, 
+        binaryOffset = binaryOffset, weights = obsWeights, ntree = ntree, 
+        ndpost = ndpost, nskip = nskip, printevery = printevery, 
+        keepevery = keepevery, keeptrainfits = keeptrainfits, usequants = usequants, 
+        numcut = numcut, printcutoffs = printcutoffs, nthread = nthread, 
+        keepcall = keepcall, verbose = verbose)
+    ntest <- length(test$Y)
+    ntrain <- length(train$Y)
+    psi_nBn_testx <- all_psi[1:ntest]
+    psi_nBn_trainx <- all_psi[(ntest+1):(ntest+ntrain)]
+
+    return(list(psi_nBn_trainx = psi_nBn_trainx, psi_nBn_testx = psi_nBn_testx,
+                model = bart_fit, train_y = train$Y, test_y = test$Y))
 }
