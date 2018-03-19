@@ -191,8 +191,8 @@ xgboost_wrapper <- function(test, train, ntrees = 500,
             params = params, save_period = save_period)
     newx <- model.matrix(~. - 1, data = test$X)
 
-    psi_nBn_testx <- predict(xgboost_fit, newdata = test$X)
-    psi_nBn_trainx <- predict(xgboost_fit, newdata = train$X)
+    psi_nBn_testx <- predict(xgboost_fit, newdata = newx)
+    psi_nBn_trainx <- predict(xgboost_fit, newdata = x)
 
     return(list(psi_nBn_trainx = psi_nBn_trainx, psi_nBn_testx = psi_nBn_testx,
                 model = xgboost_fit, train_y = train$Y, test_y = test$Y))
