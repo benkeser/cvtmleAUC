@@ -184,7 +184,7 @@ xgboost_wrapper <- function(test, train, ntrees = 500,
     max_depth = 4, shrinkage = 0.1, minobspernode = 10, params = list(), 
     nthread = 1, verbose = 0, save_period = NULL){
     x <- model.matrix(~. - 1, data = train$X)
-    xgmat <- xgboost::xgb.DMatrix(data = train$X, label = train$Y)
+    xgmat <- xgboost::xgb.DMatrix(data = x, label = train$Y)
     xgboost_fit <- xgboost::xgboost(data = xgmat, objective = "binary:logistic", 
             nrounds = ntrees, max_depth = max_depth, min_child_weight = minobspernode, 
             eta = shrinkage, verbose = verbose, nthread = nthread, 
