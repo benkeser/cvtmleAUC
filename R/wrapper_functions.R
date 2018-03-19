@@ -136,39 +136,39 @@ glmnet_wrapper <- function(train, test, lambda.select = "ncoef", ncoef = 5){
 }
 
 
-#' Wrapper for fitting dbarts
-#' 
-#' @param train ...
-#' @param test ...
-#' @return A list
-#' @export
-#' @importFrom dbarts bart
-#' @importFrom stats pnorm
-#' @examples
-#' # TO DO: Add
-bart_wrapper <- function(train, test, sigest = NA, sigdf = 3, 
-    sigquant = 0.9, k = 2, power = 2, base = 0.95, binaryOffset = 0, 
-    ntree = 200, ndpost = 1000, nskip = 100, printevery = 100, 
-    keepevery = 1, keeptrainfits = TRUE, usequants = FALSE, numcut = 100, 
-    printcutoffs = 0, nthread = 1, keepcall = TRUE, verbose = FALSE){
+# #' Wrapper for fitting dbarts
+# #' 
+# #' @param train ...
+# #' @param test ...
+# #' @return A list
+# #' @export
+# #' @importFrom dbarts bart
+# #' @importFrom stats pnorm
+# #' @examples
+# #' # TO DO: Add
+# bart_wrapper <- function(train, test, sigest = NA, sigdf = 3, 
+#     sigquant = 0.9, k = 2, power = 2, base = 0.95, binaryOffset = 0, 
+#     ntree = 200, ndpost = 1000, nskip = 100, printevery = 100, 
+#     keepevery = 1, keeptrainfits = TRUE, usequants = FALSE, numcut = 100, 
+#     printcutoffs = 0, nthread = 1, keepcall = TRUE, verbose = FALSE){
     
-    bart_fit <- dbarts::bart(x.train = train$X, y.train = train$Y, 
-        x.test = rbind(train$X, test$X), sigest = sigest, sigdf = sigdf, 
-        sigquant = sigquant, k = k, power = power, base = base, 
-        binaryOffset = binaryOffset, ntree = ntree, 
-        ndpost = ndpost, nskip = nskip, printevery = printevery, 
-        keepevery = keepevery, keeptrainfits = keeptrainfits, usequants = usequants, 
-        numcut = numcut, printcutoffs = printcutoffs, nthread = nthread, 
-        keepcall = keepcall, verbose = verbose)
-    ntest <- length(test$Y)
-    ntrain <- length(train$Y)
-    all_psi <- colMeans(stats::pnorm(bart_fit$yhat.test))
-    psi_nBn_testx <- all_psi[1:ntest]
-    psi_nBn_trainx <- all_psi[(ntest+1):(ntest+ntrain)]
+#     bart_fit <- dbarts::bart(x.train = train$X, y.train = train$Y, 
+#         x.test = rbind(train$X, test$X), sigest = sigest, sigdf = sigdf, 
+#         sigquant = sigquant, k = k, power = power, base = base, 
+#         binaryOffset = binaryOffset, ntree = ntree, 
+#         ndpost = ndpost, nskip = nskip, printevery = printevery, 
+#         keepevery = keepevery, keeptrainfits = keeptrainfits, usequants = usequants, 
+#         numcut = numcut, printcutoffs = printcutoffs, nthread = nthread, 
+#         keepcall = keepcall, verbose = verbose)
+#     ntest <- length(test$Y)
+#     ntrain <- length(train$Y)
+#     all_psi <- colMeans(stats::pnorm(bart_fit$yhat.test))
+#     psi_nBn_testx <- all_psi[1:ntest]
+#     psi_nBn_trainx <- all_psi[(ntest+1):(ntest+ntrain)]
 
-    return(list(psi_nBn_trainx = psi_nBn_trainx, psi_nBn_testx = psi_nBn_testx,
-                model = bart_fit, train_y = train$Y, test_y = test$Y))
-}
+#     return(list(psi_nBn_trainx = psi_nBn_trainx, psi_nBn_testx = psi_nBn_testx,
+#                 model = bart_fit, train_y = train$Y, test_y = test$Y))
+# }
 
 #' Wrapper for fitting xgboost
 #' 

@@ -24,7 +24,7 @@ bigB <- 100
 ns <- c(100, 250, 500)
 K <- c(5,10,20,40)
 wrappers <- c("randomforest_wrapper", "glmnet_wrapper",
-              "xgboost_wrapper", "polymars_wrapper", "svm_wrapper")
+              "xgboost_wrapper", "polymars_wrapper")
 
 parm <- expand.grid(seed = 1:bigB,
                     data_set = data_sets, 
@@ -89,13 +89,13 @@ if (args[1] == 'run') {
     # load data set from package 
     eval(parse(text = paste0("data(",parm$data_set[i],")")))
     # rename to dat for simplicity
-    dat <- eval(parse(text = parm_red$data_set[i]))
+    dat <- eval(parse(text = parm$data_set[i]))
     # load training observations
     load(paste0("~/cvtmleauc/scratch/real_data_idx_", data_suffix))
     # training data
-    train_dat <- dat[dat$train == 1, ]
+    train_dat <- dat[train_idx, ]
     # test data
-    test_dat <- dat[dat$train == 0, ]
+    test_dat <- dat[-train_idx, ]
     # column named outcome
     outcome_idx <- which(colnames(dat) == "outcome")
 
@@ -121,7 +121,7 @@ if (args[1] == 'run') {
         predict(x$model, newx = data.matrix(newdata), type = "response", s = "lambda.min")
       }else if("xgboost" %in% class(x$model)){
         predict(x$model, newdata = newdata)
-      }else if("polymars" %in% class(x$model)){
+      }else if("polyclass" %in% class(x$model)){
         polspline::ppolyclass(cov = newdata, fit = x$model)[, 2]
       }else if("svm" %in% class(x$model)){
         attr(predict(x$model, newdata = newdata, probability = TRUE), "prob")[, "1"]
@@ -130,7 +130,7 @@ if (args[1] == 'run') {
 
     # predictions for outer layer of CV for cvauc
     preds_for_cvauc <- lapply(fit_cvauc$prediction_list, my_predict, 
-                              newdata = test_dat[[,-outcome_idx]])
+                              newdata = test_dat[,-outcome_idx])
     labels_for_cvauc <- rep(list(test_dat[,outcome_idx]), parm$K[i])
     true_cvauc <- mean(cvAUC::AUC(predictions = preds_for_cvauc,
                         labels = labels_for_cvauc))

@@ -42,14 +42,14 @@ if (args[1] == 'listsize') {
 
 # execute prepare job ##################
 if (args[1] == 'prepare') {
-  for(i in 1:nrow(parm)){
-     set.seed(parm$seed[i])
-     dat <- makeData(n = parm$n[i], p = p)
-     save(dat, file=paste0("~/cvtmleauc/scratch/dataList",
-                           "_n=",parm$n[i],
-                           "_K=",parm$K[i],
-                           "_seed=",parm$seed[i],".RData"))
-   }
+  # for(i in 1:nrow(parm)){
+  #    set.seed(parm$seed[i])
+  #    dat <- makeData(n = parm$n[i], p = p)
+  #    save(dat, file=paste0("~/cvtmleauc/scratch/dataList",
+  #                          "_n=",parm$n[i],
+  #                          "_K=",parm$K[i],
+  #                          "_seed=",parm$seed[i],".RData"))
+  #  }
    print(paste0('initial datasets saved to: ~/cvtmleauc/scratch/dataList ... .RData'))
 }
 
@@ -87,8 +87,15 @@ if (args[1] == 'run') {
         predict(x$model, newdata = newdata, type = "vote")[, 2]
       }else if("cv.glmnet" %in% class(x$model)){
         predict(x$model, newx = data.matrix(newdata), type = "response", s = "lambda.min")
+      }else if("xgboost" %in% class(x$model)){
+        predict(x$model, newdata = newdata)
+      }else if("polyclass" %in% class(x$model)){
+        polspline::ppolyclass(cov = newdata, fit = x$model)[, 2]
+      }else if("svm" %in% class(x$model)){
+        attr(predict(x$model, newdata = newdata, probability = TRUE), "prob")[, "1"]
       }
     }
+
     # load results for each wrapper
     wrappers <- c("glm", "stepglm", "randomforest", "glmnet")
     rslt <- NULL
@@ -133,79 +140,6 @@ if (args[1] == 'run') {
       bestcvauc_cv_select[ct] <- as.numeric(cv_select_idx == bestcvauc)
       bestauc_cv_select[ct] <- as.numeric(cv_select_idx == bestauc)
     }
-
-
-
-    
-
-    # set seed
-    set.seed(parm$seed[i])
-
-    # get estimates of dcvauc
-    fit_dcvauc <- cvauc_cvtmle(Y = dat$Y, X = dat$X, K = parm$K[i], 
-                        learner = parm$wrapper[i], nested_cv = TRUE)
-    # get estimates of cvauc
-    fit_cvauc <- cvauc_cvtmle(Y = dat$Y, X = dat$X, K = parm$K[i], 
-                        learner = parm$wrapper[i], nested_cv = FALSE,
-                        prediction_list = fit_dcvauc$prediction_list[1:parm$K[i]])
-    # get true cvAUC
-    N <- 1e4
-    bigdat <- makeData(n = N, p = p)
-
-    #--------------------------------
-    # get predictions from all fits
-    #--------------------------------
-    # first write a function that gets predictions back from each type
-    # of wrapper considered
-    my_predict <- function(x, newdata){
-      if("glm" %in% class(x$model)){
-        predict(x$model, newdata = newdata, type = "response")
-      }else if("randomForest" %in% class(x$model)){
-        predict(x$model, newdata = newdata, type = "vote")[, 2]
-      }else if("glmnet" %in% class(x$model)){
-        predict(x$model, newx = newdata, type = "response", s = "lambda.min")
-      }
-    }
-    # predictions for outer layer of CV for cvauc
-    preds_for_cvauc <- lapply(fit_cvauc$prediction_list, my_predict, newdata = bigdat$X)
-    # predictions for inner layers of CV for dcvauc
-    preds_for_dcvauc <- lapply(fit_dcvauc$prediction_list[-(1:parm$K[i])], my_predict, newdata = bigdat$X)
-    # list of outcome labels for cvauc -- should be of length K
-    labels_for_cvauc <- rep(list(bigdat$Y), parm$K[i])
-    # list of outcome labels for dcvauc -- should be of length choose(K, K-2)
-    labels_for_dcvauc <- rep(list(bigdat$Y), choose(parm$K[i], 2))
-    # compute true cvauc
-    true_cvauc <- mean(cvAUC::AUC(predictions = preds_for_cvauc,
-                            labels = labels_for_cvauc))
-    # compute true dcvauc
-    true_dcvauc <- mean(cvAUC::AUC(predictions = preds_for_dcvauc,
-                            labels = labels_for_dcvauc))
-
-    # c together output
-    out <- c( # cvtmle estimates of dcvauc
-             fit_dcvauc$est_cvtmle, fit_dcvauc$se_cvtmle,
-             # iterations of cvtmle for dcvauc
-             fit_dcvauc$iter, 
-             # initial plug-in estimate of dcvauc
-             fit_dcvauc$est_init, 
-             # one-step estimate of dcvauc
-             fit_dcvauc$est_onestep, fit_dcvauc$se_onestep,
-             # estimating eqn estimate of dcvauc
-             fit_dcvauc$est_esteq, fit_dcvauc$se_esteq,
-             # cvtmle estimate of cvauc
-             fit_cvauc$est_cvtmle, fit_cvauc$se_cvtmle, 
-             # iterations of cvtmle for cvauc
-             fit_cvauc$iter, fit_cvauc$est_init, 
-             # one-step estimate of cvauc
-             fit_cvauc$est_onestep, fit_cvauc$se_onestep,
-             # estimating eqn estimate of cvauc
-             fit_cvauc$est_esteq, fit_cvauc$se_esteq,
-             # full sample split estimate of cvauc
-             fit_dcvauc$est_empirical, fit_dcvauc$se_empirical, 
-             # true cv auc 
-             true_cvauc, 
-             # true dcvauc
-             true_dcvauc)
 
     # save output 
     save(out, file = paste0("~/cvtmleauc/out/out_",

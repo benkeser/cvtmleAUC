@@ -26,14 +26,14 @@ p <- 10
 parm <- expand.grid(seed = 1:bigB,
                     n = ns, K = K, 
                     wrapper = wrappers,
-                    stringsAsFactors = FALSE)
+                    stringsAsFactors = FALSE)[1:10,]
 
 # parm <- parm[1,,drop=FALSE]
 # source in simulation Functions
 source("~/cvtmleauc/makeData.R")
 # load drinf
 # library(glmnet)
-# devtools::install_github("benkeser/cvtmleAUC")
+# devtools::install_github("benkeser/cvtmleAUC", dependencies = TRUE)
 library(cvtmleAUC, lib.loc = "/home/dbenkese/R/x86_64-pc-linux-gnu-library/3.4")
 library(SuperLearner, lib.loc = '/home/dbenkese/R/x86_64-pc-linux-gnu-library/3.4')
 
@@ -77,8 +77,10 @@ if (args[1] == 'run') {
     set.seed(parm$seed[i])
 
     # get estimates of dcvauc
-    fit_dcvauc <- cvauc_cvtmle(Y = dat$Y, X = dat$X, K = parm$K[i], 
-                        learner = parm$wrapper[i], nested_cv = TRUE)
+    tm <- system.time(
+      fit_dcvauc <- cvauc_cvtmle(Y = dat$Y, X = dat$X, K = parm$K[i], 
+                          learner = parm$wrapper[i], nested_cv = TRUE)
+    )
     # get estimates of cvauc
     fit_cvauc <- cvauc_cvtmle(Y = dat$Y, X = dat$X, K = parm$K[i], 
                         learner = parm$wrapper[i], nested_cv = FALSE,
@@ -99,8 +101,15 @@ if (args[1] == 'run') {
         predict(x$model, newdata = newdata, type = "vote")[, 2]
       }else if("cv.glmnet" %in% class(x$model)){
         predict(x$model, newx = data.matrix(newdata), type = "response", s = "lambda.min")
+      }else if("xgboost" %in% class(x$model)){
+        predict(x$model, newdata = newdata)
+      }else if("polyclass" %in% class(x$model)){
+        polspline::ppolyclass(cov = newdata, fit = x$model)[, 2]
+      }else if("svm" %in% class(x$model)){
+        attr(predict(x$model, newdata = newdata, probability = TRUE), "prob")[, "1"]
       }
     }
+
     # predictions for outer layer of CV for cvauc
     preds_for_cvauc <- lapply(fit_cvauc$prediction_list, my_predict, newdata = bigdat$X)
     # predictions for inner layers of CV for dcvauc
@@ -168,10 +177,13 @@ if (args[1] == 'run') {
 if (args[1] == 'merge') {   
   ns <- c(100, 250, 500, 750)
   bigB <- 500
-  K <- c(5,10,20,30)
+  K <- c(5,10,20,40)
+  wrappers <- c("glm_wrapper", "stepglm_wrapper", "randomforest_wrapper", "glmnet_wrapper")
   p <- 10
-  parm <- expand.grid(seed=1:bigB,
-                      n=ns, K = K)
+  parm <- expand.grid(seed = 1:bigB,
+                      n = ns, K = K, 
+                      wrapper = wrappers,
+                      stringsAsFactors = FALSE)
   rslt <- matrix(NA, nrow = nrow(parm), ncol = 13)
   for(i in 1:nrow(parm)){
       tmp_1 <- tryCatch({
@@ -179,25 +191,27 @@ if (args[1] == 'merge') {
                       "_n=", parm$n[i],
                       "_seed=",parm$seed[i],
                       "_K=", parm$K[i],
+                      "_wrapper=",parm$wrapper[i],
                       ".RData"))
           out
       }, error=function(e){
-        rep(NA, 10)
+        rep(NA, 20)
       })
-      rslt[i,] <- c(parm$seed[i], parm$n[i], parm$K[i], tmp_1)
+      rslt[i,] <- c(parm$seed[i], parm$n[i], parm$K[i], parm$wrapper[i], tmp_1)
   }
   # # format
   out <- data.frame(rslt)
 
-  sim_names <- c("seed","n","K",
-                 "cvtmle","se_cvtmle","iter_cvtmle",
-                 "init",
-                 "onestep","se_onestep",
-                 "empirical","se_empirical",
-                 "truth", "truth_full")
+  sim_names <- c("seed","n","K","wrapper",
+                 "est_dcvtmle", "se_dcvtmle", "iter_dcvtmle",
+                 "est_dinit", "est_donestep", "se_donestep",
+                 "est_desteq","se_desteq","est_cvtmle","se_cvtmle",
+                 "iter_cvtmle","est_init", "est_onestep", "se_onestep",
+                 "est_esteq","se_esteq","est_emp","se_emp","true_cvauc",
+                 "true_dcvauc")
   colnames(out) <- sim_names
 
-  save(out, file=paste0('~/cvtmleauc/out/allOut.RData'))
+  save(out, file=paste0('~/cvtmleauc/out/allOut_new.RData'))
 }
 # local editing 
 if(FALSE){

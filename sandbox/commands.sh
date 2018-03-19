@@ -2,16 +2,16 @@
 # commands for scp'ing sce and cent over
 #-----------------------------------------
 cd ~/Dropbox/R/cvtmleAUC/sandbox
-scp cent.R sce.sh makeData.R dbenkese@snail.fhcrc.org:~/cvtmleauc
+scp cent_new.R sce_new.sh makeData.R dbenkese@snail.fhcrc.org:~/cvtmleauc
 
 ssh dbenkese@snail.fhcrc.org
 cd cvtmleauc
-scp cent.R sce.sh makeData.R dbenkese@rhino.fhcrc.org:~/cvtmleauc
+scp cent_new.R sce_new.sh makeData.R dbenkese@rhino.fhcrc.org:~/cvtmleauc
 
 ssh dbenkese@rhino.fhcrc.org
 cd cvtmleauc
-chmod +x cent* sce*
-./sce.sh ./cent.R run_v9
+chmod +x cent_new* sce_new*
+./sce_new.sh ./cent_new.R new_run_test4
 
 #-----------------------------------------
 # commands to get into rhino and load R
