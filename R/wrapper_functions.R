@@ -121,7 +121,7 @@ glmnet_wrapper <- function(train, test, lambda.select = "ncoef", ncoef = 5){
         glmnet_fit <- glmnet::glmnet(x = x, y = train$Y,
             lambda = NULL, family = "binomial", alpha = 1, nlambda = 100)
         n_nonzero_coef <- apply(glmnet_fit$beta, 2, function(x){ sum(abs(x) > 0) })
-        lambda_idx <- which(n_nonzero_coef == ncoef)[1]
+        lambda_idx <- which.min(abs(n_nonzero_coef - ncoef))[1]
         lambda_select <- glmnet_fit$lambda[lambda_idx]
         glmnet_fit$my_lambda <- lambda_select
         Psi_nBn_0 <- function(x){
