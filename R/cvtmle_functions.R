@@ -395,11 +395,11 @@ F_nBn_star_nested_cv <- function(psi_x, y, epsilon = 0,
                        ){
   # get cdf estimated in each validation fold
   all_cv_est <- lapply(inner_valid_prediction_and_y_list, function(z){
-    plogis(SuperLearner::trimLogit(mean(z$inner_psi_nBn_testx[z$inner_test_y %in% y] <= psi_x, na.rm = TRUE), tol) +
+    plogis(SuperLearner::trimLogit(mean(z$inner_psi_nBn_testx[z$inner_test_y %in% y] <= psi_x), tol) +
           sum(epsilon))
   })
   # average over folds
-  return(mean(unlist(all_cv_est, use.names = FALSE)))
+  return(mean(unlist(all_cv_est, use.names = FALSE), na.rm = TRUE))
 }
 
 #' Worker function to make long form data set needed for
