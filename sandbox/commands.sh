@@ -11,7 +11,8 @@ scp cent_new.R sce_new.sh makeData.R dbenkese@rhino.fhcrc.org:~/cvtmleauc
 ssh dbenkese@rhino.fhcrc.org
 cd cvtmleauc
 chmod +x cent_new* sce_new*
-./sce_new.sh ./cent_new.R new_run_test4
+ml R
+./sce_new.sh ./cent_new.R new_run_v1
 
 #-----------------------------------------
 # commands to get into rhino and load R

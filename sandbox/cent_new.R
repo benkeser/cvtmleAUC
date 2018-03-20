@@ -21,12 +21,13 @@ if(length(args) < 1){
 ns <- c(100, 250, 500, 750)
 bigB <- 500
 K <- c(5,10,20,40)
-wrappers <- c("glm_wrapper", "stepglm_wrapper", "randomforest_wrapper", "glmnet_wrapper")
+# wrappers <- c("glm_wrapper", "stepglm_wrapper", "randomforest_wrapper", "glmnet_wrapper")
+wrappers <- c("glmnet_wrapper")
 p <- 10
 parm <- expand.grid(seed = 1:bigB,
                     n = ns, K = K, 
                     wrapper = wrappers,
-                    stringsAsFactors = FALSE)[1:10,]
+                    stringsAsFactors = FALSE)
 
 # parm <- parm[1,,drop=FALSE]
 # source in simulation Functions
@@ -34,8 +35,9 @@ source("~/cvtmleauc/makeData.R")
 # load drinf
 # library(glmnet)
 # devtools::install_github("benkeser/cvtmleAUC", dependencies = TRUE)
+library(cvAUC, lib.loc = "/home/dbenkese/R/x86_64-pc-linux-gnu-library/3.4")
 library(cvtmleAUC, lib.loc = "/home/dbenkese/R/x86_64-pc-linux-gnu-library/3.4")
-library(SuperLearner, lib.loc = '/home/dbenkese/R/x86_64-pc-linux-gnu-library/3.4')
+library(SuperLearner,lib.loc = "/home/dbenkese/R/x86_64-pc-linux-gnu-library/3.4")
 
 # get the list size #########
 if (args[1] == 'listsize') {
@@ -100,7 +102,11 @@ if (args[1] == 'run') {
       }else if("randomForest" %in% class(x$model)){
         predict(x$model, newdata = newdata, type = "vote")[, 2]
       }else if("cv.glmnet" %in% class(x$model)){
-        predict(x$model, newx = data.matrix(newdata), type = "response", s = "lambda.min")
+        newx <- model.matrix(~.-1,data = newdata)
+        predict(x$model, newx = newx, type = "response", s = "lambda.min")
+      }else if("glmnet" %in% class(x$model)){
+        newx <- model.matrix(~.-1,data = newdata)
+        predict(x$model, newx = newx, type = "response", s = x$my_lambda)
       }else if("xgboost" %in% class(x$model)){
         predict(x$model, newdata = newdata)
       }else if("polyclass" %in% class(x$model)){

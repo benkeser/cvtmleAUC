@@ -108,7 +108,7 @@ stepglm_wrapper <- function(train, test){
 #' @examples
 #' # TO DO: Add
 glmnet_wrapper <- function(train, test, lambda.select = "ncoef", ncoef = 5){
-    x <- model.matrix(~ -1 + ., data = train$x)
+    x <- model.matrix(~ -1 + ., data = train$X)
     if(lambda.select == "cv"){
         glmnet_fit <- glmnet::cv.glmnet(x = x, y = train$Y,
             lambda = NULL, type.measure = "deviance", nfolds = 5, 
