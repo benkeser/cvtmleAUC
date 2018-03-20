@@ -12,7 +12,7 @@ ssh dbenkese@rhino.fhcrc.org
 cd cvtmleauc
 chmod +x cent_new* sce_new*
 ml R
-./sce_new.sh ./cent_new.R glmnet_run_v3
+./sce_new.sh ./cent_new.R redo_v2
 
 #-----------------------------------------
 # commands to get into rhino and load R

@@ -21,14 +21,17 @@ if(length(args) < 1){
 ns <- c(100, 250, 500, 750)
 bigB <- 500
 K <- c(5,10,20,40)
-# wrappers <- c("glm_wrapper", "stepglm_wrapper", "randomforest_wrapper", "glmnet_wrapper")
-wrappers <- c("glmnet_wrapper")
+wrappers <- c("glm_wrapper", "stepglm_wrapper", "randomforest_wrapper", "glmnet_wrapper")
+# wrappers <- c("glmnet_wrapper")
 p <- 10
 parm <- expand.grid(seed = 1:bigB,
                     n = ns, K = K, 
                     wrapper = wrappers,
                     stringsAsFactors = FALSE)
 
+load('~/cvtmleauc/out/allOut_new.RData')
+redo_idx <- which(is.na(out$est_dcvtmle))
+parm <- parm[redo_idx,]
 # parm <- parm[1,,drop=FALSE]
 # source in simulation Functions
 source("~/cvtmleauc/makeData.R")
@@ -46,14 +49,14 @@ if (args[1] == 'listsize') {
 
 # execute prepare job ##################
 if (args[1] == 'prepare') {
-  parm_red <- parm[parm$K == parm$K[1] & parm$wrapper == parm$wrapper[1],]
-  for(i in 1:nrow(parm_red)){
-     set.seed(parm_red$seed[i])
-     dat <- makeData(n = parm_red$n[i], p = p)
-     save(dat, file=paste0("~/cvtmleauc/scratch/dataList",
-                           "_n=",parm_red$n[i],
-                           "_seed=",parm_red$seed[i],".RData"))
-   }
+  # parm_red <- parm[parm$K == parm$K[1] & parm$wrapper == parm$wrapper[1],]
+  # for(i in 1:nrow(parm_red)){
+  #    set.seed(parm_red$seed[i])
+  #    dat <- makeData(n = parm_red$n[i], p = p)
+  #    save(dat, file=paste0("~/cvtmleauc/scratch/dataList",
+  #                          "_n=",parm_red$n[i],
+  #                          "_seed=",parm_red$seed[i],".RData"))
+  #  }
    print(paste0('initial datasets saved to: ~/cvtmleauc/scratch/dataList ... .RData'))
 }
 
@@ -106,7 +109,7 @@ if (args[1] == 'run') {
         predict(x$model, newx = newx, type = "response", s = "lambda.min")
       }else if("glmnet" %in% class(x$model)){
         newx <- model.matrix(~.-1,data = newdata)
-        predict(x$model, newx = newx, type = "response", s = x$my_lambda)
+        predict(x$model, newx = newx, type = "response", s = x$model$my_lambda)
       }else if("xgboost" %in% class(x$model)){
         predict(x$model, newdata = newdata)
       }else if("polyclass" %in% class(x$model)){
@@ -190,7 +193,7 @@ if (args[1] == 'merge') {
                       n = ns, K = K, 
                       wrapper = wrappers,
                       stringsAsFactors = FALSE)
-  rslt <- matrix(NA, nrow = nrow(parm), ncol = 13)
+  rslt <- matrix(NA, nrow = nrow(parm), ncol = 24)
   for(i in 1:nrow(parm)){
       tmp_1 <- tryCatch({
           load(paste0("~/cvtmleauc/out/out",

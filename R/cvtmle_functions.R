@@ -33,7 +33,7 @@ cvauc_cvtmle <- function(Y, X, K, learner = "glm_wrapper",
   set.seed(seed)
   folds <- SuperLearner::CVFolds(N = n, id = NULL, Y = Y, 
                                  cvControl = list(V = K, 
-                                    stratifyCV = ifelse(K <= sum(Y), TRUE, FALSE), 
+                                    stratifyCV = ifelse(K <= sum(Y) & K <= sum(!Y), TRUE, FALSE), 
                                     shuffle = TRUE, validRows = NULL))
   if(is.null(prediction_list)){
     prediction_list <- .getPredictions(learner = learner, Y = Y, X = X, 
