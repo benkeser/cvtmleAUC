@@ -99,12 +99,15 @@ cvauc_cvtmle <- function(Y, X, K, learner = "glm_wrapper",
 
     # estimating equations
     if(!nested_cv){
-    est_esteq <- stats::uniroot(.estimatingFn, interval = c(0, 1), 
-                     prediction_list = prediction_list, gn = mean(Y))$root
+
+    est_esteq <- tryCatch({stats::uniroot(.estimatingFn, interval = c(0, 1), 
+                     prediction_list = prediction_list, gn = mean(Y))$root},
+                  error = function(e){ return(NA) })
     se_esteq <- se_onestep
     }else{
-      est_esteq <- stats::uniroot(.estimatingFnNestedCV, interval = c(0, 1), 
-                   prediction_list = prediction_list, gn = mean(Y), folds = folds, K = K)$root
+      est_esteq <- tryCatch({stats::uniroot(.estimatingFnNestedCV, interval = c(0, 1), 
+                   prediction_list = prediction_list, gn = mean(Y), folds = folds, K = K)$root},
+                    error = function(e){ return(NA) })
       se_esteq <- se_onestep
     }
 
