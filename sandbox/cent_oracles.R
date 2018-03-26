@@ -29,11 +29,19 @@ parm <- expand.grid(seed = 1:bigB,
 # parm <- parm[1,,drop=FALSE]
 # source in simulation Functions
 source("~/cvtmleauc/makeData.R")
+# source("~/cvtmleauc/wrapper_functions.R")
 # load drinf
-# library(glmnet)
-devtools::install_github("benkeser/cvtmleAUC")
+# devtools::install_github("benkeser/cvtmleAUC")
 library(cvtmleAUC, lib.loc = "/home/dbenkese/R/x86_64-pc-linux-gnu-library/3.4")
-library(SuperLearner, lib.loc = '/home/dbenkese/R/x86_64-pc-linux-gnu-library/3.4')
+library(glmnet)
+library(randomForest)
+library(cvAUC)
+
+load('~/cvtmleauc/out/allOut_oracles.RData')
+idx <- which(is.na(full_rslt[,5]))
+ceil_idx <- ceiling(idx/4)
+parm <- parm[ceil_idx,]
+# library(SuperLearner, lib.loc = '/home/dbenkese/R/x86_64-pc-linux-gnu-library/3.4')
 
 # get the list size #########
 if (args[1] == 'listsize') {
@@ -62,6 +70,8 @@ if (args[1] == 'run') {
   print(paste(Sys.time(), "arrid:" , id, "TASKID:",
               TASKID, "STEPSIZE:", STEPSIZE))
   for (i in (id+TASKID):(id+TASKID+STEPSIZE-1)) {
+  # for(i in idx_ceil){
+    cat("i \n")
     print(paste(Sys.time(), "i:" , i))
     print(parm[i,])
     
@@ -79,14 +89,18 @@ if (args[1] == 'run') {
     load(paste0("~/cvtmleauc/scratch/dataList_", data_suffix))
 
     N <- 1e4
-    bigdat <- makeData(n = N, p = p)
+    bigdat <- makeData(n = N, p = 10)
     my_predict <- function(x, newdata){
       if("glm" %in% class(x$model)){
         predict(x$model, newdata = newdata, type = "response")
       }else if("randomForest" %in% class(x$model)){
         predict(x$model, newdata = newdata, type = "vote")[, 2]
       }else if("cv.glmnet" %in% class(x$model)){
-        predict(x$model, newx = data.matrix(newdata), type = "response", s = "lambda.min")
+        newx <- model.matrix(~.-1,data = newdata)
+        predict(x$model, newx = newx, type = "response", s = "lambda.min")
+      }else if("glmnet" %in% class(x$model)){
+        newx <- model.matrix(~.-1,data = newdata)
+        predict(x$model, newx = newx, type = "response", s = x$model$my_lambda)
       }else if("xgboost" %in% class(x$model)){
         predict(x$model, newdata = newdata)
       }else if("polyclass" %in% class(x$model)){
@@ -114,10 +128,10 @@ if (args[1] == 'run') {
       big_pred <- my_predict(x = tmp, newdata = bigdat$X)
       true_cvauc <- mean(cvAUC::AUC(predictions = big_pred,
                         labels = bigdat$Y))
-      rslt <- rbind(rslt, c(out, true_cvauc))
+      rslt <- rbind(rslt, c(parm[i,], out, true_cvauc))
     }
     rslt <- cbind(wrappers, data.frame(rslt))
-    colnames(rslt) <- c("learner","est_dcvtmle", "se_dcvtmle", "iter_dcvtmle",
+    colnames(rslt) <- c("learner","seed","n","K","est_dcvtmle", "se_dcvtmle", "iter_dcvtmle",
                         "est_dinit", "est_donestep", "se_donestep",
                         "est_desteq","se_desteq","est_cvtmle","se_cvtmle",
                         "iter_cvtmle","est_init", "est_onestep", "se_onestep",
@@ -130,31 +144,42 @@ if (args[1] == 'run') {
     auc_cv_select <- rep(NA, length(est))
     bestauc_cv_select <- rep(NA, length(est))
     ct <- 0
+    bestcvauc <- which.max(rslt$true_cvauc)
+    bestauc <- which.max(rslt$true_auc)
+
     for(e in est){
       ct <- ct + 1
-      bestcvauc <- which.max(rslt$true_cvauc)
-      bestauc <- which.max(rslt$true_auc)
       cv_select_idx <- which.max(rslt[,paste0("est_",e)])
       cvauc_cv_select[ct] <- rslt$true_cvauc[cv_select_idx]
       auc_cv_select[ct] <- rslt$true_auc[cv_select_idx]
       bestcvauc_cv_select[ct] <- as.numeric(cv_select_idx == bestcvauc)
       bestauc_cv_select[ct] <- as.numeric(cv_select_idx == bestauc)
     }
+    names(cvauc_cv_select) <- est
+    names(bestcvauc_cv_select) <- est
+    names(auc_cv_select) <- est
+    names(bestauc_cv_select) <- est
+
+    out <- list(rslt = rslt, 
+                cvauc_cv_select = cvauc_cv_select,
+                auc_cv_select = cvauc_cv_select,
+                bestcvauc_cv_select = cvauc_cv_select,
+                bestauc_cv_select = cvauc_cv_select)
 
     # save output 
-    save(out, file = paste0("~/cvtmleauc/out/out_",
+    save(out, file = paste0("~/cvtmleauc/out/oracleout_",
                             "n=", parm$n[i],
                             "_seed=",parm$seed[i],
                             "_K=",parm$K[i],
                             "_wrapper=",parm$wrapper[i],
                             ".RData.tmp"))
-    file.rename(paste0("~/cvtmleauc/out/out_",
+    file.rename(paste0("~/cvtmleauc/out/oracleout_",
                             "n=", parm$n[i],
                             "_seed=",parm$seed[i],
                             "_K=",parm$K[i],
                             "_wrapper=",parm$wrapper[i],                            
                             ".RData.tmp"),
-                paste0("~/cvtmleauc/out/out_",
+                paste0("~/cvtmleauc/out/oracleout_",
                             "n=", parm$n[i],
                             "_seed=",parm$seed[i],
                             "_K=",parm$K[i],
@@ -167,36 +192,66 @@ if (args[1] == 'run') {
 if (args[1] == 'merge') {   
   ns <- c(100, 250, 500, 750)
   bigB <- 500
-  K <- c(5,10,20,30)
-  p <- 10
-  parm <- expand.grid(seed=1:bigB,
-                      n=ns, K = K)
-  rslt <- matrix(NA, nrow = nrow(parm), ncol = 13)
-  for(i in 1:nrow(parm)){
-      tmp_1 <- tryCatch({
-          load(paste0("~/cvtmleauc/out/out",
-                      "_n=", parm$n[i],
-                      "_seed=",parm$seed[i],
-                      "_K=", parm$K[i],
-                      ".RData"))
-          out
-      }, error=function(e){
-        rep(NA, 10)
-      })
-      rslt[i,] <- c(parm$seed[i], parm$n[i], parm$K[i], tmp_1)
+  K <- c(5,10,20,40)
+
+  parm <- expand.grid(seed = 1:bigB,
+                      n = ns, K = K, 
+                      stringsAsFactors = FALSE)
+  prev_out <- get(load('~/cvtmleauc/out/allOut_new.RData'))
+  full_rslt <- matrix(NA, nrow = 32000, ncol = 25)
+  ct <- 4
+  for(i in seq_len(nrow(parm))){
+    # load result file 
+      tmp <- tryCatch({get(load(paste0("~/cvtmleauc/out/oracleout_",
+                              "n=", parm$n[i],
+                              "_seed=",parm$seed[i],
+                              "_K=",parm$K[i],
+                              "_wrapper=",parm$wrapper[i],
+                              ".RData")))},
+                      error = function(e){
+                        grbg <- list(rslt = data.frame(matrix(NA, nrow = 4, ncol = 25)))
+                        colnames(grbg$rslt) <- colnames(full_rslt)
+                        return(grbg)
+                      })
+      # if(!is.na(tmp$rslt[1,1])){
+      #   tmp$rslt$wrapper <- c("glm_wrapper","stepglm_wrapper","randomforest_wrapper",
+      #                         "glmnet_wrapper")
+      # }
+      full_rslt[(ct-3):ct,] <- data.matrix(tmp$rslt)
+      ct <- ct + 4
   }
-  # # format
-  out <- data.frame(rslt)
+  # ns <- c(100, 250, 500, 750)
+  # bigB <- 500
+  # K <- c(5,10,20,30)
+  # p <- 10
+  # parm <- expand.grid(seed=1:bigB,
+  #                     n=ns, K = K)
+  # rslt <- matrix(NA, nrow = nrow(parm), ncol = 13)
+  # for(i in 1:nrow(parm)){
+  #     tmp_1 <- tryCatch({
+  #         load(paste0("~/cvtmleauc/out/out",
+  #                     "_n=", parm$n[i],
+  #                     "_seed=",parm$seed[i],
+  #                     "_K=", parm$K[i],
+  #                     ".RData"))
+  #         out
+  #     }, error=function(e){
+  #       rep(NA, 10)
+  #     })
+  #     rslt[i,] <- c(parm$seed[i], parm$n[i], parm$K[i], tmp_1)
+  # }
+  # # # format
+  # out <- data.frame(rslt)
 
-  sim_names <- c("seed","n","K",
-                 "cvtmle","se_cvtmle","iter_cvtmle",
-                 "init",
-                 "onestep","se_onestep",
-                 "empirical","se_empirical",
-                 "truth", "truth_full")
-  colnames(out) <- sim_names
+  # sim_names <- c("seed","n","K",
+  #                "cvtmle","se_cvtmle","iter_cvtmle",
+  #                "init",
+  #                "onestep","se_onestep",
+  #                "empirical","se_empirical",
+  #                "truth", "truth_full")
+  # colnames(out) <- sim_names
 
-  save(out, file=paste0('~/cvtmleauc/out/allOut.RData'))
+  save(full_rslt, file=paste0('~/cvtmleauc/out/allOut_oracles.RData'))
 }
 # local editing 
 if(FALSE){

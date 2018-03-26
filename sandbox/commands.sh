@@ -12,7 +12,20 @@ ssh dbenkese@rhino.fhcrc.org
 cd cvtmleauc
 chmod +x cent_new* sce_new*
 ml R
-./sce_new.sh ./cent_new.R redo_v2
+./sce_new.sh ./cent_new.R redo_v3
+
+cd ~/Dropbox/R/cvtmleAUC/sandbox
+scp ../R/wrapper_functions.R cent_oracles.R sce_oracles.sh makeData.R dbenkese@snail.fhcrc.org:~/cvtmleauc
+
+ssh dbenkese@snail.fhcrc.org
+cd cvtmleauc
+scp wrapper_functions.R cent_oracles.R sce_oracles.sh makeData.R dbenkese@rhino.fhcrc.org:~/cvtmleauc
+
+ssh dbenkese@rhino.fhcrc.org
+cd cvtmleauc
+chmod +x cent_oracles* sce_oracles*
+ml R
+./sce_oracles.sh ./cent_oracles.R oracles_v6
 
 #-----------------------------------------
 # commands to get into rhino and load R

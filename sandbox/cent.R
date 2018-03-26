@@ -32,6 +32,7 @@ source("~/cvtmleauc/makeData.R")
 # library(glmnet)
 library(cvtmleAUC, lib.loc = "/home/dbenkese/R/x86_64-unknown-linux-gnu-library/3.2/")
 library(SuperLearner)
+library(glmnet)
 
 # get the list size #########
 if (args[1] == 'listsize') {

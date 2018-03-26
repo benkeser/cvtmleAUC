@@ -126,7 +126,7 @@ glmnet_wrapper <- function(train, test, lambda.select = "ncoef", ncoef = 5){
         glmnet_fit$my_lambda <- lambda_select
         Psi_nBn_0 <- function(x){
           newx <- model.matrix(~ -1 + ., data = x)
-          stats::predict(glmnet_fit, newx = data.matrix(x), type = "response", s = lambda_select)
+          stats::predict(glmnet_fit, newx = newx, type = "response", s = glmnet_fit$my_lambda)
         }
     }
     psi_nBn_trainx <- Psi_nBn_0(train$X)
