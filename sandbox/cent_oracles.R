@@ -37,10 +37,10 @@ library(glmnet)
 library(randomForest)
 library(cvAUC)
 
-load('~/cvtmleauc/out/allOut_oracles.RData')
-idx <- which(is.na(full_rslt[,5]))
-ceil_idx <- ceiling(idx/4)
-parm <- parm[ceil_idx,]
+# load('~/cvtmleauc/out/allOut_oracles.RData')
+# idx <- which(is.na(out[,5]))
+# ceil_idx <- ceiling(idx/4)
+# parm <- parm[ceil_idx,]
 # library(SuperLearner, lib.loc = '/home/dbenkese/R/x86_64-pc-linux-gnu-library/3.4')
 
 # get the list size #########
@@ -70,7 +70,7 @@ if (args[1] == 'run') {
   print(paste(Sys.time(), "arrid:" , id, "TASKID:",
               TASKID, "STEPSIZE:", STEPSIZE))
   for (i in (id+TASKID):(id+TASKID+STEPSIZE-1)) {
-  # for(i in idx_ceil){
+  # for(i in ceil_idx){
     cat("i \n")
     print(paste(Sys.time(), "i:" , i))
     print(parm[i,])
@@ -115,20 +115,24 @@ if (args[1] == 'run') {
     rslt <- NULL
     for(w in wrappers){
       # load wrapper results
-      eval(parse(text = paste0("out_",w," <- get(load(paste0('~/cvtmleauc/out/out_',",
+      eval(parse(text = paste0("out_",w," <- tryCatch({get(load(paste0('~/cvtmleauc/out/out_',",
                                paste0("'n=", parm$n[i],"',"),
                                 paste0("'_seed=",parm$seed[i],"',"),
                                 paste0("'_K=",parm$K[i],"',"),
                                 paste0("'_wrapper=",paste0(w,"_wrapper"),"',"),
                                 paste0("'.RData","'"),
-                               ")))")))
+                               ")))}, error = function(e){ print(e) })")))
       # fit to full data
       tmp <- do.call(paste0(w,"_wrapper"), args = list(test = dat, train = dat))
       # compute AUC of Psi(P_n)
       big_pred <- my_predict(x = tmp, newdata = bigdat$X)
       true_cvauc <- mean(cvAUC::AUC(predictions = big_pred,
                         labels = bigdat$Y))
-      rslt <- rbind(rslt, c(parm[i,], out, true_cvauc))
+      if(!("error" %in% class(eval(parse(text = paste0("out_",w)))))){
+        rslt <- rbind(rslt, c(parm[i,], out, true_cvauc))
+      }else{
+        rslt <- rbind(rslt, c(parm[i,], rep(NA, 20), true_cvauc))
+      }
     }
     rslt <- cbind(wrappers, data.frame(rslt))
     colnames(rslt) <- c("learner","seed","n","K","est_dcvtmle", "se_dcvtmle", "iter_dcvtmle",
@@ -150,10 +154,17 @@ if (args[1] == 'run') {
     for(e in est){
       ct <- ct + 1
       cv_select_idx <- which.max(rslt[,paste0("est_",e)])
-      cvauc_cv_select[ct] <- rslt$true_cvauc[cv_select_idx]
-      auc_cv_select[ct] <- rslt$true_auc[cv_select_idx]
-      bestcvauc_cv_select[ct] <- as.numeric(cv_select_idx == bestcvauc)
-      bestauc_cv_select[ct] <- as.numeric(cv_select_idx == bestauc)
+      if(length(cv_select_idx) > 0){
+        cvauc_cv_select[ct] <- rslt$true_cvauc[cv_select_idx]      
+        auc_cv_select[ct] <- rslt$true_auc[cv_select_idx]
+        bestcvauc_cv_select[ct] <- as.numeric(cv_select_idx == bestcvauc)
+        bestauc_cv_select[ct] <- as.numeric(cv_select_idx == bestauc)
+      }else{
+        cvauc_cv_select[ct] <- NA
+        auc_cv_select[ct] <- NA
+        bestcvauc_cv_select[ct] <- NA
+        bestauc_cv_select[ct] <- NA
+      }
     }
     names(cvauc_cv_select) <- est
     names(bestcvauc_cv_select) <- est
@@ -162,9 +173,9 @@ if (args[1] == 'run') {
 
     out <- list(rslt = rslt, 
                 cvauc_cv_select = cvauc_cv_select,
-                auc_cv_select = cvauc_cv_select,
-                bestcvauc_cv_select = cvauc_cv_select,
-                bestauc_cv_select = cvauc_cv_select)
+                auc_cv_select = auc_cv_select,
+                bestcvauc_cv_select = bestcvauc_cv_select,
+                bestauc_cv_select = bestauc_cv_select)
 
     # save output 
     save(out, file = paste0("~/cvtmleauc/out/oracleout_",
@@ -250,145 +261,108 @@ if (args[1] == 'merge') {
   #                "empirical","se_empirical",
   #                "truth", "truth_full")
   # colnames(out) <- sim_names
-
+  sim_names <- c("wrapper","seed","n","K",
+                 "est_dcvtmle", "se_dcvtmle", "iter_dcvtmle",
+                 "est_dinit", "est_donestep", "se_donestep",
+                 "est_desteq","se_desteq","est_cvtmle","se_cvtmle",
+                 "iter_cvtmle","est_init", "est_onestep", "se_onestep",
+                 "est_esteq","se_esteq","est_emp","se_emp","true_cvauc",
+                 "true_dcvauc","true_auc")
+  colnames(full_rslt) <- sim_names
+  out <- data.frame(full_rslt)
+  out$wrapper <- c("glm", "stepglm", "randomforest", "glmnet")
   save(full_rslt, file=paste0('~/cvtmleauc/out/allOut_oracles.RData'))
 }
 # local editing 
 if(FALSE){
-  setwd("~/Dropbox/R/cvtmleauc/sandbox/simulation")
-  load("allOut.RData")
-  # bias
-  parm <- expand.grid(n = c(100, 250, 500, 750),
-                      K = c(5, 10, 20, 30))
-  b <- v <- m <- co <- NULL
-  for(i in seq_len(length(parm[,1]))){
-    x <- out[out$n == parm$n[i] & out$K == parm$K[i],]
-    b <- rbind(b, colMeans(x[,c("cvtmle", "onestep", "empirical")] - x$truth))
-    v <- rbind(v, apply(x[,c("cvtmle", "onestep", "empirical")], 2, var))
-    m <- rbind(m, colMeans((x[,c("cvtmle", "onestep", "empirical")] - x$truth)^2))
-    # coverage
-    cov_tmle <- mean(x$cvtmle - 1.96 * x$se_cvtmle < x$truth & 
-                      x$cvtmle + 1.96 * x$se_cvtmle > x$truth)
-    cov_onestep <- mean(x$onestep - 1.96 * x$se_onestep < x$truth & 
-                      x$onestep + 1.96 * x$se_onestep > x$truth)
-    cov_empirical <- mean(x$empirical - 1.96 * x$se_empirical < x$truth & 
-                      x$empirical + 1.96 * x$se_empirical > x$truth)
-    co <- rbind(co, c(cov_tmle, cov_onestep, cov_empirical))
-  }
-  parm <- cbind(parm, b, v, m, co)
-  colnames(parm) <- c("n", "K", paste0("bias_", c("cvtmle","onestep","empirical")),
-                      paste0("var_", c("cvtmle","onestep","empirical")),
-                      paste0("mse_", c("cvtmle","onestep","empirical")),
-                      paste0("cov_", c("cvtmle","onestep","empirical")))
+  load("~/cvtmleauc/out/allOut_oracles.RData")
 
+  get_sim_rslt <- function(out, parm, wrapper, truth = "true_auc",
+                           estimators = c("dcvtmle","donestep","desteq",
+                                   "cvtmle","onestep","esteq",
+                                   "emp"), ...){
+    b <- v <- m <- co <- NULL
+    for(i in seq_len(length(parm[,1]))){
+      x <- out[out$n == parm$n[i] & out$K == parm$K[i] & out$wrapper == wrapper,]
+      b <- rbind(b, colMeans(x[,paste0("est_",estimators)] - x[,truth], na.rm = TRUE))
+      v <- rbind(v, apply(x[,paste0("est_",estimators)], 2, var, na.rm = TRUE))
+      m <- rbind(m, colMeans((x[,paste0("est_",estimators)] - as.numeric(x[,truth]))^2, na.rm = TRUE))
+      # coverage
+      coverage <- rep(NA, length(estimators))
+      ct <- 0
+      for(est in estimators){
+        ct <- ct + 1
+        coverage[ct] <- mean(x[,paste0("est_",est)] - 1.96 * x[,paste0("se_",est)] < x[,truth] & 
+                        x[,paste0("est_",est)] + 1.96 * x[,paste0("se_",est)] > x[,truth], na.rm = TRUE)
+      }
+      co <- rbind(co, coverage)
+    }
+    parm <- cbind(parm, b, v, m, co)
+    colnames(parm) <- c("n", "K", paste0("bias_", estimators),
+                        paste0("var_", estimators),
+                        paste0("mse_", estimators),
+                        paste0("cov_", estimators))
+    return(parm)
+  }
+  parm <- expand.grid(n = c(100, 250, 500, 750),
+                      K = c(5, 10, 20, 40))
+  glm_rslt <- get_sim_rslt(out, parm, wrapper = "glm")
+  stepglm_rslt <- get_sim_rslt(out, parm, wrapper = "stepglm")
+  randomforest_rslt <- get_sim_rslt(out, parm, wrapper = "randomforest")
+  glmnet_rslt <- get_sim_rslt(out, parm, wrapper = "glmnet")
+  
   #--------------------------------
   # MSE plots
   #--------------------------------
+  make_mse_compare_plot <- function(rslt, est1, est2, ns = c(100, 250, 500, 750),
+                                    Ks = c(5, 10, 20, 40),...){
   # make matrix of relative MSE
   n_ct <- 0
   K_ct <- 0
-  rel_mse_cvtmle <- matrix(NA, 4, 4)
-  rel_mse_onestep <- matrix(NA, 4, 4)
-  rel_mse_tmlevonestep <- matrix(NA, 4, 4)
-  for(n in c(100, 250, 500, 750)){
+  rel_mse <- matrix(NA, length(ns), length(Ks))
+  for(n in ns){
     n_ct <- n_ct + 1
-    for(K in c(5, 10, 20, 30)){
+    for(K in Ks){
       K_ct <- K_ct + 1
-      rel_mse_cvtmle[n_ct, K_ct] <- parm$mse_cvtmle[parm$n == n & parm$K == K] / 
-                                parm$mse_empirical[parm$n == n & parm$K == K]      
-      rel_mse_onestep[n_ct, K_ct] <- parm$mse_onestep[parm$n == n & parm$K == K] / 
-                                parm$mse_empirical[parm$n == n & parm$K == K]
-      rel_mse_tmlevonestep[n_ct, K_ct] <- parm$mse_cvtmle[parm$n == n & parm$K == K] / 
-                                parm$mse_onestep[parm$n == n & parm$K == K]
+      rel_mse[n_ct, K_ct] <- rslt[rslt$n == n & rslt$K == K, paste0("mse_",est1)] / 
+                                rslt[rslt$n == n & rslt$K == K, paste0("mse_",est2)]      
     }
     K_ct <- 0
   }
-  row.names(rel_mse_cvtmle) <- row.names(rel_mse_onestep) <- row.names(rel_mse_tmlevonestep) <- c(100, 250, 500, 750)
-  colnames(rel_mse_cvtmle) <- colnames(rel_mse_onestep) <- colnames(rel_mse_tmlevonestep) <- c(5, 10, 20, 30)
+  row.names(rel_mse) <- ns
+  colnames(rel_mse) <- Ks
   
-  #--------------------------------
-  # CV TMLE vs. Empirical 
-  #--------------------------------
-  pdf("mse_results.pdf")
-  superheat(X = rel_mse_cvtmle, X.text = round(rel_mse_cvtmle, 2), scale = FALSE, 
+  superheat::superheat(X = rel_mse, X.text = round(rel_mse, 2), scale = FALSE, 
             pretty.order.rows = FALSE, 
             pretty.order.cols = FALSE, heat.col.scheme = "red",
             row.title = "Sample size", column.title = "CV folds",
-            legend.breaks = c(0.7, 0.8, 0.9, 1),
-            title = "MSE CVTMLE / MSE Empirical")
-  #--------------------------------
-  # One step vs. Empirical 
-  #--------------------------------
-  superheat(X = rel_mse_onestep, X.text = round(rel_mse_onestep, 2), scale = FALSE, 
-            pretty.order.rows = FALSE, 
-            pretty.order.cols = FALSE, heat.col.scheme = "red",
-            row.title = "Sample size", column.title = "CV folds",
-            legend.breaks = c(0.7, 0.8, 0.9, 1),
-            title = "MSE CV One step / MSE Empirical")  
-  #--------------------------------
-  # CVTMLE vs. Onestep 
-  #--------------------------------
-  superheat(X = rel_mse_tmlevonestep, X.text = round(rel_mse_tmlevonestep, 2), 
-            scale = FALSE, 
-            pretty.order.rows = FALSE, 
-            pretty.order.cols = FALSE, heat.col.scheme = "red",
-            row.title = "Sample size", column.title = "CV folds",
-            legend.breaks = c(0.7, 0.8, 0.9, 1),
-            title = "MSE CV One step / MSE CVTMLE")
-  dev.off()
-
-  #--------------------------------
-  # Coverage plots
-  #--------------------------------
-  # make matrix of relative MSE
-  n_ct <- 0
-  K_ct <- 0
-  cov_cvtmle <- matrix(NA, 4, 4)
-  cov_onestep <- matrix(NA, 4, 4)
-  cov_tmlevonestep <- matrix(NA, 4, 4)
-  for(n in c(100, 250, 500, 750)){
-    n_ct <- n_ct + 1
-    for(K in c(5, 10, 20, 30)){
-      K_ct <- K_ct + 1
-      cov_cvtmle[n_ct, K_ct] <- parm$cov_cvtmle[parm$n == n & parm$K == K]     
-      cov_onestep[n_ct, K_ct] <- parm$cov_onestep[parm$n == n & parm$K == K] 
-      cov_tmlevonestep[n_ct, K_ct] <- parm$cov_empirical[parm$n == n & parm$K == K] 
-    }
-    K_ct <- 0
+            title = paste0("MSE(",est1,")/MSE(",est2,")"),
+  # plot_done()
+            legend.breaks = seq(min(rel_mse), max(rel_mse), by = 0.1), ...)
   }
-  row.names(cov_cvtmle) <- row.names(cov_onestep) <- row.names(cov_tmlevonestep) <- c(100, 250, 500, 750)
-  colnames(cov_cvtmle) <- colnames(cov_onestep) <- colnames(cov_tmlevonestep) <- c(5, 10, 20, 30)
-  
-  #--------------------------------
-  # CV TMLE vs. Empirical 
-  #--------------------------------
-  pdf("coverage_results.pdf")
-  superheat(X = cov_cvtmle, X.text = round(cov_cvtmle, 2), scale = FALSE, 
-            pretty.order.rows = FALSE, 
-            pretty.order.cols = FALSE, heat.col.scheme = "red",
-            row.title = "Sample size", column.title = "CV folds",
-            legend.breaks = c(0.7, 0.8, 0.9, 1),
-            title = "Coverage of nominal 95% CI CVTMLE")
-  #--------------------------------
-  # One step vs. Empirical 
-  #--------------------------------
-  superheat(X = cov_onestep, X.text = round(cov_onestep, 2), scale = FALSE, 
-            pretty.order.rows = FALSE, 
-            pretty.order.cols = FALSE, heat.col.scheme = "red",
-            row.title = "Sample size", column.title = "CV folds",
-            legend.breaks = c(0.7, 0.8, 0.9, 1),
-            title = "Coverage of nominal 95% CI One step")  
-  #--------------------------------
-  # CVTMLE vs. Onestep 
-  #--------------------------------
-  superheat(X = cov_tmlevonestep, X.text = round(cov_tmlevonestep, 2), 
-            scale = FALSE, 
-            pretty.order.rows = FALSE, 
-            pretty.order.cols = FALSE, heat.col.scheme = "red",
-            row.title = "Sample size", column.title = "CV folds",
-            legend.breaks = c(0.7, 0.8, 0.9, 1),
-            title = "Coverage of nominal 95% CI Empirical")
-  dev.off()
 
+  # CV TMLE vs. empirical
 
+  for(rslt in c("glm_rslt","randomforest_rslt","glmnet_rslt","stepglm_rslt")){
+    pdf(paste0("~/cvtmleauc/",rslt,"_perfvstrueauc.pdf"))
+    # comparing to emp
+      make_mse_compare_plot(eval(parse(text = rslt)), est1 = "dcvtmle", est2 = "emp")
+      make_mse_compare_plot(eval(parse(text = rslt)), est1 = "cvtmle", est2 = "emp")
+      make_mse_compare_plot(eval(parse(text = rslt)), est1 = "desteq", est2 = "emp")
+      make_mse_compare_plot(eval(parse(text = rslt)), est1 = "esteq", est2 = "emp")  
+      make_mse_compare_plot(eval(parse(text = rslt)), est1 = "donestep", est2 = "emp")
+      make_mse_compare_plot(eval(parse(text = rslt)), est1 = "onestep", est2 = "emp")
+    # comparing to eachother
+      make_mse_compare_plot(eval(parse(text = rslt)), est1 = "onestep", est2 = "cvtmle")
+      make_mse_compare_plot(eval(parse(text = rslt)), est1 = "donestep", est2 = "dcvtmle")
+      make_mse_compare_plot(eval(parse(text = rslt)), est1 = "onestep", est2 = "esteq")
+      make_mse_compare_plot(eval(parse(text = rslt)), est1 = "donestep", est2 = "desteq")
+      make_mse_compare_plot(eval(parse(text = rslt)), est1 = "esteq", est2 = "cvtmle")
+      make_mse_compare_plot(eval(parse(text = rslt)), est1 = "desteq", est2 = "dcvtmle")
+    # comparing cv to dcv 
+      make_mse_compare_plot(eval(parse(text = rslt)), est1 = "onestep", est2 = "donestep")
+      make_mse_compare_plot(eval(parse(text = rslt)), est1 = "cvtmle", est2 = "dcvtmle")
+      make_mse_compare_plot(eval(parse(text = rslt)), est1 = "esteq", est2 = "desteq")
+    dev.off()
+  }
 }

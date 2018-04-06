@@ -4,8 +4,9 @@
 \alias{cvtn_cvtmle}
 \title{Compute CVTML estimates of cross-validated AUC}
 \usage{
-cvtn_cvtmle(Y, X, K, sens = 0.95, learner = "glm_wrapper", seed = 1234,
-  parallel = FALSE, maxIter = 10, icTol = 1/length(Y), ...)
+cvtn_cvtmle(Y, X, K = 20, sens = 0.95, learner = "glm_wrapper",
+  nested_cv = TRUE, nested_K = K - 1, parallel = FALSE, maxIter = 10,
+  icTol = 1/length(Y), quantile_type = 8, prediction_list = NULL, ...)
 }
 \arguments{
 \item{Y}{The outcome}
@@ -16,8 +17,6 @@ cvtn_cvtmle(Y, X, K, sens = 0.95, learner = "glm_wrapper", seed = 1234,
 
 \item{learner}{The learner wrapper}
 
-\item{seed}{A random seed to set}
-
 \item{parallel}{Compute the predictors in parallel?}
 
 \item{maxIter}{Maximum number of iterations for cvtmle}
@@ -26,9 +25,13 @@ cvtn_cvtmle(Y, X, K, sens = 0.95, learner = "glm_wrapper", seed = 1234,
 efficient influence function is less than \code{icTol}}
 
 \item{...}{other arguments, not currently used}
+
+\item{seed}{A random seed to set}
 }
 \value{
 A list
+TO DO: Seems like this needs to return the quantiles in order to be useful
+in a practical sense.
 }
 \description{
 TO DO: Add
@@ -38,5 +41,6 @@ n <- 200
 p <- 10
 X <- matrix(rnorm(n*p), nrow = n, ncol = p)
 Y <- rbinom(n, 1, plogis(X[,1] + X[,10]))
-fit <- cvauc_cvtmle(Y = Y, X = X, K = 5, learner = "glm_wrapper")
+fit <- cvtn_cvtmle(Y = Y, X = X, K = 5, learner = "glm_wrapper")
+
 }

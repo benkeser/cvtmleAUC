@@ -22,23 +22,22 @@
 #' X <- matrix(rnorm(n*p), nrow = n, ncol = p)
 #' Y <- rbinom(n, 1, plogis(X[,1] + X[,10]))
 #' fit <- cvauc_cvtmle(Y = Y, X = X, K = 5, learner = "glm_wrapper")
-cvauc_cvtmle <- function(Y, X, K, learner = "glm_wrapper", 
-                         seed = 1234,
+cvauc_cvtmle <- function(Y, X, K = 20, learner = "glm_wrapper", 
                          nested_cv = FALSE,
+                         nested_K = K - 1,
                          parallel = FALSE, maxIter = 10, 
-                         icTol = 1/length(Y), 
+                         icTol = 1 / length(Y), 
                          prediction_list = NULL,
                          ...){
   n <- length(Y)
-  set.seed(seed)
   folds <- SuperLearner::CVFolds(N = n, id = NULL, Y = Y, 
                                  cvControl = list(V = K, 
                                     stratifyCV = ifelse(K <= sum(Y) & K <= sum(!Y), TRUE, FALSE), 
                                     shuffle = TRUE, validRows = NULL))
   if(is.null(prediction_list)){
     prediction_list <- .getPredictions(learner = learner, Y = Y, X = X, 
-                                   K = K, folds=folds, parallel = FALSE,
-                                   nested_cv = nested_cv)
+                                   K = K, nested_K = nested_K, folds=folds, parallel = FALSE,
+                                   nested_cv = nested_cv, nested_K = K - 1)
   }
 
   # initial distributions of psi in training samples
@@ -239,9 +238,15 @@ cvauc_cvtmle <- function(Y, X, K, learner = "glm_wrapper",
     # compute regular cvAUC
     valid_pred_list <- lapply(prediction_list[1:K], "[[", "psi_nBn_testx")
     valid_label_list <- lapply(prediction_list[1:K], "[[", "test_y")
-    regular_cvauc <- tryCatch({cvAUC::ci.cvAUC(predictions = valid_pred_list,
-                                labels = valid_label_list)}, error = function(e){
-                                  return(list(cvAUC = NA, se = NA))})
+    if(K < n - 1){
+      regular_cvauc <- tryCatch({cvAUC::ci.cvAUC(predictions = valid_pred_list,
+                                  labels = valid_label_list)}, error = function(e){
+                                    return(list(cvAUC = NA, se = NA))})
+    }else{
+      regular_cvauc <- tryCatch({cvAUC::ci.cvAUC(predictions = unlist(valid_pred_list),
+                                  labels = unlist(valid_label_list))}, error = function(e){
+                                    return(list(cvAUC = NA, se = NA))})
+    }
     est_empirical <- regular_cvauc$cvAUC
     se_empirical <- regular_cvauc$se
     if(init_auc == 0.5){
@@ -275,6 +280,11 @@ cvauc_cvtmle <- function(Y, X, K, learner = "glm_wrapper",
     out$est_esteq <- est_esteq
     out$se_esteq <- se_esteq
     out$folds <- folds
+
+    out$se_cvtmle_type <- "std"
+    out$se_esteq_type <- "std"
+    out$se_onestep_type <- "std"
+    out$se_empirical_type <- "std"
 
     out$prediction_list <- prediction_list
     class(out) <- "cvauc"
@@ -801,7 +811,8 @@ F_nBn_star_nested_cv <- function(psi_x, y, epsilon = 0,
 #' @param parallel Whether to compute things in parallel using future
 #' 
 #' @return A list of the result of the wrapper executed in each fold
-.getPredictions <- function(learner, Y, X, K, folds, parallel, nested_cv = FALSE){
+.getPredictions <- function(learner, Y, X, K = 10, folds, parallel, nested_cv = FALSE,
+                            nested_K = K - 1){
   .doFit <- function(x, tmpX, Y, folds, learner){
     out <- do.call(learner, args=list(train = list(Y = Y[-unlist(folds[x])], X = tmpX[-unlist(folds[x]),,drop=FALSE]),
                                       test = list(Y = Y[unlist(folds[x])], X = tmpX[unlist(folds[x]),,drop=FALSE])))
@@ -809,24 +820,73 @@ F_nBn_star_nested_cv <- function(psi_x, y, epsilon = 0,
     out$valid_folds <- x
     return(out)
   }
+
   
   if(!nested_cv){
     valid_folds <- split(seq(K),factor(seq(K)))
   }else{
-    combns <- combn(K, 2)
-    valid_folds <- c(split(seq(K), factor(seq(K))),
-                     split(combns, col(combns)))
+    if(nested_K == K - 1){
+      combns <- combn(K, 2)
+      valid_folds <- c(split(seq(K), factor(seq(K))),
+                       split(combns, col(combns)))
+    }
   }
 
   if(parallel){
     stop("Parallel processing code needs to be re-written.")
-    # cl <- makeCluster(detectCores())
-    # registerDoParallel(cl)
-    # predFitList <- foreach(v = 1:length(folds), .export=learner) %dopar% 
-    #   .doFit(v, tmpX = X, Y = Y, folds = folds, learner = learner)
-    # stopCluster(cl)
   }else{
-    predFitList <- lapply(valid_folds ,FUN = .doFit, tmpX = X, Y = Y, folds = folds, learner = learner)
+    if(nested_K == K - 1){
+      predFitList <- lapply(valid_folds ,FUN = .doFit, tmpX = X, Y = Y, folds = folds, learner = learner)
+    }else if(nested_cv & nested_K != K - 1){
+      inner_folds <- vector(mode = "list", length = K)
+      for(k in seq_len(K)){
+        train_idx <- unlist(folds[-k], use.names = FALSE)
+        # these will just be numbers 1:length(train_idx)
+        inner_folds[[k]] <- SuperLearner::CVFolds(N = length(train_idx), 
+                                                        id = NULL, Y = Y[train_idx], 
+                                   cvControl = list(V = nested_K, 
+                                                    stratifyCV = ifelse(nested_K <= sum(Y[train_idx]) 
+                                                                        & nested_K <= sum(!Y[train_idx]), 
+                                                                        TRUE, FALSE), 
+                                   shuffle = TRUE, validRows = NULL))
+        # so replace them with actual ids
+        inner_folds[[k]] <- lapply(inner_folds[[k]], function(x){
+          train_idx[x]
+        })
+      }
+      fold_combos <- expand.grid(outer_K = seq_len(K),
+                                 inner_K = c(0,seq_len(nested_K)))
+      # here x will be a data.frame with columns outer_K and inner_K
+      .doFit2 <- function(x, tmpX, Y, folds, inner_folds, learner){
+        if(x[2] == 0){
+          # in this case, just remove from folds
+          out <- do.call(learner, args=list(train = list(Y = Y[-unlist(folds[x[1]])], 
+                                                         X = tmpX[-unlist(folds[x[1]]),,drop=FALSE]),
+                                      test = list(Y = Y[unlist(folds[x[1]])], 
+                                                  X = tmpX[unlist(folds[x[1]]),,drop=FALSE])))
+          out$valid_ids <- unlist(folds[x[1]], use.names = FALSE)
+          out$valid_folds <- x[1]
+        }else{
+          # browser()
+          # in this case, remove from folds and inner folds
+          outer_valid_idx <- unlist(folds[x[1]], use.names = FALSE)
+          inner_valid_idx <- unlist(inner_folds[[x[1]]][x[2]], use.names = FALSE)
+          remove_idx <- c(outer_valid_idx, inner_valid_idx)
+          out <- do.call(learner, args=list(train = list(Y = Y[-remove_idx], 
+                                                         X = tmpX[-remove_idx,,drop=FALSE]),
+                                      test = list(Y = Y[inner_valid_idx], 
+                                                  X = tmpX[inner_valid_idx, , drop = FALSE])))
+          out$valid_ids <- inner_valid_idx
+          # leave this corresponding to outer validation fold?
+          out$valid_folds <- x[1]
+        }
+        return(out)
+      }
+      predFitList <- apply(fold_combos, 1, FUN = .doFit2, 
+                           tmpX = X, Y = Y, folds = folds, 
+                           inner_folds = inner_folds, 
+                           learner = learner)      
+    }
   }
   
   # return results
@@ -834,3 +894,65 @@ F_nBn_star_nested_cv <- function(psi_x, y, epsilon = 0,
 }
 
 
+#' Function to do leave pair out AUC computation
+#' @param Y The outcome
+#' @param X The predictors
+#' @param K The number of folds
+#' @param learner The learner wrapper
+#' @param seed A random seed to set
+#' @param parallel Compute the predictors in parallel?
+#' @export
+
+leave_pair_out_auc <- function(Y, X, learner = "glm_wrapper", 
+                         seed = 1234,
+                         nested_cv = FALSE,
+                         parallel = FALSE, ...){
+  case_idx <- which(Y == 1)
+  control_idx <- which(Y == 0)
+  grid_idx <- expand.grid(case = case_idx, control = control_idx)
+  folds <- split(grid_idx, seq_len(nrow(grid_idx)))
+
+  prediction_list <- .getPredictions(learner = learner, Y = Y, X = X, 
+                               K = length(folds), folds=folds, parallel = FALSE,
+                               nested_cv = FALSE)
+
+  zero_one_vec <- lapply(prediction_list, function(x){
+    as.numeric(x$psi_nBn_testx[1] > x$psi_nBn_testx[2])
+  })
+
+  auc <- mean(unlist(zero_one_vec))
+
+  return(list(auc = auc))
+}
+
+
+boot_corrected_auc <- function(Y, X, B = 500, learner = "glm_wrapper", 
+                         seed = 1234,
+                         nested_cv = FALSE,
+                         parallel = FALSE, ...){
+  one_boot <- function(Y, X, n){
+    idx <- sample(seq_len(n), replace = TRUE)
+    train_Y <- Y[idx]
+    train_X <- X[idx, , drop = FALSE]
+    fit <- do.call(learner, args=list(train = list(Y = train_Y, X = train_X),
+                                      test = list(Y = Y, X = X)))
+    train_cvauc <- tryCatch({cvAUC::cvAUC(predictions = fit$psi_nBn_trainx,
+                            labels = train_Y)$cvAUC}, error = function(e){
+                              return(NA)})
+    test_cvauc <- tryCatch({cvAUC::cvAUC(predictions = fit$psi_nBn_testx,
+                            labels = Y)$cvAUC}, error = function(e){
+                              return(NA)})
+    optimism <- train_cvauc - test_cvauc
+    return(optimism)
+  }
+  n <- length(Y)
+  all_boot <- replicate(B, one_boot(Y = Y, X = X, n = n))
+  mean_optimism <- mean(all_boot)
+
+  full_fit <- do.call(learner, args=list(train = list(Y = Y, X = X),
+                                      test = list(Y = Y, X = X)))
+  naive_auc <- cvAUC::cvAUC(predictions = fit$psi_nBn_testx,
+                            labels = Y)$cvAUC
+  corrected_auc <- naive_auc - mean_optimism
+  return(list(auc = corrected_auc))
+}

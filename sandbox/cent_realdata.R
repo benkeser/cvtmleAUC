@@ -18,7 +18,7 @@ if(length(args) < 1){
   stop("Not enough arguments. Please use args 'listsize', 'prepare', 'run <itemsize>' or 'merge'")
 }
 
-data_sets <- c("adult", "asd", "bank", "cardio", "default",
+data_sets <- c("adult", "bank", "cardio", "default",
                "drugs", "magic", "wine")
 bigB <- 100
 ns <- c(100, 250, 500)
@@ -26,8 +26,8 @@ K <- c(5,10,20,40)
 wrappers <- c("randomforest_wrapper", "glmnet_wrapper",
               "polymars_wrapper", "stepglm_wrapper")
 
-parm <- expand.grid(seed = 1:bigB,
-                    data_set = data_sets, 
+parm <- expand.grid(data_set = data_sets,
+                    seed = 1:bigB,
                     K = K, 
                     n = ns,
                     wrapper = wrappers, 
@@ -42,7 +42,7 @@ parm <- expand.grid(seed = 1:bigB,
 library(cvtmleAUC, lib.loc = "/home/dbenkese/R/x86_64-pc-linux-gnu-library/3.4")
 # library(SuperLearner, lib.loc = '/home/dbenkese/R/x86_64-pc-linux-gnu-library/3.4')
 library(glmnet)
-library(xgboost)
+# library(xgboost)
 library(polspline)
 
 

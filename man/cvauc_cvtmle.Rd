@@ -4,9 +4,9 @@
 \alias{cvauc_cvtmle}
 \title{Compute CVTML estimates of cross-validated AUC}
 \usage{
-cvauc_cvtmle(Y, X, K, learner = "glm_wrapper", seed = 1234,
-  nested_cv = FALSE, parallel = FALSE, maxIter = 10,
-  icTol = 1/length(Y), prediction_list = NULL, ...)
+cvauc_cvtmle(Y, X, K = 20, learner = "glm_wrapper", nested_cv = FALSE,
+  nested_K = K - 1, parallel = FALSE, maxIter = 10, icTol = 1/length(Y),
+  prediction_list = NULL, ...)
 }
 \arguments{
 \item{Y}{The outcome}
@@ -17,8 +17,6 @@ cvauc_cvtmle(Y, X, K, learner = "glm_wrapper", seed = 1234,
 
 \item{learner}{The learner wrapper}
 
-\item{seed}{A random seed to set}
-
 \item{parallel}{Compute the predictors in parallel?}
 
 \item{maxIter}{Maximum number of iterations for cvtmle}
@@ -27,6 +25,8 @@ cvauc_cvtmle(Y, X, K, learner = "glm_wrapper", seed = 1234,
 efficient influence function is less than \code{icTol}}
 
 \item{...}{other arguments, not currently used}
+
+\item{seed}{A random seed to set}
 }
 \value{
 A list
