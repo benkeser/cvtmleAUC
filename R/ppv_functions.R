@@ -403,8 +403,8 @@ cvtn_cvtmle <- function(Y, X, K = 20, sens = 0.95, learner = "glm_wrapper",
                                            inner_valid_prediction_and_y_list = inner_valid_prediction_and_y_list)
     F_nBn_vec <- ifelse(prediction_list[[x]]$test_y == 0, F_nBn_y0_at_c0, F_nBn_y1_at_c0)
     F_nBn_vec_pred <- c(F_nBn_y0_at_c0, F_nBn_y1_at_c0)
+    if(density_list[[x]][[1]] == 0){ density_list[[x]][[1]] <- 1e-3 }
     dens_ratio <- density_list[[x]][[2]]/density_list[[x]][[1]]
-    if(dens_ratio == Inf){ dens_ratio <- 1e2 }
     ind <- as.numeric(prediction_list[[x]]$psi_nBn_testx <= quantile_list[[x]])
   }
 
