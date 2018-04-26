@@ -3,16 +3,19 @@
 #-----------------------------------------
 cd ~/Dropbox/R/cvtmleAUC/sandbox
 scp cent_new.R sce_new.sh makeData.R dbenkese@snail.fhcrc.org:~/cvtmleauc
+scp cent_newest.R sce.sh makeData.R dbenkese@snail.fhcrc.org:~/cvtmleauc
 
 ssh dbenkese@snail.fhcrc.org
 cd cvtmleauc
 scp cent_new.R sce_new.sh makeData.R dbenkese@rhino.fhcrc.org:~/cvtmleauc
+scp cent_newest.R sce.sh makeData.R dbenkese@rhino.fhcrc.org:~/cvtmleauc
 
 ssh dbenkese@rhino.fhcrc.org
 cd cvtmleauc
-chmod +x cent_new* sce_new*
+chmod +x cent* sce*
 ml R
 ./sce_new.sh ./cent_new.R small_v2
+./sce.sh ./cent_newest.R runtn_full_v1
 
 cd ~/Dropbox/R/cvtmleAUC/sandbox
 scp ../R/wrapper_functions.R cent_oracles.R sce_oracles.sh makeData.R dbenkese@snail.fhcrc.org:~/cvtmleauc
