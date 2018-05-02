@@ -18,21 +18,27 @@ if(length(args) < 1){
   stop("Not enough arguments. Please use args 'listsize', 'prepare', 'run <itemsize>' or 'merge'")
 }
 
-ns <- c(100, 200, 1000)
+ns <- c(50, 100, 250, 500)
 bigB <- 500
-K <- c(5,20,50)
+K <- c(5, 10, 20, 40)
+wrappers <- c("glm_wrapper", "randomforest_wrapper")
+# wrappers <- c("glmnet_wrapper")
 p <- 10
-parm <- expand.grid(seed=1:bigB,
-                    n=ns, K = K)
+# TO DO:
+# Add a replicate argument for repeated cross-validation estimators
+parm <- expand.grid(seed = 1:bigB,
+                    n = ns, K = K, 
+                    wrapper = wrappers,
+                    stringsAsFactors = FALSE)
 
 # parm <- parm[1,,drop=FALSE]
 # source in simulation Functions
 source("~/cvtmleauc/makeData.R")
 # load drinf
 # library(glmnet)
-library(cvtmleAUC, lib.loc = "/home/dbenkese/R/x86_64-unknown-linux-gnu-library/3.2/")
-library(SuperLearner)
-library(glmnet)
+library(cvtmleAUC, lib.loc = "/home/dbenkese/R/x86_64-pc-linux-gnu-library/3.4")
+# library(SuperLearner)
+# library(glmnet)
 
 # get the list size #########
 if (args[1] == 'listsize') {
@@ -41,14 +47,14 @@ if (args[1] == 'listsize') {
 
 # execute prepare job ##################
 if (args[1] == 'prepare') {
-  for(i in 1:nrow(parm)){
-     set.seed(parm$seed[i])
-     dat <- makeData(n = parm$n[i], p = p)
-     save(dat, file=paste0("~/cvtmleauc/scratch/dataList",
-                           "_n=",parm$n[i],
-                           "_K=",parm$K[i],
-                           "_seed=",parm$seed[i],".RData"))
-   }
+  # for(i in 1:nrow(parm)){
+  #    set.seed(parm$seed[i])
+  #    dat <- makeData(n = parm$n[i], p = p)
+  #    save(dat, file=paste0("~/cvtmleauc/scratch/dataList",
+  #                          "_n=",parm$n[i],
+  #                          "_K=",parm$K[i],
+  #                          "_seed=",parm$seed[i],".RData"))
+  #  }
    print(paste0('initial datasets saved to: ~/cvtmleauc/scratch/dataList ... .RData'))
 }
 

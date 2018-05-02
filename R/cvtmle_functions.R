@@ -37,7 +37,7 @@ cvauc_cvtmle <- function(Y, X, K = 20, learner = "glm_wrapper",
   if(is.null(prediction_list)){
     prediction_list <- .getPredictions(learner = learner, Y = Y, X = X, 
                                    K = K, nested_K = nested_K, folds=folds, parallel = FALSE,
-                                   nested_cv = nested_cv, nested_K = K - 1)
+                                   nested_cv = nested_cv)
   }
 
   # initial distributions of psi in training samples

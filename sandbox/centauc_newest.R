@@ -30,8 +30,8 @@ parm <- expand.grid(seed = 1:bigB,
                     n = ns, K = K, 
                     wrapper = wrappers,
                     stringsAsFactors = FALSE)
-load("~/cvtmleauc/scratch/redo_parm_newest.RData")
-parm <- redo_parm
+# load("~/cvtmleauc/scratch/redo_parm_newest.RData")
+# parm <- redo_parm
 # load('~/cvtmleauc/out/allOut_new.RData')
 # redo_idx <- which(is.na(out$est_dcvtmle))
 # parm <- parm[redo_idx,]
@@ -91,12 +91,12 @@ if (args[1] == 'run') {
     fit_cv <- vector(mode = "list", length = n_replicates)
     for(j in seq_len(n_replicates)){
       set.seed(j)
-      fit_dcv[[j]] <- cvtn_cvtmle(Y = dat$Y, X = dat$X, K = parm$K[i], 
+      fit_dcv[[j]] <- cvauc_cvtmle(Y = dat$Y, X = dat$X, K = parm$K[i], 
                           learner = parm$wrapper[i], nested_cv = TRUE,
                           nested_K = 39)
       set.seed(j)
     # get estimates of cvtn
-      fit_cv[[j]] <- cvtn_cvtmle(Y = dat$Y, X = dat$X, K = parm$K[i], 
+      fit_cv[[j]] <- cvauc_cvtmle(Y = dat$Y, X = dat$X, K = parm$K[i], 
                           learner = parm$wrapper[i], nested_cv = FALSE,
                           prediction_list = fit_dcv$prediction_list[1:parm$K[i]])
     }
@@ -109,16 +109,14 @@ if (args[1] == 'run') {
     # fit on full data
     fit_full <- do.call(parm$wrapper[i], args = list(train = list(X = dat$X, Y = dat$Y), 
                             test = list(X = big_data$X, Y = big_data$Y)))
-    bigquantile_full <- quantile(fit_full$psi_nBn_testx[big_data$Y == 1], p = 0.05, type = 8)
-    big_testneg_full <- mean(fit_full$psi_nBn_testx <= bigquantile_full)
-    true_parameter <- big_testneg_full
-
+    true_parameter <- cvAUC::AUC(predictions = fit_full$psi_nBn_testx, labels = bigdat$Y)
     # bootstrap estimate 
     # only needed for K = 5 runs
     # and will be put back in later
     if(parm$K[i] == 5){
       set.seed(parm$seed[i])
-      fit_boot <- cvtmleAUC:::boot_corrected_cvtn(Y = dat$Y, X = dat$X, learner = parm$wrapper[i])
+      fit_boot <- cvtmleAUC:::boot_corrected_auc(Y = dat$Y, X = dat$X, learner = parm$wrapper[i])
+      fit_lpo <- cvtmleAUC::leave_pair_out_auc(Y = dat$Y, X = dat$X, learner = parm$wrapper[i])
     }else{
       fit_boot <- list(NA)
     }
@@ -171,19 +169,19 @@ if (args[1] == 'run') {
     out <- c(out, fit_boot[[1]], true_parameter)
 
     # save output 
-    save(out, file = paste0("~/cvtmleauc/out/outtn_",
+    save(out, file = paste0("~/cvtmleauc/out/outauc_",
                             "n=", parm$n[i],
                             "_seed=",parm$seed[i],
                             "_K=",parm$K[i],
                             "_wrapper=",parm$wrapper[i],
                             ".RData.tmp"))
-    file.rename(paste0("~/cvtmleauc/out/outtn_",
+    file.rename(paste0("~/cvtmleauc/out/outauc_",
                             "n=", parm$n[i],
                             "_seed=",parm$seed[i],
                             "_K=",parm$K[i],
                             "_wrapper=",parm$wrapper[i],                            
                             ".RData.tmp"),
-                paste0("~/cvtmleauc/out/outtn_",
+                paste0("~/cvtmleauc/out/outauc_",
                             "n=", parm$n[i],
                             "_seed=",parm$seed[i],
                             "_K=",parm$K[i],
