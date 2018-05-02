@@ -1,5 +1,5 @@
 #' Print results of cvauc_cvtmle
-#' @exportMethod
+#' @export
 #' @param x An object of class "cvauc"
 print.cvauc <- function(x, ...){
 	cvtmle_ci <- if(x$se_cvtmle_type == "std"){
