@@ -54,7 +54,45 @@ randomforest_wrapper <- function(train, test,
     psi_nBn_testx <- all_psi[1:ntest]
     psi_nBn_trainx <- all_psi[(ntest+1):(ntest+ntrain)]
     return(list(psi_nBn_trainx = psi_nBn_trainx, psi_nBn_testx = psi_nBn_testx,
-                model = rf_fit, train_y = train$Y, test_y = test$Y))
+                model = NULL, train_y = train$Y, test_y = test$Y))
+}
+#' Wrapper for fitting a main terms random forest
+#' 
+#' @param train ...
+#' @param test ...
+#' @param mtry ...
+#' @param ntree ...
+#' @param nodesize ...
+#' @param maxnodes ...
+#' @param importance ...
+#' @param ... ...
+#' @return A list
+#' @export
+#' @importFrom ranger ranger 
+#' @importFrom stats predict
+#' @examples
+#' # TO DO: Add
+ranger_wrapper <- function(train, test,
+                                 num.trees = 500, mtry = floor(sqrt(ncol(X))), 
+    write.forest = TRUE, probability = TRUE, 
+    min.node.size = 5, 
+    replace = TRUE, sample.fraction = ifelse(replace, 1, 0.632), 
+    num.threads = 1, verbose = TRUE, ...){
+
+    fit <- ranger::ranger(myY ~ ., data = cbind(myY = factor(train$Y), train$X), 
+        num.trees = num.trees, mtry = mtry, min.node.size = min.node.size, 
+        replace = replace, sample.fraction = sample.fraction, 
+        write.forest = write.forest, probability = probability, 
+        num.threads = num.threads, 
+        verbose = verbose)
+    pred_data <- rbind(test$X, train$X)
+    all_psi <- predict(fit, data = pred_data)$predictions[, "1"]
+    ntest <- length(test$Y)
+    ntrain <- length(train$Y)
+    psi_nBn_testx <- all_psi[1:ntest]
+    psi_nBn_trainx <- all_psi[(ntest+1):(ntest+ntrain)]
+    return(list(psi_nBn_trainx = psi_nBn_trainx, psi_nBn_testx = psi_nBn_testx,
+                model = NULL, train_y = train$Y, test_y = test$Y))
 }
 
 #' Wrapper for fitting a main terms GLM

@@ -167,6 +167,7 @@ if (args[1] == 'run') {
   cl <- makeCluster(12)
   # future::plan("cluster", workers = cl)
   clusterEvalQ(cl, library("randomForest"))
+  clusterEvalQ(cl, library("cvtmleAUC"))
   clusterEvalQ(cl,source("~/cvtmleauc/makeData.R"))
   # plan('multisession')
   parSapply(cl = cl, X = seq_len(2000), FUN = do.one)

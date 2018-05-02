@@ -30,6 +30,8 @@ parm <- expand.grid(seed = 1:bigB,
                     n = ns, K = K, 
                     wrapper = wrappers,
                     stringsAsFactors = FALSE)
+load("~/cvtmleauc/scratch/redo_parm_newest.RData")
+parm <- redo_parm
 # load('~/cvtmleauc/out/allOut_new.RData')
 # redo_idx <- which(is.na(out$est_dcvtmle))
 # parm <- parm[redo_idx,]
@@ -53,14 +55,14 @@ if (args[1] == 'listsize') {
 
 # execute prepare job ##################
 if (args[1] == 'prepare') {
-  parm_red <- parm[parm$K == parm$K[1] & parm$wrapper == parm$wrapper[1],]
-  for(i in 1:nrow(parm_red)){
-     set.seed(parm_red$seed[i])
-     dat <- makeData(n = parm_red$n[i], p = p)
-     save(dat, file=paste0("~/cvtmleauc/scratch/dataList",
-                           "_n=",parm_red$n[i],
-                           "_seed=",parm_red$seed[i],".RData"))
-   }
+  # parm_red <- parm[parm$K == parm$K[1] & parm$wrapper == parm$wrapper[1],]
+  # for(i in 1:nrow(parm_red)){
+  #    set.seed(parm_red$seed[i])
+  #    dat <- makeData(n = parm_red$n[i], p = p)
+  #    save(dat, file=paste0("~/cvtmleauc/scratch/dataList",
+  #                          "_n=",parm_red$n[i],
+  #                          "_seed=",parm_red$seed[i],".RData"))
+  #  }
    print(paste0('initial datasets saved to: ~/cvtmleauc/scratch/dataList ... .RData'))
 }
 
@@ -161,7 +163,7 @@ if (args[1] == 'run') {
              # full sample split estimate of cv
              avg_dcv$est_empirical, avg_dcv$se_empirical)
     }
-    out <- c(out, fit_boot[[1]], true_parameter, true_cvparameter)
+    out <- c(out, fit_boot[[1]], true_parameter)
 
     # save output 
     save(out, file = paste0("~/cvtmleauc/out/outtn_",
@@ -208,12 +210,12 @@ if (args[1] == 'merge') {
                             "_K=",parm$K[i],
                             "_wrapper=",parm$wrapper[i],
                             ".RData"))){
-      tmp_1 <- load(paste0("~/cvtmleauc/out/outtn_",
+      tmp_1 <- get(load(paste0("~/cvtmleauc/out/outtn_",
                             "n=", parm$n[i],
                             "_seed=",parm$seed[i],
                             "_K=",parm$K[i],
                             "_wrapper=",parm$wrapper[i],
-                            ".RData"))
+                            ".RData")))
     }else{
       redo_parm <- rbind(redo_parm, parm[i,])
       tmp_1 <- rep(NA, 66)
@@ -246,6 +248,7 @@ if (args[1] == 'merge') {
     as.numeric(as.character(y))})
 
   save(out, file=paste0('~/cvtmleauc/out/allOut_cvtn.RData'))
+  save(redo_parm, file = "~/cvtmleauc/scratch/redo_parm_newest.RData")
 }
 
 
