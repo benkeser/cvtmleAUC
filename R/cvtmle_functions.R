@@ -13,6 +13,7 @@
 #' @param ... other arguments, not currently used
 #' @importFrom SuperLearner CVFolds
 #' @importFrom cvAUC ci.cvAUC
+#' @importFrom cvma ci.cvAUC_withIC
 #' @importFrom stats uniroot
 #' @export
 #' @return A list
@@ -66,7 +67,7 @@ cvauc_cvtmle <- function(Y, X, K = 20, learner = "glm_wrapper",
   # compute mean of EIF
   D1 <- .Dy(full_long_data, y = 1)
   D0 <- .Dy(full_long_data, y = 0)
-  ic <- D1 + D0 
+  ic <- ic_os <- D1 + D0 
   PnDstar <- mean(ic)
 
   # compute initial estimate of cvAUC
@@ -94,7 +95,7 @@ cvauc_cvtmle <- function(Y, X, K = 20, learner = "glm_wrapper",
     est_esteq <- init_auc
   }else{
     est_onestep <- init_auc + PnDstar
-    se_onestep <- sqrt(var(ic)/n)
+    se_onestep <- sqrt(var(ic_os)/n)
 
     # estimating equations
     if(!nested_cv){
@@ -239,16 +240,18 @@ cvauc_cvtmle <- function(Y, X, K = 20, learner = "glm_wrapper",
     valid_pred_list <- lapply(prediction_list[1:K], "[[", "psi_nBn_testx")
     valid_label_list <- lapply(prediction_list[1:K], "[[", "test_y")
     if(K < n - 1){
-      regular_cvauc <- tryCatch({cvAUC::ci.cvAUC(predictions = valid_pred_list,
+      regular_cvauc <- tryCatch({cvma::ci.cvAUC_withIC(predictions = valid_pred_list,
                                   labels = valid_label_list)}, error = function(e){
                                     return(list(cvAUC = NA, se = NA))})
     }else{
-      regular_cvauc <- tryCatch({cvAUC::ci.cvAUC(predictions = unlist(valid_pred_list),
+      # this is for computing the weird LOO CV estimator
+      regular_cvauc <- tryCatch({cvma::ci.cvAUC_withIC(predictions = unlist(valid_pred_list),
                                   labels = unlist(valid_label_list))}, error = function(e){
                                     return(list(cvAUC = NA, se = NA))})
     }
     est_empirical <- regular_cvauc$cvAUC
     se_empirical <- regular_cvauc$se
+    ic_emp <- regular_cvauc$ic
     if(init_auc == 0.5){
       se_onestep <- se_cvtmle <- se_esteq <- se_empirical
       iter <- 1
@@ -280,6 +283,9 @@ cvauc_cvtmle <- function(Y, X, K = 20, learner = "glm_wrapper",
     out$est_esteq <- est_esteq
     out$se_esteq <- se_esteq
     out$folds <- folds
+    out$ic_cvtmle <- ic
+    out$ic_onestep <- ic_os
+    out$ic_empirical <- ic_empirical
 
     out$se_cvtmle_type <- "std"
     out$se_esteq_type <- "std"
