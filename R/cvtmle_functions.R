@@ -925,7 +925,7 @@ leave_pair_out_auc <- function(Y, X, learner = "glm_wrapper",
   return(list(auc = auc))
 }
 
-
+#' @export
 boot_corrected_auc <- function(Y, X, B = 500, learner = "glm_wrapper", 
                          seed = 1234,
                          nested_cv = FALSE,
@@ -951,7 +951,7 @@ boot_corrected_auc <- function(Y, X, B = 500, learner = "glm_wrapper",
 
   full_fit <- do.call(learner, args=list(train = list(Y = Y, X = X),
                                       test = list(Y = Y, X = X)))
-  naive_auc <- cvAUC::cvAUC(predictions = fit$psi_nBn_testx,
+  naive_auc <- cvAUC::cvAUC(predictions = full_fit$psi_nBn_testx,
                             labels = Y)$cvAUC
   corrected_auc <- naive_auc - mean_optimism
   return(list(auc = corrected_auc))

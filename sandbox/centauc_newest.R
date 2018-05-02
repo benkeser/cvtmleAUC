@@ -85,7 +85,7 @@ if (args[1] == 'run') {
                 ".RData"))
     
     # get estimates of dcvauc
-    options(np.messages = FALSE)
+    # options(np.messages = FALSE)
     n_replicates <- 20
     fit_dcv <- vector(mode = "list", length = n_replicates)
     fit_cv <- vector(mode = "list", length = n_replicates)
@@ -109,16 +109,17 @@ if (args[1] == 'run') {
     # fit on full data
     fit_full <- do.call(parm$wrapper[i], args = list(train = list(X = dat$X, Y = dat$Y), 
                             test = list(X = big_data$X, Y = big_data$Y)))
-    true_parameter <- cvAUC::AUC(predictions = fit_full$psi_nBn_testx, labels = bigdat$Y)
+    true_parameter <- cvAUC::AUC(predictions = fit_full$psi_nBn_testx, labels = big_data$Y)
     # bootstrap estimate 
     # only needed for K = 5 runs
     # and will be put back in later
     if(parm$K[i] == 5){
       set.seed(parm$seed[i])
-      fit_boot <- cvtmleAUC:::boot_corrected_auc(Y = dat$Y, X = dat$X, learner = parm$wrapper[i])
-      fit_lpo <- cvtmleAUC::leave_pair_out_auc(Y = dat$Y, X = dat$X, learner = parm$wrapper[i])
+      fit_boot <- boot_corrected_auc(Y = dat$Y, X = dat$X, learner = parm$wrapper[i])
+      fit_lpo <- leave_pair_out_auc(Y = dat$Y, X = dat$X, learner = parm$wrapper[i])
     }else{
       fit_boot <- list(NA)
+      fit_lpo <- list(NA)
     }
     # c together output
     out <- c( # cvtmle estimates of dcvauc
