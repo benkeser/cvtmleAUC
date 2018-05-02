@@ -486,14 +486,18 @@ boot_corrected_cvtn <- function(Y, X, B = 200, learner = "glm_wrapper",
   covar <- cov(icMatrix)
   B <- length(result_list)
   a <- matrix(1/B, nrow = B, ncol = 1)
-  if(estimate <= 0 | estimate >= 1){
-    logit <- FALSE
-  }
-  if(!logit){
-      se <- sqrt( t(a) %*% covar %*% a / dim(icMatrix)[2])
+  if(!any(is.na(estimate))){
+    if(estimate <= 0 | estimate >= 1){
+      logit <- FALSE
+    }
+    if(!logit){
+        se <- sqrt( t(a) %*% covar %*% a / dim(icMatrix)[2])
+    }else{
+      g <- 1 / (estimate - estimate^2)
+      se <- sqrt( g^2 * t(a) %*% covar %*% a / dim(icMatrix)[2] )
+    }
   }else{
-    g <- 1 / (estimate - estimate^2)
-    se <- sqrt( g^2 * t(a) %*% covar %*% a / dim(icMatrix)[2] )
+    se <- NA    
   }
   return(se)
 }
