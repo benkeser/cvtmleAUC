@@ -112,7 +112,7 @@ glm_wrapper <- function(train, test){
     psi_nBn_trainx <- Psi_nBn_0(train$X)
     psi_nBn_testx <- Psi_nBn_0(test$X)
     return(list(psi_nBn_trainx = psi_nBn_trainx, psi_nBn_testx = psi_nBn_testx,
-                model = glm_fit, train_y = train$Y, test_y = test$Y))
+                model = NULL, train_y = train$Y, test_y = test$Y))
 }
 
 #' Wrapper for fitting a main terms GLM

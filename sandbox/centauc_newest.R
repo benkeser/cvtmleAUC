@@ -24,8 +24,6 @@ K <- c(5, 10, 20, 40)
 wrappers <- c("glm_wrapper", "randomforest_wrapper")
 # wrappers <- c("glmnet_wrapper")
 p <- 10
-# TO DO:
-# Add a replicate argument for repeated cross-validation estimators
 parm <- expand.grid(seed = 1:bigB,
                     n = ns, K = K, 
                     wrapper = wrappers,
@@ -167,7 +165,7 @@ if (args[1] == 'run') {
              # full sample split estimate of cv
              avg_dcv$est_empirical, avg_dcv$se_empirical)
     }
-    out <- c(out, fit_boot[[1]], true_parameter)
+    out <- c(out, fit_boot[[1]], fit_lpo[[1]], true_parameter)
 
     # save output 
     save(out, file = paste0("~/cvtmleauc/out/outauc_",
@@ -208,13 +206,13 @@ if (args[1] == 'merge') {
                       stringsAsFactors = FALSE)
   rslt <- matrix(NA, nrow = nrow(parm), ncol = 66 + 4)
   for(i in 1:nrow(parm)){
-    if(file.exists(paste0("~/cvtmleauc/out/outtn_",
+    if(file.exists(paste0("~/cvtmleauc/out/outauc",
                             "n=", parm$n[i],
                             "_seed=",parm$seed[i],
                             "_K=",parm$K[i],
                             "_wrapper=",parm$wrapper[i],
                             ".RData"))){
-      tmp_1 <- get(load(paste0("~/cvtmleauc/out/outtn_",
+      tmp_1 <- get(load(paste0("~/cvtmleauc/out/outauc",
                             "n=", parm$n[i],
                             "_seed=",parm$seed[i],
                             "_K=",parm$K[i],
@@ -226,14 +224,15 @@ if (args[1] == 'merge') {
     }
     rslt[i,] <- c(parm$seed[i], parm$n[i], parm$K[i], parm$wrapper[i], tmp_1)
     if(parm$K[i] != 5){
-      boot_rslt_out <- get(load(paste0("~/cvtmleauc/out/outtn_",
+      boot_rslt_out <- get(load(paste0("~/cvtmleauc/out/outauc",
                             "n=", parm$n[i],
                             "_seed=",parm$seed[i],
                             "_K=5",
                             "_wrapper=",parm$wrapper[i],
                             ".RData")))
-      boot_idx <- length(boot_rslt_out) - 1
-      rslt[i,boot_idx] <- boot_rslt_out[boot_idx]
+      boot_idx <- length(boot_rslt_out) - 2
+      lpo_idx <- length(boot_rslt_out) - 1
+      rslt[i,c(boot_idx, lpo_idx)] <- boot_rslt_out[c(boot_idx,lpo_idx)]
     }
   }
   # # format
@@ -261,8 +260,8 @@ if (args[1] == 'merge') {
   out[,c(1:3,5:ncol(out))] <- apply(out[,c(1:3,5:ncol(out))], 2, function(y){
     as.numeric(as.character(y))})
 
-  save(out, file=paste0('~/cvtmleauc/out/allOut_cvtn.RData'))
-  save(redo_parm, file = "~/cvtmleauc/scratch/redo_parm_newest.RData")
+  save(out, file=paste0('~/cvtmleauc/out/allOut_cvauc.RData'))
+  save(redo_parm, file = "~/cvtmleauc/scratch/redo_parm_aucnewest.RData")
 }
 
 
