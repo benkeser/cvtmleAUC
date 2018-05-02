@@ -94,7 +94,7 @@ if (args[1] == 'run') {
       fit_dcv[[j]] <- cvtn_cvtmle(Y = dat$Y, X = dat$X, K = parm$K[i], 
                           learner = parm$wrapper[i], nested_cv = TRUE,
                           nested_K = 39)
-      set.seed(j)
+                                set.seed(j)
     # get estimates of cvtn
       fit_cv[[j]] <- cvtn_cvtmle(Y = dat$Y, X = dat$X, K = parm$K[i], 
                           learner = parm$wrapper[i], nested_cv = FALSE,

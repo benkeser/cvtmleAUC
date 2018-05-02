@@ -73,7 +73,7 @@ randomforest_wrapper <- function(train, test,
 #' @examples
 #' # TO DO: Add
 ranger_wrapper <- function(train, test,
-                                 num.trees = 500, mtry = floor(sqrt(ncol(X))), 
+                                 num.trees = 500, mtry = floor(sqrt(ncol(train$X))), 
     write.forest = TRUE, probability = TRUE, 
     min.node.size = 5, 
     replace = TRUE, sample.fraction = ifelse(replace, 1, 0.632), 
