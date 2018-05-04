@@ -42,7 +42,8 @@ source("~/cvtmleauc/makeData.R")
 # library(glmnet)
 # devtools::install_github("benkeser/cvtmleAUC", dependencies = TRUE)
 library(cvtmleAUC, lib.loc = "/home/dbenkese/R/x86_64-pc-linux-gnu-library/3.4")
-# library(np, lib.loc = "/home/dbenkese/R/x86_64-pc-linux-gnu-library/3.4")
+
+ # library(np, lib.loc = "/home/dbenkese/R/x86_64-pc-linux-gnu-library/3.4")
 # library(cvAUC)
 # library(SuperLearner)
 # library(data.table)
@@ -189,6 +190,9 @@ if (args[1] == 'run') {
                             "_K=",parm$K[i],
                             "_wrapper=",parm$wrapper[i],
                             ".RData"))
+
+    grbg <- c(NULL)
+    save(grbg, file = paste0("~/cvtmleauc/out/",i,"-run.dat"))  
   }
 }
 
@@ -226,7 +230,13 @@ if (args[1] == 'merge') {
       tmp_1 <- rep(NA, 66)
     }
     rslt[i,] <- c(parm$seed[i], parm$n[i], parm$K[i], parm$wrapper[i], tmp_1)
-    if(parm$K[i] != 5){
+    if(is.na(tmp_1[length(tmp_1) - 1])){
+      if(file.exists(paste0("~/cvtmleauc/out/outtn_",
+                            "n=", parm$n[i],
+                            "_seed=",parm$seed[i],
+                            "_K=5",
+                            "_wrapper=",parm$wrapper[i],
+                            ".RData"))){
       boot_rslt_out <- get(load(paste0("~/cvtmleauc/out/outtn_",
                             "n=", parm$n[i],
                             "_seed=",parm$seed[i],
@@ -235,6 +245,7 @@ if (args[1] == 'merge') {
                             ".RData")))
       boot_idx <- length(boot_rslt_out) - 1
       rslt[i,boot_idx] <- boot_rslt_out[boot_idx]
+      }
     }
   }
   # # format
@@ -332,11 +343,13 @@ if(FALSE){
         tmp20 <- tmp[tmp$K == 20,]
         tmp40 <- tmp[tmp$K == 40,]
         # est <- c("mse_dcvtmle1","mse_donestep1","mse_emp1","mse_bootstrap")
-        grbg <- t(as.matrix(rbind(tmp5[,est],tmp10[,est],tmp20[,est],tmp40[,est])))
+        grbg <- as.matrix(rbind(tmp5[,est],tmp10[,est],tmp20[,est],tmp40[,est]))
         if(absolute_val){
           grbg <- abs(grbg)
         }
-        colnames(grbg) <- c(5,10,20,40)
+        grbg[2:4,4] <- NA
+
+        row.names(grbg) <- c(5,10,20,40)
         if(n == 50){leg.text <- est_labels}else{leg.text <- FALSE}
         barplot(grbg, legend.text = leg.text, args.legend = list(x = "topright"),
           beside=TRUE, log = "y", yaxt = "n", ... )
@@ -356,11 +369,13 @@ if(FALSE){
         tmp20 <- tmp[tmp$K == 20,]
         tmp40 <- tmp[tmp$K == 40,]
         # est <- c("mse_dcvtmle1","mse_donestep1","mse_emp1","mse_bootstrap")
-        grbg <- t(as.matrix(rbind(tmp5[,est],tmp10[,est],tmp20[,est],tmp40[,est])))
+        grbg <- as.matrix(rbind(tmp5[,est],tmp10[,est],tmp20[,est],tmp40[,est]))
         if(absolute_val){
           grbg <- abs(grbg)
         }
-        colnames(grbg) <- c(5,10,20,40)
+        grbg[2:4,4] <- NA
+
+        row.names(grbg) <- c(5,10,20,40)
         barplot(grbg,  beside=TRUE, log = "y", yaxt = "n", ...)
         mtext(side = 1, outer = FALSE, line = 2, xaxis_label, cex =0.75)
         if(n == 50){
@@ -373,24 +388,32 @@ if(FALSE){
       }
     }
 
+    library(RColorBrewer)
+    my_col <- brewer.pallette(5,"Grays")
+
+
     # bias
     make_side_by_side_bar_plots(glm_rslt, randomforest_rslt, 
                                 est = c("bias_dcvtmle1","bias_donestep1",
                                         "bias_emp1","bias_bootstrap"),
                                 est_label = c("CVTMLE", "CVOS","Empirical","Bootstrap"),
-                                ylim = c(0.0001,100), yaxis_label = "Absolute Bias")
+                                ylim = c(0.0001,100), yaxis_label = "Absolute Bias",
+                                col = my_col[sort(rep(1:4,4))])
     # variance
     make_side_by_side_bar_plots(glm_rslt, randomforest_rslt, 
                                 est = c("var_dcvtmle1","var_donestep1",
                                         "var_emp1","var_bootstrap"),
                                 est_label = c("CVTMLE", "CVOS","Empirical","Bootstrap"),
-                                ylim = c(0.0001,50), yaxis_label = "Variance")
+                                ylim = c(0.0001,50), yaxis_label = "Variance",
+                                col = my_col[sort(rep(1:4,4))])
     # mse
     make_side_by_side_bar_plots(glm_rslt, randomforest_rslt, 
                                 est = c("mse_dcvtmle1","mse_donestep1",
                                         "mse_emp1","mse_bootstrap"),
                                 est_label = c("CVTMLE", "CVOS","Empirical","Bootstrap"),
-                                ylim = c(0.0001,100), yaxis_label = "Mean squared-error")
+                                ylim = c(0.0001,100), yaxis_label = "Mean squared-error",
+                                col = my_col[sort(rep(1:4,4))])
+
 
     # bias by CV Repeats for CVTMLE
     make_side_by_side_bar_plots(glm_rslt, randomforest_rslt, 

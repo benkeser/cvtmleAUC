@@ -21,10 +21,9 @@ if(length(args) < 1){
 data_sets <- c("adult", "bank", "cardio", "default",
                "drugs", "magic", "wine")
 bigB <- 100
-ns <- c(100, 250, 500)
-K <- c(5,10,20,40)
-wrappers <- c("randomforest_wrapper", "glmnet_wrapper",
-              "polymars_wrapper", "stepglm_wrapper")
+ns <- c(50, 100, 250, 500)
+K <- c(5, 10, 20, 40)
+wrappers <- c("randomforest_wrapper", "glmnet_wrapper")
 
 parm <- expand.grid(data_set = data_sets,
                     seed = 1:bigB,
@@ -43,8 +42,7 @@ library(cvtmleAUC, lib.loc = "/home/dbenkese/R/x86_64-pc-linux-gnu-library/3.4")
 # library(SuperLearner, lib.loc = '/home/dbenkese/R/x86_64-pc-linux-gnu-library/3.4')
 library(glmnet)
 # library(xgboost)
-library(polspline)
-
+# library(polspline)
 
 # get the list size #########
 if (args[1] == 'listsize') {
@@ -78,7 +76,8 @@ if (args[1] == 'run') {
   for (i in (id+TASKID):(id+TASKID+STEPSIZE-1)) {
     print(paste(Sys.time(), "i:" , i))
     print(parm[i,])
-    
+    options(np.messages = FALSE)
+
     # load data
     data_suffix <- paste0("n=",parm$n[i],"_data=",parm$data_set[i],
                 "_seed=",parm$seed[i], 
@@ -103,263 +102,182 @@ if (args[1] == 'run') {
     # column named outcome
     outcome_idx <- which(colnames(dat) == "outcome")
 
-    # find cvauc
     # get estimates of dcvauc
-    tm <- system.time(
-      fit_dcvauc <- cvauc_cvtmle(Y = train_dat[,outcome_idx], 
-                                 X = train_dat[,-outcome_idx], K = parm$K[i], 
-                          learner = parm$wrapper[i], nested_cv = TRUE)
-    )
-    # get estimates of cvauc
-    fit_cvauc <- cvauc_cvtmle(Y = train_dat[,outcome_idx], 
-                              X = train_dat[,-outcome_idx], K = parm$K[i], 
-                        learner = parm$wrapper[i], nested_cv = FALSE,
-                        prediction_list = fit_dcvauc$prediction_list[1:parm$K[i]])
+    # options(np.messages = FALSE)
+    n_replicates <- 20
+    fitauc_dcv <- vector(mode = "list", length = n_replicates)
+    fitauc_cv <- vector(mode = "list", length = n_replicates)    
+    fittn_dcv <- vector(mode = "list", length = n_replicates)
+    fittn_cv <- vector(mode = "list", length = n_replicates)
+    for(j in seq_len(n_replicates)){
+      set.seed(j)
+      fitauc_dcv[[j]] <- cvauc_cvtmle(Y = train_dat[,outcome_idx], 
+                                      X = train_dat[,-outcome_idx], 
+                                      K = parm$K[i], 
+                          learner = parm$wrapper[i], nested_cv = TRUE,
+                          nested_K = 39)
+      set.seed(j)
+    # get estimates of cvtn
+      fitauc_cv[[j]] <- cvauc_cvtmle(Y = train_dat[,outcome_idx], 
+                                      X = train_dat[,-outcome_idx], 
+                                      K = parm$K[i], 
+                          learner = parm$wrapper[i], nested_cv = FALSE,
+                          prediction_list = fitauc_dcv$prediction_list[1:parm$K[i]])
 
-    my_predict <- function(x, newdata){
-      if("glm" %in% class(x$model)){
-        predict(x$model, newdata = newdata, type = "response")
-      }else if("randomForest" %in% class(x$model)){
-        predict(x$model, newdata = newdata, type = "vote")[, 2]
-      }else if("cv.glmnet" %in% class(x$model)){
-        newx <- model.matrix(~.-1,data = newdata)
-        predict(x$model, newx = newx, type = "response", s = "lambda.min")
-      }else if("glmnet" %in% class(x$model)){
-        newx <- model.matrix(~.-1,data = newdata)
-        predict(x$model, newx = newx, type = "response", s = x$model$my_lambda)
-      }else if("xgboost" %in% class(x$model)){
-        predict(x$model, newdata = newdata)
-      }else if("polyclass" %in% class(x$model)){
-        polspline::ppolyclass(cov = newdata, fit = x$model)[, 2]
-      }else if("svm" %in% class(x$model)){
-        attr(predict(x$model, newdata = newdata, probability = TRUE), "prob")[, "1"]
-      }
+      set.seed(j)
+    # get estimates of cvtn
+      fittn_dcv[[j]] <- cvtn_cvtmle(Y = train_dat[,outcome_idx], 
+                                      X = train_dat[,-outcome_idx], 
+                                      K = parm$K[i], 
+                          learner = parm$wrapper[i], nested_cv = TRUE,
+                          prediction_list = fitauc_dcv$prediction_list)      
+      set.seed(j)
+    # get estimates of cvtn
+      fittn_cv[[j]] <- cvtn_cvtmle(Y = train_dat[,outcome_idx], 
+                                      X = train_dat[,-outcome_idx], 
+                                       K = parm$K[i], 
+                          learner = parm$wrapper[i], nested_cv = FALSE,
+                          prediction_list = fitauc_cv$prediction_list)
     }
 
-    # predictions for outer layer of CV for cvauc
-    preds_for_cvauc <- lapply(fit_cvauc$prediction_list, my_predict, 
-                              newdata = test_dat[,-outcome_idx])
-    labels_for_cvauc <- rep(list(test_dat[,outcome_idx]), parm$K[i])
-    true_cvauc <- mean(cvAUC::AUC(predictions = preds_for_cvauc,
-                        labels = labels_for_cvauc))
+   fit_full <- do.call(parm$wrapper[i], args = list(train = list(X = train_dat[,-outcome_idx], Y = train_dat[,outcome_idx]), 
+                            test = list(X = test_dat[,-outcome_idx], Y = test_dat[,outcome_idx])))
+
+   true_auc <- cvAUC::AUC(predictions = fit_full$psi_nBn_testx, labels = test_dat[,outcome_idx])
+
+   bigquantile_full <- quantile(fit_full$psi_nBn_testx[test_dat[,outcome_idx] == 1], p = 0.05, type = 8)
+   big_testneg_full <- mean(fit_full$psi_nBn_testx <= bigquantile_full)
+   true_tn <- big_testneg_full
+
+ # bootstrap estimate 
+    # only needed for K = 5 runs
+    # and will be put back in later
+    if(parm$K[i] == 5){
+      set.seed(parm$seed[i])
+      # fit_boot <- boot_corrected_auc(Y = train_dat[,outcome_idx], X = train_dat[,-outcome_idx], learner = parm$wrapper[i])
+      # fit_boot <- boot_corrected_tn(Y = train_dat[,outcome_idx], X = train_dat[,-outcome_idx], learner = parm$wrapper[i])
+      fit_lpo <- leave_pair_out_auc(Y = train_dat[,outcome_idx], X = train_dat[,-outcome_idx], learner = parm$wrapper[i])
+    }else{
+      fit_boot <- list(NA)
+      fit_lpo <- list(NA)
+    }
 
     # c together output
-    out <- c( # cvtmle estimates of dcvauc
-             fit_dcvauc$est_cvtmle, fit_dcvauc$se_cvtmle,
-             # iterations of cvtmle for dcvauc
-             fit_dcvauc$iter, 
-             # initial plug-in estimate of dcvauc
-             fit_dcvauc$est_init, 
-             # one-step estimate of dcvauc
-             fit_dcvauc$est_onestep, fit_dcvauc$se_onestep,
-             # estimating eqn estimate of dcvauc
-             fit_dcvauc$est_esteq, fit_dcvauc$se_esteq,
-             # cvtmle estimate of cvauc
-             fit_cvauc$est_cvtmle, fit_cvauc$se_cvtmle, 
-             # iterations of cvtmle for cvauc
-             fit_cvauc$iter, fit_cvauc$est_init, 
-             # one-step estimate of cvauc
-             fit_cvauc$est_onestep, fit_cvauc$se_onestep,
-             # estimating eqn estimate of cvauc
-             fit_cvauc$est_esteq, fit_cvauc$se_esteq,
-             # full sample split estimate of cvauc
-             fit_dcvauc$est_empirical, fit_dcvauc$se_empirical, 
-             # true cv auc 
-             true_cvauc)
+    for(param in c("auc","tn")){
+      eval(parse(text = paste0(
+        "out_",param," <- ", 
+        'c( # cvtmle estimates of dcvauc
+             fit',param,'_dcv[[1]]$est_cvtmle, fit',param,'_dcv[[1]]$se_cvtmle,
+             # iterations of cvtmle for dcv
+             # fit',param,'_dcv[[1]]$iter, 
+             # initial plug-in estimate of dcv
+             fit',param,'_dcv[[1]]$est_init, 
+             # one-step estimate of dcv
+             fit',param,'_dcv[[1]]$est_onestep, fit',param,'_dcv[[1]]$se_onestep,
+             # estimating eqn estimate of dcv
+             fit',param,'_dcv[[1]]$est_esteq, fit',param,'_dcv[[1]]$se_esteq,
+             # cvtmle estimate of cv
+             fit',param,'_cv[[1]]$est_cvtmle, fit',param,'_cv[[1]]$se_cvtmle, 
+             # iterations of cvtmle for cv
+             # fit',param,'_cv[[1]]$iter, 
+             fit',param,'_cv[[1]]$est_init, 
+             # one-step estimate of cv
+             fit',param,'_cv[[1]]$est_onestep, fit',param,'_cv[[1]]$se_onestep,
+             # estimating eqn estimate of cv
+             fit',param,'_cv[[1]]$est_esteq, fit',param,'_cv[[1]]$se_esteq,
+             # full sample split estimate of cv
+             fit',param,'_dcv[[1]]$est_empirical, fit',param,'_dcv[[1]]$se_empirical)'
+      )))
+    }
+    
+    # now add in MC averaged results for M = 5, 10, 20
+    for(M in c(5, 10, 20)){
+      for(param in c("auc","tn")){
+        this_dcvfit <- if(param == "auc"){
+          fitauc_dcv
+        }else{
+          fittn_dcv
+        }        
+        this_cvfit <- if(param == "auc"){
+          fittn_dcv
+        }else{
+          fittn_dcv
+        }
+      avg_dcv <- .getMCAveragedResults(this_dcvfit[1:M], logit = FALSE)
+      avg_cv <- .getMCAveragedResults(this_cvfit[1:M], logit = FALSE)
+      eval(parse(text = paste0('out_',param,' <- c(out_',param,',',
+                               'avg_dcv$est_cvtmle, avg_dcv$se_cvtmle,
+               # initial plug-in estimate of dcv
+               avg_dcv$est_init, 
+             # one-step estimate of dcv
+             avg_dcv$est_onestep, avg_dcv$se_onestep,
+             # estimating eqn estimate of dcv
+             avg_dcv$est_esteq, avg_dcv$se_esteq,
+             # cvtmle estimate of cv
+             avg_cv$est_cvtmle, avg_cv$se_cvtmle, 
+             # iterations of cvtmle for cv
+             avg_cv$est_init, 
+             # one-step estimate of cv
+             avg_cv$est_onestep, avg_cv$se_onestep,
+             # estimating eqn estimate of cv
+             avg_cv$est_esteq, avg_cv$se_esteq,
+             # full sample split estimate of cv
+             avg_dcv$est_empirical, avg_dcv$se_empirical)')))
+    }
+  }
+    out_auc <- c(out_auc, fit_lpo[[1]], true_auc)
+    out_tn <- c(out_tn, true_tn)
 
     # save output 
-    save(out, file = paste0("~/cvtmleauc/out/real_data_out_",
+    save(out_auc, file = paste0("~/cvtmleauc/out/realdataaucout_",
                             "n=", parm$n[i],
                             "_seed=",parm$seed[i],
                             "_K=",parm$K[i],
                             "_wrapper=",parm$wrapper[i],
+                            "_data=",parm$data_set[i],
                             ".RData.tmp"))
-    file.rename(paste0("~/cvtmleauc/out/real_data_out_",
-                            "n=", parm$n[i],
-                            "_seed=",parm$seed[i],
-                            "_K=",parm$K[i],
-                            "_wrapper=",parm$wrapper[i],                            
-                            ".RData.tmp"),
-                paste0("~/cvtmleauc/out/real_data_out_",
+    file.rename(paste0("~/cvtmleauc/out/realdataaucout_",
                             "n=", parm$n[i],
                             "_seed=",parm$seed[i],
                             "_K=",parm$K[i],
                             "_wrapper=",parm$wrapper[i],
+                            "_data=",parm$data_set[i],                            
+                            ".RData.tmp"),
+                paste0("~/cvtmleauc/out/realdataaucout_",
+                            "n=", parm$n[i],
+                            "_seed=",parm$seed[i],
+                            "_K=",parm$K[i],
+                            "_wrapper=",parm$wrapper[i],
+                            "_data=",parm$data_set[i],
+                            ".RData"))    
+    save(out_tn, file = paste0("~/cvtmleauc/out/realdatatnout_",
+                            "n=", parm$n[i],
+                            "_seed=",parm$seed[i],
+                            "_K=",parm$K[i],
+                            "_wrapper=",parm$wrapper[i],
+                            "_data=",parm$data_set[i],
+                            ".RData.tmp"))
+    file.rename(paste0("~/cvtmleauc/out/realdatatnout_",
+                            "n=", parm$n[i],
+                            "_seed=",parm$seed[i],
+                            "_K=",parm$K[i],
+                            "_wrapper=",parm$wrapper[i],
+                            "_data=",parm$data_set[i],                            
+                            ".RData.tmp"),
+                paste0("~/cvtmleauc/out/realdatatnout_",
+                            "n=", parm$n[i],
+                            "_seed=",parm$seed[i],
+                            "_K=",parm$K[i],
+                            "_wrapper=",parm$wrapper[i],
+                            "_data=",parm$data_set[i],
                             ".RData"))
+    grbg <- c(NULL)
+    save(grbg, file = paste0("~/cvtmleauc/out/",i,"-run_realdata.dat")) 
   }
 }
 
 # merge job ###########################
 if (args[1] == 'merge') {   
-  ns <- c(100, 250, 500, 750)
-  bigB <- 500
-  K <- c(5,10,20,30)
-  p <- 10
-  parm <- expand.grid(seed=1:bigB,
-                      n=ns, K = K)
-  rslt <- matrix(NA, nrow = nrow(parm), ncol = 13)
-  for(i in 1:nrow(parm)){
-      tmp_1 <- tryCatch({
-          load(paste0("~/cvtmleauc/out/out",
-                      "_n=", parm$n[i],
-                      "_seed=",parm$seed[i],
-                      "_K=", parm$K[i],
-                      ".RData"))
-          out
-      }, error=function(e){
-        rep(NA, 10)
-      })
-      rslt[i,] <- c(parm$seed[i], parm$n[i], parm$K[i], tmp_1)
-  }
-  # # format
-  out <- data.frame(rslt)
-
-  sim_names <- c("seed","n","K",
-                 "cvtmle","se_cvtmle","iter_cvtmle",
-                 "init",
-                 "onestep","se_onestep",
-                 "empirical","se_empirical",
-                 "truth", "truth_full")
-  colnames(out) <- sim_names
-
-  save(out, file=paste0('~/cvtmleauc/out/allOut.RData'))
-}
-# local editing 
-if(FALSE){
-  setwd("~/Dropbox/R/cvtmleauc/sandbox/simulation")
-  load("allOut.RData")
-  # bias
-  parm <- expand.grid(n = c(100, 250, 500, 750),
-                      K = c(5, 10, 20, 30))
-  b <- v <- m <- co <- NULL
-  for(i in seq_len(length(parm[,1]))){
-    x <- out[out$n == parm$n[i] & out$K == parm$K[i],]
-    b <- rbind(b, colMeans(x[,c("cvtmle", "onestep", "empirical")] - x$truth))
-    v <- rbind(v, apply(x[,c("cvtmle", "onestep", "empirical")], 2, var))
-    m <- rbind(m, colMeans((x[,c("cvtmle", "onestep", "empirical")] - x$truth)^2))
-    # coverage
-    cov_tmle <- mean(x$cvtmle - 1.96 * x$se_cvtmle < x$truth & 
-                      x$cvtmle + 1.96 * x$se_cvtmle > x$truth)
-    cov_onestep <- mean(x$onestep - 1.96 * x$se_onestep < x$truth & 
-                      x$onestep + 1.96 * x$se_onestep > x$truth)
-    cov_empirical <- mean(x$empirical - 1.96 * x$se_empirical < x$truth & 
-                      x$empirical + 1.96 * x$se_empirical > x$truth)
-    co <- rbind(co, c(cov_tmle, cov_onestep, cov_empirical))
-  }
-  parm <- cbind(parm, b, v, m, co)
-  colnames(parm) <- c("n", "K", paste0("bias_", c("cvtmle","onestep","empirical")),
-                      paste0("var_", c("cvtmle","onestep","empirical")),
-                      paste0("mse_", c("cvtmle","onestep","empirical")),
-                      paste0("cov_", c("cvtmle","onestep","empirical")))
-
-  #--------------------------------
-  # MSE plots
-  #--------------------------------
-  # make matrix of relative MSE
-  n_ct <- 0
-  K_ct <- 0
-  rel_mse_cvtmle <- matrix(NA, 4, 4)
-  rel_mse_onestep <- matrix(NA, 4, 4)
-  rel_mse_tmlevonestep <- matrix(NA, 4, 4)
-  for(n in c(100, 250, 500, 750)){
-    n_ct <- n_ct + 1
-    for(K in c(5, 10, 20, 30)){
-      K_ct <- K_ct + 1
-      rel_mse_cvtmle[n_ct, K_ct] <- parm$mse_cvtmle[parm$n == n & parm$K == K] / 
-                                parm$mse_empirical[parm$n == n & parm$K == K]      
-      rel_mse_onestep[n_ct, K_ct] <- parm$mse_onestep[parm$n == n & parm$K == K] / 
-                                parm$mse_empirical[parm$n == n & parm$K == K]
-      rel_mse_tmlevonestep[n_ct, K_ct] <- parm$mse_cvtmle[parm$n == n & parm$K == K] / 
-                                parm$mse_onestep[parm$n == n & parm$K == K]
-    }
-    K_ct <- 0
-  }
-  row.names(rel_mse_cvtmle) <- row.names(rel_mse_onestep) <- row.names(rel_mse_tmlevonestep) <- c(100, 250, 500, 750)
-  colnames(rel_mse_cvtmle) <- colnames(rel_mse_onestep) <- colnames(rel_mse_tmlevonestep) <- c(5, 10, 20, 30)
-  
-  #--------------------------------
-  # CV TMLE vs. Empirical 
-  #--------------------------------
-  pdf("mse_results.pdf")
-  superheat(X = rel_mse_cvtmle, X.text = round(rel_mse_cvtmle, 2), scale = FALSE, 
-            pretty.order.rows = FALSE, 
-            pretty.order.cols = FALSE, heat.col.scheme = "red",
-            row.title = "Sample size", column.title = "CV folds",
-            legend.breaks = c(0.7, 0.8, 0.9, 1),
-            title = "MSE CVTMLE / MSE Empirical")
-  #--------------------------------
-  # One step vs. Empirical 
-  #--------------------------------
-  superheat(X = rel_mse_onestep, X.text = round(rel_mse_onestep, 2), scale = FALSE, 
-            pretty.order.rows = FALSE, 
-            pretty.order.cols = FALSE, heat.col.scheme = "red",
-            row.title = "Sample size", column.title = "CV folds",
-            legend.breaks = c(0.7, 0.8, 0.9, 1),
-            title = "MSE CV One step / MSE Empirical")  
-  #--------------------------------
-  # CVTMLE vs. Onestep 
-  #--------------------------------
-  superheat(X = rel_mse_tmlevonestep, X.text = round(rel_mse_tmlevonestep, 2), 
-            scale = FALSE, 
-            pretty.order.rows = FALSE, 
-            pretty.order.cols = FALSE, heat.col.scheme = "red",
-            row.title = "Sample size", column.title = "CV folds",
-            legend.breaks = c(0.7, 0.8, 0.9, 1),
-            title = "MSE CV One step / MSE CVTMLE")
-  dev.off()
-
-  #--------------------------------
-  # Coverage plots
-  #--------------------------------
-  # make matrix of relative MSE
-  n_ct <- 0
-  K_ct <- 0
-  cov_cvtmle <- matrix(NA, 4, 4)
-  cov_onestep <- matrix(NA, 4, 4)
-  cov_tmlevonestep <- matrix(NA, 4, 4)
-  for(n in c(100, 250, 500, 750)){
-    n_ct <- n_ct + 1
-    for(K in c(5, 10, 20, 30)){
-      K_ct <- K_ct + 1
-      cov_cvtmle[n_ct, K_ct] <- parm$cov_cvtmle[parm$n == n & parm$K == K]     
-      cov_onestep[n_ct, K_ct] <- parm$cov_onestep[parm$n == n & parm$K == K] 
-      cov_tmlevonestep[n_ct, K_ct] <- parm$cov_empirical[parm$n == n & parm$K == K] 
-    }
-    K_ct <- 0
-  }
-  row.names(cov_cvtmle) <- row.names(cov_onestep) <- row.names(cov_tmlevonestep) <- c(100, 250, 500, 750)
-  colnames(cov_cvtmle) <- colnames(cov_onestep) <- colnames(cov_tmlevonestep) <- c(5, 10, 20, 30)
-  
-  #--------------------------------
-  # CV TMLE vs. Empirical 
-  #--------------------------------
-  pdf("coverage_results.pdf")
-  superheat(X = cov_cvtmle, X.text = round(cov_cvtmle, 2), scale = FALSE, 
-            pretty.order.rows = FALSE, 
-            pretty.order.cols = FALSE, heat.col.scheme = "red",
-            row.title = "Sample size", column.title = "CV folds",
-            legend.breaks = c(0.7, 0.8, 0.9, 1),
-            title = "Coverage of nominal 95% CI CVTMLE")
-  #--------------------------------
-  # One step vs. Empirical 
-  #--------------------------------
-  superheat(X = cov_onestep, X.text = round(cov_onestep, 2), scale = FALSE, 
-            pretty.order.rows = FALSE, 
-            pretty.order.cols = FALSE, heat.col.scheme = "red",
-            row.title = "Sample size", column.title = "CV folds",
-            legend.breaks = c(0.7, 0.8, 0.9, 1),
-            title = "Coverage of nominal 95% CI One step")  
-  #--------------------------------
-  # CVTMLE vs. Onestep 
-  #--------------------------------
-  superheat(X = cov_tmlevonestep, X.text = round(cov_tmlevonestep, 2), 
-            scale = FALSE, 
-            pretty.order.rows = FALSE, 
-            pretty.order.cols = FALSE, heat.col.scheme = "red",
-            row.title = "Sample size", column.title = "CV folds",
-            legend.breaks = c(0.7, 0.8, 0.9, 1),
-            title = "Coverage of nominal 95% CI Empirical")
-  dev.off()
 
 
 }

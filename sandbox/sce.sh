@@ -61,6 +61,7 @@ if [[ -z $RETRYFAILED ]]; then
         echo "    STEPSIZE ${STEPSIZE}, arrid ${arrid} depends on job ${waitforjobs}..."
         sbatch --dependency=afterok:${waitforjobs} --job-name=${ANALYSIS} \
                --array=1-${arrupper}:${STEPSIZE} --partition=${PARTITION} \
+               --exclude=gizmoe[1-23] \
                --mail-type=FAIL --mail-user="${username}${MAILDOM}" --time=0-1 \
                --output="${MYSCRATCH}/out/${ANALYSIS}.run.${arrid}_%a_%A.%J" \
                --wrap="${SCRIPT} run ${arrid} $3 $4 $5 $6 $7 $8 $9" --requeue
@@ -89,10 +90,11 @@ else
     # --requeue works only for preempted jobs 
     for i in $(seq 1 $RETRYFAILED); do
         id=$((${i}*${STEPSIZE}-${STEPSIZE}+1))
-        if ! [[ -f "${MYSCRATCH}/run/${i}-run.dat" ]]; then
+        if ! [[ -f "${RESULTDIR}/${i}-run_realdata.dat" ]]; then
             echo "  re-submitting ${SCRIPT} run ${id}"
             sbatch --dependency=singleton --job-name=${ANALYSIS} \
                    --partition=${PARTITION} --requeue --time=0-2 \
+                   --exclude=gizmoe[1-23] \
                    --mail-type=FAIL --mail-user="${username}${MAILDOM}" \
                    --output="${MYSCRATCH}/out/${ANALYSIS}.run2.${i}.%J" \
                    --wrap="${SCRIPT} run ${id} $3 $4 $5 $6 $7 $8 $9"

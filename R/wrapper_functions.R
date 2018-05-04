@@ -145,7 +145,7 @@ stepglm_wrapper <- function(train, test){
 #' @importFrom glmnet cv.glmnet
 #' @examples
 #' # TO DO: Add
-glmnet_wrapper <- function(train, test, lambda.select = "ncoef", ncoef = 5){
+glmnet_wrapper <- function(train, test, lambda.select = "cv", ncoef = 5){
     x <- model.matrix(~ -1 + ., data = train$X)
     if(lambda.select == "cv"){
         glmnet_fit <- glmnet::cv.glmnet(x = x, y = train$Y,
@@ -170,7 +170,7 @@ glmnet_wrapper <- function(train, test, lambda.select = "ncoef", ncoef = 5){
     psi_nBn_trainx <- Psi_nBn_0(train$X)
     psi_nBn_testx <- Psi_nBn_0(test$X)
     return(list(psi_nBn_trainx = psi_nBn_trainx, psi_nBn_testx = psi_nBn_testx,
-                model = glmnet_fit, train_y = train$Y, test_y = test$Y))
+                model = NULL, train_y = train$Y, test_y = test$Y))
 }
 
 

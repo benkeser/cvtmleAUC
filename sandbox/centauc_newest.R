@@ -28,7 +28,7 @@ parm <- expand.grid(seed = 1:bigB,
                     n = ns, K = K, 
                     wrapper = wrappers,
                     stringsAsFactors = FALSE)
-# load("~/cvtmleauc/scratch/redo_parm_newest.RData")
+load("~/cvtmleauc/scratch/redo_parm_newest.RData")
 # parm <- redo_parm
 # load('~/cvtmleauc/out/allOut_new.RData')
 # redo_idx <- which(is.na(out$est_dcvtmle))
@@ -108,6 +108,7 @@ if (args[1] == 'run') {
     fit_full <- do.call(parm$wrapper[i], args = list(train = list(X = dat$X, Y = dat$Y), 
                             test = list(X = big_data$X, Y = big_data$Y)))
     true_parameter <- cvAUC::AUC(predictions = fit_full$psi_nBn_testx, labels = big_data$Y)
+    
     # bootstrap estimate 
     # only needed for K = 5 runs
     # and will be put back in later
@@ -186,6 +187,8 @@ if (args[1] == 'run') {
                             "_K=",parm$K[i],
                             "_wrapper=",parm$wrapper[i],
                             ".RData"))
+    grbg <- c(NULL)
+    save(grbg, file = paste0("~/cvtmleauc/out/",i,"-run.dat"))  
   }
 }
 
@@ -223,17 +226,17 @@ if (args[1] == 'merge') {
       tmp_1 <- rep(NA, 66)
     }
     rslt[i,] <- c(parm$seed[i], parm$n[i], parm$K[i], parm$wrapper[i], tmp_1)
-    if(parm$K[i] != 5){
-      boot_rslt_out <- get(load(paste0("~/cvtmleauc/out/outauc",
-                            "n=", parm$n[i],
-                            "_seed=",parm$seed[i],
-                            "_K=5",
-                            "_wrapper=",parm$wrapper[i],
-                            ".RData")))
-      boot_idx <- length(boot_rslt_out) - 2
-      lpo_idx <- length(boot_rslt_out) - 1
-      rslt[i,c(boot_idx, lpo_idx)] <- boot_rslt_out[c(boot_idx,lpo_idx)]
-    }
+    # if(parm$K[i] != 5){
+    #   boot_rslt_out <- get(load(paste0("~/cvtmleauc/out/outauc",
+    #                         "n=", parm$n[i],
+    #                         "_seed=",parm$seed[i],
+    #                         "_K=5",
+    #                         "_wrapper=",parm$wrapper[i],
+    #                         ".RData")))
+    #   boot_idx <- length(boot_rslt_out) - 2
+    #   lpo_idx <- length(boot_rslt_out) - 1
+    #   rslt[i,c(boot_idx, lpo_idx)] <- boot_rslt_out[c(boot_idx,lpo_idx)]
+    # }
   }
   # # format
   out <- data.frame(rslt, stringsAsFactors = FALSE)
