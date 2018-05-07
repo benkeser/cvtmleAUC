@@ -82,7 +82,7 @@ cvtn_cvtmle <- function(Y, X, K = 20, sens = 0.95, learner = "glm_wrapper",
     target_data <- Reduce("rbind", lapply(target_and_pred_data, "[[", "out"))
     pred_data <- Reduce("rbind", lapply(target_and_pred_data, "[[", "out_pred"))
   }
-  target_data$weight <- with(target_data, 1 + Y/gn * f_ratio)
+  target_data$weight <- with(target_data, 1 - Y/gn * f_ratio)
   target_data$logit_Fn <- SuperLearner::trimLogit(target_data$Fn, trim = 1e-5)
   pred_data$logit_Fn <- SuperLearner::trimLogit(pred_data$Fn, trim = 1e-5)
   
@@ -200,7 +200,7 @@ cvtn_cvtmle <- function(Y, X, K = 20, sens = 0.95, learner = "glm_wrapper",
                       folds = NULL)}, error = function(e){
     list(f_0_c0 = 1, f_10_c0 = 1)
   })
-  weight <- (1 + x$test_y / gn * dens$f_0_c0/dens$f_10_c0)
+  weight <- (1 - x$test_y / gn * dens$f_0_c0/dens$f_10_c0)
   ind <- as.numeric(x$psi_nBn_testx <= c0)
   Dpsi <- weight * (ind - FYnc0)
 

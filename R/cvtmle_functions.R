@@ -819,7 +819,8 @@ F_nBn_star_nested_cv <- function(psi_x, y, epsilon = 0,
 #' @return A list of the result of the wrapper executed in each fold
 .getPredictions <- function(learner, Y, X, K = 10, folds, parallel, nested_cv = FALSE,
                             nested_K = K - 1){
-  .doFit <- function(x, tmpX, Y, folds, learner){
+  .doFit <- function(x, tmpX, Y, folds, learner, seed = 21){
+    set.seed(seed)
     out <- do.call(learner, args=list(train = list(Y = Y[-unlist(folds[x])], X = tmpX[-unlist(folds[x]),,drop=FALSE]),
                                       test = list(Y = Y[unlist(folds[x])], X = tmpX[unlist(folds[x]),,drop=FALSE])))
     out$valid_ids <- unlist(folds[x], use.names = FALSE)
@@ -863,8 +864,9 @@ F_nBn_star_nested_cv <- function(psi_x, y, epsilon = 0,
       fold_combos <- expand.grid(outer_K = seq_len(K),
                                  inner_K = c(0,seq_len(nested_K)))
       # here x will be a data.frame with columns outer_K and inner_K
-      .doFit2 <- function(x, tmpX, Y, folds, inner_folds, learner){
+      .doFit2 <- function(x, tmpX, Y, folds, inner_folds, learner, seed = 21){
         if(x[2] == 0){
+          set.seed(21)
           # in this case, just remove from folds
           out <- do.call(learner, args=list(train = list(Y = Y[-unlist(folds[x[1]])], 
                                                          X = tmpX[-unlist(folds[x[1]]),,drop=FALSE]),
