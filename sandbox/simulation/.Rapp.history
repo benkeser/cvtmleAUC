@@ -1,190 +1,4 @@
-names(fm)
-fm$coefficients
-fm$converged
-!fm$converged | abs(max(fm$coefficients)) > coefTol
-a <- a_0[2]
-Q <- Qn[[2]]
-g <- gn[[2]]
-gr <- grn[[2]]
-off <- SuperLearner::trimLogit((Q - l)/(u - l))
-if (reduction == "univariate") {#
-            H2 <- as.numeric(A == a & DeltaA == 1 & DeltaY == #
-                1)/gr$grn2 * gr$grn1#
-        }
-suppressWarnings(fm <- stats::glm(Yscale ~ -1 + offset(off) + #
-            H2, start = 0, data = data.frame(Y = Y, off = off, #
-            H2 = H2), family = "binomial"))
-fm
-!fm$converged | abs(max(fm$coefficients)) > coefTol
-a <- a_0[1]
-Q <- Qn[[1]]
-g <- gn[[1]]
-gr <- grn[[1]]
-l <- min(Y, na.rm = TRUE)
-u <- max(Y, na.rm = TRUE)
-Yscale <- (Y - l) / (u - l)
-off <- SuperLearner::trimLogit((Q - l) / (u - l))
-if (reduction == "univariate") {#
-      H2 <- as.numeric(A == a & DeltaA == 1 & DeltaY == 1) / gr$grn2 * gr$grn1#
-    } else if (reduction == "bivariate") {#
-      H2 <- as.numeric(A == a & DeltaA == 1 & DeltaY == 1) / gr$grn2 *#
-        (gr$grn2 - g) / g#
-    }
-suppressWarnings(#
-      fm <- stats::glm(#
-        Yscale ~ -1 + offset(off) + H2, start = 0,#
-        data = data.frame(Y = Y, off = off, H2 = H2), family = "binomial"#
-      )#
-    )
-fm
-nameS(fm)
-names(fm)
-if (!fm$converged | abs(max(fm$coefficients)) > coefTol) {#
-      # if it doesn't converge, try with no starting values#
-      suppressWarnings(#
-        fm <- stats::glm(#
-          Yscale ~ -1 + offset(off) + H2,#
-          data = data.frame(Y = Y, off = off, H2 = H2),#
-          family = "binomial"#
-        )#
-      )#
-      if (!fm$converged | abs(max(fm$coefficients)) > coefTol) {#
-        # warning("No sane fluctuation found. Proceeding using current estimates.")#
-        if (reduction == "univariate") {#
-          return(list(est = Q, eps = rep(0, 2)))#
-        } else if (reduction == "bivariate") {#
-          return(list(est = Q, eps = rep(0, 2)))#
-        }#
-      }#
-    }
-a <- a_0[2]
-Q <- Qn[[2]]
-g <- gn[[2]]
-gr <- grn[[2]]
-l <- min(Y, na.rm = TRUE)
-u <- max(Y, na.rm = TRUE)
-Yscale <- (Y - l) / (u - l)
-off <- SuperLearner::trimLogit((Q - l) / (u - l))
-if (reduction == "univariate") {#
-      H2 <- as.numeric(A == a & DeltaA == 1 & DeltaY == 1) / gr$grn2 * gr$grn1#
-    } else if (reduction == "bivariate") {#
-      H2 <- as.numeric(A == a & DeltaA == 1 & DeltaY == 1) / gr$grn2 *#
-        (gr$grn2 - g) / g#
-    }
-suppressWarnings(#
-      fm <- stats::glm(#
-        Yscale ~ -1 + offset(off) + H2, start = 0,#
-        data = data.frame(Y = Y, off = off, H2 = H2), family = "binomial"#
-      )#
-    )
-fm
-if (!fm$converged | abs(max(fm$coefficients)) > coefTol) {#
-      # if it doesn't converge, try with no starting values#
-      suppressWarnings(#
-        fm <- stats::glm(#
-          Yscale ~ -1 + offset(off) + H2,#
-          data = data.frame(Y = Y, off = off, H2 = H2),#
-          family = "binomial"#
-        )#
-      )#
-      if (!fm$converged | abs(max(fm$coefficients)) > coefTol) {#
-        # warning("No sane fluctuation found. Proceeding using current estimates.")#
-        if (reduction == "univariate") {#
-          return(list(est = Q, eps = rep(0, 2)))#
-        } else if (reduction == "bivariate") {#
-          return(list(est = Q, eps = rep(0, 2)))#
-        }#
-      }#
-    }
-c
-a <- a_0[2]
-Q <- Qn[[2]]
-g <- gn[[2]]
-gr <- grn[[2]]
-l <- min(Y, na.rm = TRUE)
-u <- max(Y, na.rm = TRUE)
-Yscale <- (Y - l) / (u - l)
-off <- SuperLearner::trimLogit((Q - l) / (u - l))
-if (reduction == "univariate") {#
-      H2 <- as.numeric(A == a & DeltaA == 1 & DeltaY == 1) / gr$grn2 * gr$grn1#
-    } else if (reduction == "bivariate") {#
-      H2 <- as.numeric(A == a & DeltaA == 1 & DeltaY == 1) / gr$grn2 *#
-        (gr$grn2 - g) / g#
-    }
-suppressWarnings(#
-      fm <- stats::glm(#
-        Yscale ~ -1 + offset(off) + H2, start = 0,#
-        data = data.frame(Y = Y, off = off, H2 = H2), family = "binomial"#
-      )#
-    )
-fm
-if (!fm$converged | abs(max(fm$coefficients)) > coefTol) {#
-      # if it doesn't converge, try with no starting values#
-      suppressWarnings(#
-        fm <- stats::glm(#
-          Yscale ~ -1 + offset(off) + H2,#
-          data = data.frame(Y = Y, off = off, H2 = H2),#
-          family = "binomial"#
-        )#
-      )#
-      if (!fm$converged | abs(max(fm$coefficients)) > coefTol) {#
-        # warning("No sane fluctuation found. Proceeding using current estimates.")#
-        if (reduction == "univariate") {#
-          return(list(est = Q, eps = rep(0, 2)))#
-        } else if (reduction == "bivariate") {#
-          return(list(est = Q, eps = rep(0, 2)))#
-        }#
-      }#
-    }
-a <- a_0[1]
-Q <- Qn[[1]]
-g <- gn[[1]]
-gr <- grn[[1]]
-l <- min(Y, na.rm = TRUE)
-u <- max(Y, na.rm = TRUE)
-Yscale <- (Y - l) / (u - l)
-off <- SuperLearner::trimLogit((Q - l) / (u - l))
-if (reduction == "univariate") {#
-      H2 <- as.numeric(A == a & DeltaA == 1 & DeltaY == 1) / gr$grn2 * gr$grn1#
-    } else if (reduction == "bivariate") {#
-      H2 <- as.numeric(A == a & DeltaA == 1 & DeltaY == 1) / gr$grn2 *#
-        (gr$grn2 - g) / g#
-    }
-suppressWarnings(#
-      fm <- stats::glm(#
-        Yscale ~ -1 + offset(off) + H2, start = 0,#
-        data = data.frame(Y = Y, off = off, H2 = H2), family = "binomial"#
-      )#
-    )
-suppressWarnings(#
-      fm <- stats::glm(#
-        Yscale ~ -1 + offset(off) + H2, start = 0,#
-        data = data.frame(Y = Y, off = off, H2 = H2), family = "binomial"#
-      )#
-    )
-fm
-summary(G2)
-summary(H2)
-summary(gr$grn2)
-summary(gr$grn1)
-Q
-?glm
-install_github("benkeser/drtmle")
-install_github("benkeser/drtmle")
-install_github("benkeser/drtmle")
-install_github("benkeser/drtmle")
-drtmle::fluctuateQ
-drtmle:::fluctuateQ
-out <- get_all_ates(Y = dat$Y$Y, A = dat$A$A, W = dat$W, #
-                        V = 6, learners = algo, #
-                        # remove_learner = "SL.hal9001",#
-                        which_Match = algo,#
-                        which_dr_tmle = algo,#
-                        which_dr_iptw = algo)
-out
-names(out)
-out$dr_tmle
-setwd("~/Dropbox/R/cvtmleauc/sandbox/simulation/")
+setwd("~/Dropbox/R/cvtmleauc/sandbox/")
 load("allOut_cvtn.RData")
 # load("~/cvtmleauc/out/allOut_new.RData")#
 #
@@ -232,6 +46,1014 @@ load("allOut_cvtn.RData")
     #---------------------------------#
 #
     make_side_by_side_bar_plots <- function(glm_rslt, randomforest_rslt,#
+                                            est, est_labels, #
+                                            yaxis_label, #
+                                            xaxis_label = "Number CV Folds",#
+                                            absolute_val = TRUE, ... ){#
+      layout(matrix(1:8, nrow = 2, ncol = 4,  byrow = TRUE))#
+      par(mar = c(1.6, 0.6, 0.6, 0.6), mgp = c(2.1, 0.5, 0),#
+          oma = c(2.1, 5.1, 2.1, 2.1))#
+      for(n in c(50, 100, 250, 500)){#
+        tmp <- glm_rslt[glm_rslt$n == n, ]#
+        tmp5 <- tmp[tmp$K == 5,]#
+        tmp10 <- tmp[tmp$K == 10,]#
+        tmp20 <- tmp[tmp$K == 20,]#
+        tmp40 <- tmp[tmp$K == 40,]#
+        # est <- c("mse_dcvtmle1","mse_donestep1","mse_emp1","mse_bootstrap")#
+        grbg <- t(as.matrix(rbind(tmp5[,est],tmp10[,est],tmp20[,est],tmp40[,est])))#
+        if(absolute_val){#
+          grbg <- abs(grbg)#
+        }#
+        colnames(grbg) <- c(5,10,20,40)#
+        if(n == 50){leg.text <- est_labels}else{leg.text <- FALSE}#
+        barplot(grbg, legend.text = leg.text, args.legend = list(x = "topright"),#
+          beside=TRUE, log = "y", yaxt = "n", ... )#
+        if(n == 50){#
+          axis(side = 2)#
+          mtext(outer = FALSE, side = 2, line = 2, yaxis_label, cex = 0.75)#
+          mtext(outer = FALSE, side = 2, line = 4, "Logistic Regression", cex = 1)#
+        }else{#
+          axis(side = 2, labels = FALSE)#
+        }#
+        mtext(outer = FALSE, side = 3, line = 0.5, paste0("n = ", n))#
+      }#
+      for(n in c(50, 100, 250, 500)){#
+        tmp <- randomforest_rslt[randomforest_rslt$n == n, ]#
+        tmp5 <- tmp[tmp$K == 5,]#
+        tmp10 <- tmp[tmp$K == 10,]#
+        tmp20 <- tmp[tmp$K == 20,]#
+        tmp40 <- tmp[tmp$K == 40,]#
+        # est <- c("mse_dcvtmle1","mse_donestep1","mse_emp1","mse_bootstrap")#
+        grbg <- t(as.matrix(rbind(tmp5[,est],tmp10[,est],tmp20[,est],tmp40[,est])))#
+        if(absolute_val){#
+          grbg <- abs(grbg)#
+        }#
+        colnames(grbg) <- c(5,10,20,40)#
+        barplot(grbg,  beside=TRUE, log = "y", yaxt = "n", ...)#
+        mtext(side = 1, outer = FALSE, line = 2, xaxis_label, cex =0.75)#
+        if(n == 50){#
+          axis(side = 2)#
+          mtext(outer = FALSE, side = 2, line = 2, yaxis_label, cex = 0.75)#
+          mtext(outer = FALSE, side = 2, line = 4, "Random Forest", cex = 1)#
+        }else{#
+          axis(side = 2, labels = FALSE)#
+        }#
+      }#
+    }
+make_side_by_side_bar_plots(glm_rslt, randomforest_rslt, #
+                                est = c("bias_dcvtmle1","bias_donestep1",#
+                                        "bias_emp1","bias_bootstrap"),#
+                                est_label = c("CVTMLE", "CVOS","Empirical","Bootstrap"),#
+                                ylim = c(0.0001,100), yaxis_label = "Absolute Bias")
+# bias#
+    make_side_by_side_bar_plots(glm_rslt, randomforest_rslt, #
+                                est = c("bias_dcvtmle1","bias_donestep1",#
+                                        "bias_emp1","bias_bootstrap"),#
+                                est_label = c("CVTMLE", "CVOS","Empirical","Bootstrap"),#
+                                ylim = c(0.0001,100), yaxis_label = "Absolute Bias")
+make_side_by_side_bar_plots(glm_rslt, randomforest_rslt, #
+                                est = c("var_dcvtmle1","var_donestep1",#
+                                        "var_emp1","var_bootstrap"),#
+                                est_label = c("CVTMLE", "CVOS","Empirical","Bootstrap"),#
+                                ylim = c(0.0001,50), yaxis_label = "Variance")
+make_side_by_side_bar_plots(glm_rslt, randomforest_rslt, #
+                                est = c("mse_dcvtmle1","mse_donestep1",#
+                                        "mse_emp1","mse_bootstrap"),#
+                                est_label = c("CVTMLE", "CVOS","Empirical","Bootstrap"),#
+                                ylim = c(0.0001,100), yaxis_label = "Mean squared-error")
+head(out)
+sum(is.na(out$truth))
+table(out$n[is.na(out$truth)])
+table(out$n[!is.na(out$truth)])
+table(out$wrapper[!is.na(out$truth)])
+table(out$wrapper[!is.na(out$truth)],out$n[!is.na(out$truth)])
+table(out$wrapper[!is.na(out$truth)],out$n[!is.na(out$truth)], out$K[!is.na(out$truth)])
+debug(make_side_by_side_barplot)
+debug(make_side_by_side_barplots)
+debug(make_side_by_side_bar_plots)
+make_side_by_side_bar_plots(glm_rslt, randomforest_rslt, #
+                                est = c("mse_dcvtmle1","mse_donestep1",#
+                                        "mse_emp1","mse_bootstrap"),#
+                                est_label = c("CVTMLE", "CVOS","Empirical","Bootstrap"),#
+                                ylim = c(0.0001,100), yaxis_label = "Mean squared-error")
+tmp
+tmp4
+tmp5
+grg
+grbg
+barplot(t(grbg),  beside=TRUE, log = "y", yaxt = "n", ...)#
+        mtext(side = 1, outer = FALSE, line = 2, xaxis_label, cex =0.75)
+?barplot
+tmp5
+grbg
+library(ggplot2)
+install.packages("ggplot2")
+library(ggplot2)
+ggplot2.scatterplot(data=grbg, xName='wt', yName="mpg",#
+            faceting=TRUE, facetingVarNames="cyl", #
+            facetingDirection="horizontal")
+install.packages("devtools")#
+library(devtools)#
+install_github("easyGgplot2", "kassambara")
+ggplot2.scatterplot(data=grbg, xName='wt', yName="mpg",#
+            faceting=TRUE, facetingVarNames="cyl", #
+            facetingDirection="horizontal")
+library(easyGplot2)
+install.packages("devtools")#
+library(devtools)#
+install_github("kassambara/easyGplot2")
+install.packages("easyGplot2")
+?install_github
+?install_github
+install_github("kassambara/easyGgplot2")
+library(easyGplot2)
+library(easyGgplot2)
+ggplot2.scatterplot(data=grbg, xName='wt', yName="mpg",#
+            faceting=TRUE, facetingVarNames="cyl", #
+            facetingDirection="horizontal")
+ggplot2.scatterplot(data=data.frame(grbg), xName='wt', yName="mpg",#
+            faceting=TRUE, facetingVarNames="cyl", #
+            facetingDirection="horizontal")
+head(grbg)
+ggplot2.scatterplot(data=data.frame(grbg[,1:3]), xName='wt', yName="mpg",#
+            faceting=TRUE, facetingVarNames="cyl", #
+            facetingDirection="horizontal")
+grbg[,1:3]
+?ggplot2.scatterplot
+grbg <- data.frame(grbg)#
+        grbg$est <- c("CVTMLE","One Step","Empirical","Bootstrap")#
+        ggplot2.scatterplot(data=grbg, xName='Estimators', yName = "MSE"#
+            faceting=TRUE, facetingVarNames="est", #
+            facetingDirection="horizontal")
+ggplot2.scatterplot(data=grbg, xName='Estimators', yName = "MSE",#
+            faceting=TRUE, facetingVarNames="est", #
+            facetingDirection="horizontal")
+grbg$est <- c("CVTMLE","One Step","Empirical","Bootstrap")#
+        ggplot2.scatterplot(data=grbg, xName='est', yName = "MSE",#
+            faceting=TRUE, facetingVarNames="est", #
+            facetingDirection="horizontal")
+?ggplot2.scatterplot
+grbg
+tmp <- reshape(grbg, direction = "long")
+tmp <- reshape(grbg, direction = "long", varying = "X")
+?reshape
+grbg
+Q
+undebug(make_side_by_side_bar_plots)
+make_side_by_side_bar_plots(glm_rslt, randomforest_rslt, #
+                                est = c("mse_dcvtmle1","mse_donestep1",#
+                                        "mse_emp1","mse_bootstrap"),#
+                                est_label = c("CVTMLE", "CVOS","Empirical","Bootstrap"),#
+                                ylim = c(0.0001,100), yaxis_label = "Mean squared-error")
+make_side_by_side_bar_plots <- function(glm_rslt, randomforest_rslt,#
+                                            est, est_labels, #
+                                            yaxis_label, #
+                                            xaxis_label = "Number CV Folds",#
+                                            absolute_val = TRUE, ... ){#
+      layout(matrix(1:8, nrow = 2, ncol = 4,  byrow = TRUE))#
+      par(mar = c(1.6, 0.6, 0.6, 0.6), mgp = c(2.1, 0.5, 0),#
+          oma = c(2.1, 5.1, 2.1, 2.1))#
+      for(n in c(50, 100, 250, 500)){#
+        tmp <- glm_rslt[glm_rslt$n == n, ]#
+        tmp5 <- tmp[tmp$K == 5,]#
+        tmp10 <- tmp[tmp$K == 10,]#
+        tmp20 <- tmp[tmp$K == 20,]#
+        tmp40 <- tmp[tmp$K == 40,]#
+        # est <- c("mse_dcvtmle1","mse_donestep1","mse_emp1","mse_bootstrap")#
+        grbg <- as.matrix(rbind(tmp5[,est],tmp10[,est],tmp20[,est],tmp40[,est]))#
+        if(absolute_val){#
+          grbg <- abs(grbg)#
+        }#
+        colnames(grbg) <- c(5,10,20,40)#
+        if(n == 50){leg.text <- est_labels}else{leg.text <- FALSE}#
+        barplot(grbg, legend.text = leg.text, args.legend = list(x = "topright"),#
+          beside=TRUE, log = "y", yaxt = "n", ... )#
+        if(n == 50){#
+          axis(side = 2)#
+          mtext(outer = FALSE, side = 2, line = 2, yaxis_label, cex = 0.75)#
+          mtext(outer = FALSE, side = 2, line = 4, "Logistic Regression", cex = 1)#
+        }else{#
+          axis(side = 2, labels = FALSE)#
+        }#
+        mtext(outer = FALSE, side = 3, line = 0.5, paste0("n = ", n))#
+      }#
+      for(n in c(50, 100, 250, 500)){#
+        tmp <- randomforest_rslt[randomforest_rslt$n == n, ]#
+        tmp5 <- tmp[tmp$K == 5,]#
+        tmp10 <- tmp[tmp$K == 10,]#
+        tmp20 <- tmp[tmp$K == 20,]#
+        tmp40 <- tmp[tmp$K == 40,]#
+        # est <- c("mse_dcvtmle1","mse_donestep1","mse_emp1","mse_bootstrap")#
+        grbg <- t(as.matrix(rbind(tmp5[,est],tmp10[,est],tmp20[,est],tmp40[,est])))#
+        if(absolute_val){#
+          grbg <- abs(grbg)#
+        }#
+        colnames(grbg) <- c(5,10,20,40)#
+        barplot(grbg,  beside=TRUE, log = "y", yaxt = "n", ...)#
+        mtext(side = 1, outer = FALSE, line = 2, xaxis_label, cex =0.75)#
+        if(n == 50){#
+          axis(side = 2)#
+          mtext(outer = FALSE, side = 2, line = 2, yaxis_label, cex = 0.75)#
+          mtext(outer = FALSE, side = 2, line = 4, "Random Forest", cex = 1)#
+        }else{#
+          axis(side = 2, labels = FALSE)#
+        }#
+      }#
+    }
+make_side_by_side_bar_plots(glm_rslt, randomforest_rslt, #
+                                est = c("mse_dcvtmle1","mse_donestep1",#
+                                        "mse_emp1","mse_bootstrap"),#
+                                est_label = c("CVTMLE", "CVOS","Empirical","Bootstrap"),#
+                                ylim = c(0.0001,100), yaxis_label = "Mean squared-error")
+# mse#
+    make_side_by_side_bar_plots(glm_rslt, randomforest_rslt, #
+                                est = c("mse_dcvtmle1","mse_donestep1",#
+                                        "mse_emp1","mse_bootstrap"),#
+                                est_label = c("CVTMLE", "CVOS","Empirical","Bootstrap"),#
+                                ylim = c(0.0001,100), yaxis_label = "Mean squared-error",#
+                                col = 1)
+make_side_by_side_bar_plots(glm_rslt, randomforest_rslt, #
+                                est = c("mse_dcvtmle1","mse_donestep1",#
+                                        "mse_emp1","mse_bootstrap"),#
+                                est_label = c("CVTMLE", "CVOS","Empirical","Bootstrap"),#
+                                ylim = c(0.0001,100), yaxis_label = "Mean squared-error",#
+                                col = "gray50")
+# mse#
+    make_side_by_side_bar_plots(glm_rslt, randomforest_rslt, #
+                                est = c("mse_dcvtmle1","mse_donestep1",#
+                                        "mse_emp1","mse_bootstrap"),#
+                                est_label = c("CVTMLE", "CVOS","Empirical","Bootstrap"),#
+                                ylim = c(0.0001,100), yaxis_label = "Mean squared-error",#
+                                col = c(1,2,3,4))
+my_col <- brewer.pallette("Grays", 9)
+library(RColorBrewer)
+my_col <- brewer.pallette("Grays", 9)
+my_col <- brewer.pal("Grays", 9)
+my_col <- brewer.pal("Grays", 5)
+my_col <- brewer.pal(5, "Grays")
+my_col <- brewer.pal(5, "Greys")
+my_col
+my_col <- brewer.pallette(5,"Grays")#
+    make_side_by_side_bar_plots(glm_rslt, randomforest_rslt, #
+                                est = c("mse_dcvtmle1","mse_donestep1",#
+                                        "mse_emp1","mse_bootstrap"),#
+                                est_label = c("CVTMLE", "CVOS","Empirical","Bootstrap"),#
+                                ylim = c(0.0001,100), yaxis_label = "Mean squared-error",#
+                                col = my_col[sort(rep(1:4,4))])
+debug(make_side_by_side_bar_plots)
+my_col <- brewer.pallette(5,"Grays")#
+    make_side_by_side_bar_plots(glm_rslt, randomforest_rslt, #
+                                est = c("mse_dcvtmle1","mse_donestep1",#
+                                        "mse_emp1","mse_bootstrap"),#
+                                est_label = c("CVTMLE", "CVOS","Empirical","Bootstrap"),#
+                                ylim = c(0.0001,100), yaxis_label = "Mean squared-error",#
+                                col = my_col[sort(rep(1:4,4))])
+grbg
+Q
+make_side_by_side_bar_plots <- function(glm_rslt, randomforest_rslt,#
+                                            est, est_labels, #
+                                            yaxis_label, #
+                                            xaxis_label = "Number CV Folds",#
+                                            absolute_val = TRUE, ... ){#
+      layout(matrix(1:8, nrow = 2, ncol = 4,  byrow = TRUE))#
+      par(mar = c(1.6, 0.6, 0.6, 0.6), mgp = c(2.1, 0.5, 0),#
+          oma = c(2.1, 5.1, 2.1, 2.1))#
+      for(n in c(50, 100, 250, 500)){#
+        tmp <- glm_rslt[glm_rslt$n == n, ]#
+        tmp5 <- tmp[tmp$K == 5,]#
+        tmp10 <- tmp[tmp$K == 10,]#
+        tmp20 <- tmp[tmp$K == 20,]#
+        tmp40 <- tmp[tmp$K == 40,]#
+        # est <- c("mse_dcvtmle1","mse_donestep1","mse_emp1","mse_bootstrap")#
+        grbg <- as.matrix(rbind(tmp5[,est],tmp10[,est],tmp20[,est],tmp40[,est]))#
+        if(absolute_val){#
+          grbg <- abs(grbg)#
+        }#
+        colnames(grbg) <- c(5,10,20,40)#
+        if(n == 50){leg.text <- est_labels}else{leg.text <- FALSE}#
+        grbg$mse_bootstrap[2:4] <- NA#
+        barplot(grbg, legend.text = leg.text, args.legend = list(x = "topright"),#
+          beside=TRUE, log = "y", yaxt = "n", ... )#
+        if(n == 50){#
+          axis(side = 2)#
+          mtext(outer = FALSE, side = 2, line = 2, yaxis_label, cex = 0.75)#
+          mtext(outer = FALSE, side = 2, line = 4, "Logistic Regression", cex = 1)#
+        }else{#
+          axis(side = 2, labels = FALSE)#
+        }#
+        mtext(outer = FALSE, side = 3, line = 0.5, paste0("n = ", n))#
+      }#
+      for(n in c(50, 100, 250, 500)){#
+        tmp <- randomforest_rslt[randomforest_rslt$n == n, ]#
+        tmp5 <- tmp[tmp$K == 5,]#
+        tmp10 <- tmp[tmp$K == 10,]#
+        tmp20 <- tmp[tmp$K == 20,]#
+        tmp40 <- tmp[tmp$K == 40,]#
+        # est <- c("mse_dcvtmle1","mse_donestep1","mse_emp1","mse_bootstrap")#
+        grbg <- t(as.matrix(rbind(tmp5[,est],tmp10[,est],tmp20[,est],tmp40[,est])))#
+        if(absolute_val){#
+          grbg <- abs(grbg)#
+        }#
+        colnames(grbg) <- c(5,10,20,40)#
+        barplot(grbg,  beside=TRUE, log = "y", yaxt = "n", ...)#
+        mtext(side = 1, outer = FALSE, line = 2, xaxis_label, cex =0.75)#
+        if(n == 50){#
+          axis(side = 2)#
+          mtext(outer = FALSE, side = 2, line = 2, yaxis_label, cex = 0.75)#
+          mtext(outer = FALSE, side = 2, line = 4, "Random Forest", cex = 1)#
+        }else{#
+          axis(side = 2, labels = FALSE)#
+        }#
+      }#
+    }
+my_col <- brewer.pallette(5,"Grays")#
+    make_side_by_side_bar_plots(glm_rslt, randomforest_rslt, #
+                                est = c("mse_dcvtmle1","mse_donestep1",#
+                                        "mse_emp1","mse_bootstrap"),#
+                                est_label = c("CVTMLE", "CVOS","Empirical","Bootstrap"),#
+                                ylim = c(0.0001,100), yaxis_label = "Mean squared-error",#
+                                col = my_col[sort(rep(1:4,4))])
+debug(make_side_by_side_bar_plots)
+my_col <- brewer.pallette(5,"Grays")#
+    make_side_by_side_bar_plots(glm_rslt, randomforest_rslt, #
+                                est = c("mse_dcvtmle1","mse_donestep1",#
+                                        "mse_emp1","mse_bootstrap"),#
+                                est_label = c("CVTMLE", "CVOS","Empirical","Bootstrap"),#
+                                ylim = c(0.0001,100), yaxis_label = "Mean squared-error",#
+                                col = my_col[sort(rep(1:4,4))])
+make_side_by_side_bar_plots <- function(glm_rslt, randomforest_rslt,#
+                                            est, est_labels, #
+                                            yaxis_label, #
+                                            xaxis_label = "Number CV Folds",#
+                                            absolute_val = TRUE, ... ){#
+      layout(matrix(1:8, nrow = 2, ncol = 4,  byrow = TRUE))#
+      par(mar = c(1.6, 0.6, 0.6, 0.6), mgp = c(2.1, 0.5, 0),#
+          oma = c(2.1, 5.1, 2.1, 2.1))#
+      for(n in c(50, 100, 250, 500)){#
+        tmp <- glm_rslt[glm_rslt$n == n, ]#
+        tmp5 <- tmp[tmp$K == 5,]#
+        tmp10 <- tmp[tmp$K == 10,]#
+        tmp20 <- tmp[tmp$K == 20,]#
+        tmp40 <- tmp[tmp$K == 40,]#
+        # est <- c("mse_dcvtmle1","mse_donestep1","mse_emp1","mse_bootstrap")#
+        grbg <- data.frame(as.matrix(rbind(tmp5[,est],tmp10[,est],tmp20[,est],tmp40[,est])))#
+        if(absolute_val){#
+          grbg <- abs(grbg)#
+        }#
+        grbg$mse_bootstrap[2:4] <- NA#
+#
+        row.names(grbg) <- c(5,10,20,40)#
+        if(n == 50){leg.text <- est_labels}else{leg.text <- FALSE}#
+        barplot(grbg, legend.text = leg.text, args.legend = list(x = "topright"),#
+          beside=TRUE, log = "y", yaxt = "n", ... )#
+        if(n == 50){#
+          axis(side = 2)#
+          mtext(outer = FALSE, side = 2, line = 2, yaxis_label, cex = 0.75)#
+          mtext(outer = FALSE, side = 2, line = 4, "Logistic Regression", cex = 1)#
+        }else{#
+          axis(side = 2, labels = FALSE)#
+        }#
+        mtext(outer = FALSE, side = 3, line = 0.5, paste0("n = ", n))#
+      }#
+      for(n in c(50, 100, 250, 500)){#
+        tmp <- randomforest_rslt[randomforest_rslt$n == n, ]#
+        tmp5 <- tmp[tmp$K == 5,]#
+        tmp10 <- tmp[tmp$K == 10,]#
+        tmp20 <- tmp[tmp$K == 20,]#
+        tmp40 <- tmp[tmp$K == 40,]#
+        # est <- c("mse_dcvtmle1","mse_donestep1","mse_emp1","mse_bootstrap")#
+        grbg <- data.frame(as.matrix(rbind(tmp5[,est],tmp10[,est],tmp20[,est],tmp40[,est])))#
+        if(absolute_val){#
+          grbg <- abs(grbg)#
+        }#
+        row.names(grbg) <- c(5,10,20,40)#
+        barplot(grbg,  beside=TRUE, log = "y", yaxt = "n", ...)#
+        mtext(side = 1, outer = FALSE, line = 2, xaxis_label, cex =0.75)#
+        if(n == 50){#
+          axis(side = 2)#
+          mtext(outer = FALSE, side = 2, line = 2, yaxis_label, cex = 0.75)#
+          mtext(outer = FALSE, side = 2, line = 4, "Random Forest", cex = 1)#
+        }else{#
+          axis(side = 2, labels = FALSE)#
+        }#
+      }#
+    }
+my_col <- brewer.pallette(5,"Grays")#
+    make_side_by_side_bar_plots(glm_rslt, randomforest_rslt, #
+                                est = c("mse_dcvtmle1","mse_donestep1",#
+                                        "mse_emp1","mse_bootstrap"),#
+                                est_label = c("CVTMLE", "CVOS","Empirical","Bootstrap"),#
+                                ylim = c(0.0001,100), yaxis_label = "Mean squared-error",#
+                                col = my_col[sort(rep(1:4,4))])
+make_side_by_side_bar_plots <- function(glm_rslt, randomforest_rslt,#
+                                            est, est_labels, #
+                                            yaxis_label, #
+                                            xaxis_label = "Number CV Folds",#
+                                            absolute_val = TRUE, ... ){#
+      layout(matrix(1:8, nrow = 2, ncol = 4,  byrow = TRUE))#
+      par(mar = c(1.6, 0.6, 0.6, 0.6), mgp = c(2.1, 0.5, 0),#
+          oma = c(2.1, 5.1, 2.1, 2.1))#
+      for(n in c(50, 100, 250, 500)){#
+        tmp <- glm_rslt[glm_rslt$n == n, ]#
+        tmp5 <- tmp[tmp$K == 5,]#
+        tmp10 <- tmp[tmp$K == 10,]#
+        tmp20 <- tmp[tmp$K == 20,]#
+        tmp40 <- tmp[tmp$K == 40,]#
+        # est <- c("mse_dcvtmle1","mse_donestep1","mse_emp1","mse_bootstrap")#
+        grbg <- as.matrix(rbind(tmp5[,est],tmp10[,est],tmp20[,est],tmp40[,est]))#
+        if(absolute_val){#
+          grbg <- abs(grbg)#
+        }#
+        grbg[2:4,4] <- NA#
+#
+        row.names(grbg) <- c(5,10,20,40)#
+        if(n == 50){leg.text <- est_labels}else{leg.text <- FALSE}#
+        barplot(grbg, legend.text = leg.text, args.legend = list(x = "topright"),#
+          beside=TRUE, log = "y", yaxt = "n", ... )#
+        if(n == 50){#
+          axis(side = 2)#
+          mtext(outer = FALSE, side = 2, line = 2, yaxis_label, cex = 0.75)#
+          mtext(outer = FALSE, side = 2, line = 4, "Logistic Regression", cex = 1)#
+        }else{#
+          axis(side = 2, labels = FALSE)#
+        }#
+        mtext(outer = FALSE, side = 3, line = 0.5, paste0("n = ", n))#
+      }#
+      for(n in c(50, 100, 250, 500)){#
+        tmp <- randomforest_rslt[randomforest_rslt$n == n, ]#
+        tmp5 <- tmp[tmp$K == 5,]#
+        tmp10 <- tmp[tmp$K == 10,]#
+        tmp20 <- tmp[tmp$K == 20,]#
+        tmp40 <- tmp[tmp$K == 40,]#
+        # est <- c("mse_dcvtmle1","mse_donestep1","mse_emp1","mse_bootstrap")#
+        grbg <- data.frame(as.matrix(rbind(tmp5[,est],tmp10[,est],tmp20[,est],tmp40[,est])))#
+        if(absolute_val){#
+          grbg <- abs(grbg)#
+        }#
+        grbg[2:4,4] <- NA#
+#
+        row.names(grbg) <- c(5,10,20,40)#
+        barplot(grbg,  beside=TRUE, log = "y", yaxt = "n", ...)#
+        mtext(side = 1, outer = FALSE, line = 2, xaxis_label, cex =0.75)#
+        if(n == 50){#
+          axis(side = 2)#
+          mtext(outer = FALSE, side = 2, line = 2, yaxis_label, cex = 0.75)#
+          mtext(outer = FALSE, side = 2, line = 4, "Random Forest", cex = 1)#
+        }else{#
+          axis(side = 2, labels = FALSE)#
+        }#
+      }#
+    }
+# mse#
+    my_col <- brewer.pallette(5,"Grays")#
+    make_side_by_side_bar_plots(glm_rslt, randomforest_rslt, #
+                                est = c("mse_dcvtmle1","mse_donestep1",#
+                                        "mse_emp1","mse_bootstrap"),#
+                                est_label = c("CVTMLE", "CVOS","Empirical","Bootstrap"),#
+                                ylim = c(0.0001,100), yaxis_label = "Mean squared-error",#
+                                col = my_col[sort(rep(1:4,4))])
+make_side_by_side_bar_plots <- function(glm_rslt, randomforest_rslt,#
+                                            est, est_labels, #
+                                            yaxis_label, #
+                                            xaxis_label = "Number CV Folds",#
+                                            absolute_val = TRUE, ... ){#
+      layout(matrix(1:8, nrow = 2, ncol = 4,  byrow = TRUE))#
+      par(mar = c(1.6, 0.6, 0.6, 0.6), mgp = c(2.1, 0.5, 0),#
+          oma = c(2.1, 5.1, 2.1, 2.1))#
+      for(n in c(50, 100, 250, 500)){#
+        tmp <- glm_rslt[glm_rslt$n == n, ]#
+        tmp5 <- tmp[tmp$K == 5,]#
+        tmp10 <- tmp[tmp$K == 10,]#
+        tmp20 <- tmp[tmp$K == 20,]#
+        tmp40 <- tmp[tmp$K == 40,]#
+        # est <- c("mse_dcvtmle1","mse_donestep1","mse_emp1","mse_bootstrap")#
+        grbg <- as.matrix(rbind(tmp5[,est],tmp10[,est],tmp20[,est],tmp40[,est]))#
+        if(absolute_val){#
+          grbg <- abs(grbg)#
+        }#
+        grbg[2:4,4] <- NA#
+#
+        row.names(grbg) <- c(5,10,20,40)#
+        if(n == 50){leg.text <- est_labels}else{leg.text <- FALSE}#
+        barplot(grbg, legend.text = leg.text, args.legend = list(x = "topright"),#
+          beside=TRUE, log = "y", yaxt = "n", ... )#
+        if(n == 50){#
+          axis(side = 2)#
+          mtext(outer = FALSE, side = 2, line = 2, yaxis_label, cex = 0.75)#
+          mtext(outer = FALSE, side = 2, line = 4, "Logistic Regression", cex = 1)#
+        }else{#
+          axis(side = 2, labels = FALSE)#
+        }#
+        mtext(outer = FALSE, side = 3, line = 0.5, paste0("n = ", n))#
+      }#
+      for(n in c(50, 100, 250, 500)){#
+        tmp <- randomforest_rslt[randomforest_rslt$n == n, ]#
+        tmp5 <- tmp[tmp$K == 5,]#
+        tmp10 <- tmp[tmp$K == 10,]#
+        tmp20 <- tmp[tmp$K == 20,]#
+        tmp40 <- tmp[tmp$K == 40,]#
+        # est <- c("mse_dcvtmle1","mse_donestep1","mse_emp1","mse_bootstrap")#
+        grbg <- as.matrix(rbind(tmp5[,est],tmp10[,est],tmp20[,est],tmp40[,est]))`#
+        if(absolute_val){#
+          grbg <- abs(grbg)#
+        }#
+        grbg[2:4,4] <- NA#
+#
+        row.names(grbg) <- c(5,10,20,40)#
+        barplot(grbg,  beside=TRUE, log = "y", yaxt = "n", ...)#
+        mtext(side = 1, outer = FALSE, line = 2, xaxis_label, cex =0.75)#
+        if(n == 50){#
+          axis(side = 2)#
+          mtext(outer = FALSE, side = 2, line = 2, yaxis_label, cex = 0.75)#
+          mtext(outer = FALSE, side = 2, line = 4, "Random Forest", cex = 1)#
+        }else{#
+          axis(side = 2, labels = FALSE)#
+        }#
+      }#
+    }
+my_col <- brewer.pallette(5,"Grays")#
+    make_side_by_side_bar_plots(glm_rslt, randomforest_rslt, #
+                                est = c("mse_dcvtmle1","mse_donestep1",#
+                                        "mse_emp1","mse_bootstrap"),#
+                                est_label = c("CVTMLE", "CVOS","Empirical","Bootstrap"),#
+                                ylim = c(0.0001,100), yaxis_label = "Mean squared-error",#
+                                col = my_col[sort(rep(1:4,4))])
+)
+}
+}
+}
+)
+]
+make_side_by_side_bar_plots <- function(glm_rslt, randomforest_rslt,#
+                                            est, est_labels, #
+                                            yaxis_label, #
+                                            xaxis_label = "Number CV Folds",#
+                                            absolute_val = TRUE, ... ){#
+      layout(matrix(1:8, nrow = 2, ncol = 4,  byrow = TRUE))#
+      par(mar = c(1.6, 0.6, 0.6, 0.6), mgp = c(2.1, 0.5, 0),#
+          oma = c(2.1, 5.1, 2.1, 2.1))#
+      for(n in c(50, 100, 250, 500)){#
+        tmp <- glm_rslt[glm_rslt$n == n, ]#
+        tmp5 <- tmp[tmp$K == 5,]#
+        tmp10 <- tmp[tmp$K == 10,]#
+        tmp20 <- tmp[tmp$K == 20,]#
+        tmp40 <- tmp[tmp$K == 40,]#
+        # est <- c("mse_dcvtmle1","mse_donestep1","mse_emp1","mse_bootstrap")#
+        grbg <- as.matrix(rbind(tmp5[,est],tmp10[,est],tmp20[,est],tmp40[,est]))#
+        if(absolute_val){#
+          grbg <- abs(grbg)#
+        }#
+        grbg[2:4,4] <- NA#
+#
+        row.names(grbg) <- c(5,10,20,40)#
+        if(n == 50){leg.text <- est_labels}else{leg.text <- FALSE}#
+        barplot(grbg, legend.text = leg.text, args.legend = list(x = "topright"),#
+          beside=TRUE, log = "y", yaxt = "n", ... )#
+        if(n == 50){#
+          axis(side = 2)#
+          mtext(outer = FALSE, side = 2, line = 2, yaxis_label, cex = 0.75)#
+          mtext(outer = FALSE, side = 2, line = 4, "Logistic Regression", cex = 1)#
+        }else{#
+          axis(side = 2, labels = FALSE)#
+        }#
+        mtext(outer = FALSE, side = 3, line = 0.5, paste0("n = ", n))#
+      }#
+      for(n in c(50, 100, 250, 500)){#
+        tmp <- randomforest_rslt[randomforest_rslt$n == n, ]#
+        tmp5 <- tmp[tmp$K == 5,]#
+        tmp10 <- tmp[tmp$K == 10,]#
+        tmp20 <- tmp[tmp$K == 20,]#
+        tmp40 <- tmp[tmp$K == 40,]#
+        # est <- c("mse_dcvtmle1","mse_donestep1","mse_emp1","mse_bootstrap")#
+        grbg <- as.matrix(rbind(tmp5[,est],tmp10[,est],tmp20[,est],tmp40[,est]))#
+        if(absolute_val){#
+          grbg <- abs(grbg)#
+        }#
+        grbg[2:4,4] <- NA#
+#
+        row.names(grbg) <- c(5,10,20,40)#
+        barplot(grbg,  beside=TRUE, log = "y", yaxt = "n", ...)#
+        mtext(side = 1, outer = FALSE, line = 2, xaxis_label, cex =0.75)#
+        if(n == 50){#
+          axis(side = 2)#
+          mtext(outer = FALSE, side = 2, line = 2, yaxis_label, cex = 0.75)#
+          mtext(outer = FALSE, side = 2, line = 4, "Random Forest", cex = 1)#
+        }else{#
+          axis(side = 2, labels = FALSE)#
+        }#
+      }#
+    }
+my_col <- brewer.pallette(5,"Grays")#
+    make_side_by_side_bar_plots(glm_rslt, randomforest_rslt, #
+                                est = c("mse_dcvtmle1","mse_donestep1",#
+                                        "mse_emp1","mse_bootstrap"),#
+                                est_label = c("CVTMLE", "CVOS","Empirical","Bootstrap"),#
+                                ylim = c(0.0001,100), yaxis_label = "Mean squared-error",#
+                                col = my_col[sort(rep(1:4,4))])
+make_side_by_side_bar_plots(glm_rslt, randomforest_rslt, #
+                                est = c("bias_dcvtmle1","bias_donestep1",#
+                                        "bias_emp1","bias_bootstrap"),#
+                                est_label = c("CVTMLE", "CVOS","Empirical","Bootstrap"),#
+                                ylim = c(0.0001,100), yaxis_label = "Absolute Bias",#
+                                col = my_col[sort(rep(1:4,4))])#
+    # variance
+make_side_by_side_bar_plots(glm_rslt, randomforest_rslt, #
+                                est = c("var_dcvtmle1","var_donestep1",#
+                                        "var_emp1","var_bootstrap"),#
+                                est_label = c("CVTMLE", "CVOS","Empirical","Bootstrap"),#
+                                ylim = c(0.0001,50), yaxis_label = "Variance",#
+                                col = my_col[sort(rep(1:4,4))])
+make_side_by_side_bar_plots(glm_rslt, randomforest_rslt, #
+                                est = c("mse_dcvtmle1","mse_donestep1",#
+                                        "mse_emp1","mse_bootstrap"),#
+                                est_label = c("CVTMLE", "CVOS","Empirical","Bootstrap"),#
+                                ylim = c(0.0001,100), yaxis_label = "Mean squared-error",#
+                                col = my_col[sort(rep(1:4,4))])
+ns <- c(50, 100, 250, 500)#
+  bigB <- 500#
+  K <- c(5,10,20,40)#
+  wrappers <- c("glm_wrapper", "randomforest_wrapper")#
+  # wrappers <- c("glmnet_wrapper")#
+  p <- 10#
+  redo_parm <- NULL#
+  # TO DO:#
+  # Add a replicate argument for repeated cross-validation estimators#
+  parm <- expand.grid(seed = 1:bigB,#
+                      n = ns, K = K, #
+                      wrapper = wrappers,#
+                      stringsAsFactors = FALSE)#
+  rslt <- matrix(NA, nrow = nrow(parm), ncol = 66 + 4)#
+  for(i in 1:nrow(parm)){#
+    if(file.exists(paste0("~/cvtmleauc/out/outtn_",#
+                            "n=", parm$n[i],#
+                            "_seed=",parm$seed[i],#
+                            "_K=",parm$K[i],#
+                            "_wrapper=",parm$wrapper[i],#
+                            ".RData"))){#
+      tmp_1 <- get(load(paste0("~/cvtmleauc/out/outtn_",#
+                            "n=", parm$n[i],#
+                            "_seed=",parm$seed[i],#
+                            "_K=",parm$K[i],#
+                            "_wrapper=",parm$wrapper[i],#
+                            ".RData")))#
+    }else{#
+      redo_parm <- rbind(redo_parm, parm[i,])#
+      tmp_1 <- rep(NA, 66)#
+    }#
+    rslt[i,] <- c(parm$seed[i], parm$n[i], parm$K[i], parm$wrapper[i], tmp_1)#
+    if(is.na(tmp_1[length(tmp_1) - 1])){#
+      if(file.exists(paste0("~/cvtmleauc/out/outtn_",#
+                            "n=", parm$n[i],#
+                            "_seed=",parm$seed[i],#
+                            "_K=5",#
+                            "_wrapper=",parm$wrapper[i],#
+                            ".RData"))){#
+      boot_rslt_out <- get(load(paste0("~/cvtmleauc/out/outtn_",#
+                            "n=", parm$n[i],#
+                            "_seed=",parm$seed[i],#
+                            "_K=5",#
+                            "_wrapper=",parm$wrapper[i],#
+                            ".RData")))#
+      boot_idx <- length(boot_rslt_out) - 1#
+      rslt[i,boot_idx] <- boot_rslt_out[boot_idx]#
+      }#
+    }#
+  }#
+  # # format#
+  out <- data.frame(rslt, stringsAsFactors = FALSE)#
+#
+  repeat_names <- c("est_dcvtmle", "se_dcvtmle", #
+                 "est_dinit", "est_donestep", "se_donestep",#
+                 "est_desteq","se_desteq","est_cvtmle","se_cvtmle",#
+                 "est_init", "est_onestep", "se_onestep",#
+                 "est_esteq","se_esteq","est_emp","se_emp")#
+  repeat_names2 <- c("est_dcvtmle", "se_dcvtmle","est_dinit",#
+                  "est_donestep", "se_donestep",#
+                 "est_desteq","se_desteq","est_cvtmle","se_cvtmle",#
+                 "est_init", "est_onestep", "se_onestep",#
+                 "est_esteq","se_esteq","est_emp","se_emp")#
+#
+  sim_names <- c("seed","n","K","wrapper",#
+                 paste0(repeat_names, 1),#
+                 paste0(repeat_names2, 5),#
+                 paste0(repeat_names2, 10),#
+                 paste0(repeat_names2, 20),#
+                 "est_bootstrap",#
+                 "truth")  #
+  colnames(out) <- sim_names#
+  out[,c(1:3,5:ncol(out))] <- apply(out[,c(1:3,5:ncol(out))], 2, function(y){#
+    as.numeric(as.character(y))})#
+#
+  save(out, file=paste0('~/cvtmleauc/out/allOut_cvtn.RData'))#
+  save(redo_parm, file = "~/cvtmleauc/scratch/redo_parm_newest.RData")
+setwd("~/Dropbox/R/cvtmleauc/sandbox/simulation/")
+load("allOut_cvtn.RData")
+# load("~/cvtmleauc/out/allOut_new.RData")#
+#
+    get_sim_rslt <- function(out, parm, wrapper, truth = "truth",#
+                             estimators = c("dcvtmle1","donestep1",#
+                                     "cvtmle1","onestep1","emp1",#
+                                     "dcvtmle5","donestep5",#
+                                     "cvtmle5","onestep5","emp5",#
+                                     "dcvtmle10","donestep10",#
+                                     "cvtmle10","onestep10","emp10",#
+                                     "dcvtmle20","donestep20",#
+                                     "cvtmle20","onestep20","emp20",#
+                                     "bootstrap"#
+                                     ), ...){#
+      b <- v <- m <- co <- NULL#
+      for(i in seq_len(length(parm[,1]))){#
+        x <- out[out$n == parm$n[i] & out$K == parm$K[i] & out$wrapper == wrapper,]#
+        b <- rbind(b, colMeans(x[,paste0("est_",estimators)] - x[,truth], na.rm = TRUE))#
+        v <- rbind(v, apply(x[,paste0("est_",estimators)], 2, var, na.rm = TRUE))#
+        m <- rbind(m, colMeans((x[,paste0("est_",estimators)] - as.numeric(x[,truth]))^2, na.rm = TRUE))#
+        # coverage#
+        # coverage <- rep(NA, length(estimators))#
+        # ct <- 0#
+        # for(est in estimators){#
+        #   ct <- ct + 1#
+        #   coverage[ct] <- mean(x[,paste0("est_",est)] - 1.96 * x[,paste0("se_",est)] < x[,truth] & #
+        #                   x[,paste0("est_",est)] + 1.96 * x[,paste0("se_",est)] > x[,truth], na.rm = TRUE)#
+        # }#
+        # co <- rbind(co, coverage)#
+      }#
+      parm <- cbind(parm, b, v, m) #, #
+                    # co)#
+      colnames(parm) <- c("n", "K", paste0("bias_", estimators),#
+                          paste0("var_", estimators),#
+                          paste0("mse_", estimators)) #,#
+                          # paste0("cov_", estimators))#
+      return(parm)#
+    }#
+    parm <- expand.grid(n = c(50, 100, 250, 500),#
+                        K = c(5, 10, 20, 40))#
+    glm_rslt <- get_sim_rslt(out, parm, wrapper = "glm_wrapper")#
+    randomforest_rslt <- get_sim_rslt(out, parm, wrapper = "randomforest_wrapper")#
+    #---------------
+make_side_by_side_bar_plots <- function(glm_rslt, randomforest_rslt,#
+                                            est, est_labels, #
+                                            yaxis_label, #
+                                            xaxis_label = "Number CV Folds",#
+                                            absolute_val = TRUE, ... ){#
+      layout(matrix(1:8, nrow = 2, ncol = 4,  byrow = TRUE))#
+      par(mar = c(1.6, 0.6, 0.6, 0.6), mgp = c(2.1, 0.5, 0),#
+          oma = c(2.1, 5.1, 2.1, 2.1))#
+      for(n in c(50, 100, 250, 500)){#
+        tmp <- glm_rslt[glm_rslt$n == n, ]#
+        tmp5 <- tmp[tmp$K == 5,]#
+        tmp10 <- tmp[tmp$K == 10,]#
+        tmp20 <- tmp[tmp$K == 20,]#
+        tmp40 <- tmp[tmp$K == 40,]#
+        # est <- c("mse_dcvtmle1","mse_donestep1","mse_emp1","mse_bootstrap")#
+        grbg <- as.matrix(rbind(tmp5[,est],tmp10[,est],tmp20[,est],tmp40[,est]))#
+        if(absolute_val){#
+          grbg <- abs(grbg)#
+        }#
+        grbg[2:4,4] <- NA#
+#
+        row.names(grbg) <- c(5,10,20,40)#
+        if(n == 50){leg.text <- est_labels}else{leg.text <- FALSE}#
+        barplot(grbg, legend.text = leg.text, args.legend = list(x = "topright"),#
+          beside=TRUE, log = "y", yaxt = "n", ... )#
+        if(n == 50){#
+          axis(side = 2)#
+          mtext(outer = FALSE, side = 2, line = 2, yaxis_label, cex = 0.75)#
+          mtext(outer = FALSE, side = 2, line = 4, "Logistic Regression", cex = 1)#
+        }else{#
+          axis(side = 2, labels = FALSE)#
+        }#
+        mtext(outer = FALSE, side = 3, line = 0.5, paste0("n = ", n))#
+      }#
+      for(n in c(50, 100, 250, 500)){#
+        tmp <- randomforest_rslt[randomforest_rslt$n == n, ]#
+        tmp5 <- tmp[tmp$K == 5,]#
+        tmp10 <- tmp[tmp$K == 10,]#
+        tmp20 <- tmp[tmp$K == 20,]#
+        tmp40 <- tmp[tmp$K == 40,]#
+        # est <- c("mse_dcvtmle1","mse_donestep1","mse_emp1","mse_bootstrap")#
+        grbg <- as.matrix(rbind(tmp5[,est],tmp10[,est],tmp20[,est],tmp40[,est]))#
+        if(absolute_val){#
+          grbg <- abs(grbg)#
+        }#
+        grbg[2:4,4] <- NA#
+#
+        row.names(grbg) <- c(5,10,20,40)#
+        barplot(grbg,  beside=TRUE, log = "y", yaxt = "n", ...)#
+        mtext(side = 1, outer = FALSE, line = 2, xaxis_label, cex =0.75)#
+        if(n == 50){#
+          axis(side = 2)#
+          mtext(outer = FALSE, side = 2, line = 2, yaxis_label, cex = 0.75)#
+          mtext(outer = FALSE, side = 2, line = 4, "Random Forest", cex = 1)#
+        }else{#
+          axis(side = 2, labels = FALSE)#
+        }#
+      }#
+    }#
+#
+    library(RColorBrewer)#
+    my_col <- brewer.pallette(5,"Grays")
+make_side_by_side_bar_plots(glm_rslt, randomforest_rslt, #
+                                est = c("bias_dcvtmle1","bias_donestep1",#
+                                        "bias_emp1","bias_bootstrap"),#
+                                est_label = c("CVTMLE", "CVOS","Empirical","Bootstrap"),#
+                                ylim = c(0.0001,100), yaxis_label = "Absolute Bias",#
+                                col = my_col[sort(rep(1:4,4))])
+make_side_by_side_bar_plots(glm_rslt, randomforest_rslt, #
+                                est = c("mse_dcvtmle1","mse_donestep1",#
+                                        "mse_emp1","mse_bootstrap"),#
+                                est_label = c("CVTMLE", "CVOS","Empirical","Bootstrap"),#
+                                ylim = c(0.0001,100), yaxis_label = "Mean squared-error",#
+                                col = my_col[sort(rep(1:4,4))])
+my_col[sort(rep(1:4,4))]
+data_sets <- c("adult", "bank", "cardio", "default",#
+               "drugs", "magic", "wine")#
+bigB <- 100#
+ns <- c(100, 250, 500)#
+K <- c(5, 10, 20, 40)#
+wrappers <- c("randomforest_wrapper", "glmnet_wrapper")#
+#
+parm <- expand.grid(data_set = data_sets,#
+                    seed = 1:bigB,#
+                    K = K, #
+                    n = ns,#
+                    wrapper = wrappers, #
+                    stringsAsFactors = FALSE)
+nrow(parm)
+library(polspline)
+"drugs", "magic", "wine")#
+bigB <- 100#
+ns <- c(50, 100, 250, 500)#
+K <- c(5, 10, 20, 40)#
+wrappers <- c("randomforest_wrapper", "glmnet_wrapper")#
+#
+parm <- expand.grid(data_set = data_sets,#
+                    seed = 1:bigB,#
+                    K = K, #
+                    n = ns,#
+                    wrapper = wrappers, #
+                    stringsAsFactors = FALSE)
+nrow(poarm)
+nrow(parm)
+# mse by CV Repeats for CVTMLE#
+    make_side_by_side_bar_plots(glm_rslt, randomforest_rslt, #
+                                est = c("mse_dcvtmle1","mse_dcvtmle5",#
+                                        "mse_dcvtmle10","mse_dcvtmle20"),#
+                                est_label = paste0("CVTMLE ", c(1,5,10,20)," repeats"),#
+                                ylim = c(0.0001,0.01), yaxis_label = "Variance")
+debug(make_side_by_side_bar_plots)
+make_side_by_side_bar_plots(glm_rslt, randomforest_rslt, #
+                                est = c("mse_dcvtmle1","mse_dcvtmle5",#
+                                        "mse_dcvtmle10","mse_dcvtmle20"),#
+                                est_label = paste0("CVTMLE ", c(1,5,10,20)," repeats"),#
+                                ylim = c(0.0001,0.01), yaxis_label = "Variance")
+grbg
+make_side_by_side_bar_plots <- function(glm_rslt, randomforest_rslt,#
+                                            est, est_labels, rm_last = TRUE,#
+                                            yaxis_label, #
+                                            xaxis_label = "Number CV Folds",#
+                                            absolute_val = TRUE, ... ){#
+      layout(matrix(1:8, nrow = 2, ncol = 4,  byrow = TRUE))#
+      par(mar = c(1.6, 0.6, 0.6, 0.6), mgp = c(2.1, 0.5, 0),#
+          oma = c(2.1, 5.1, 2.1, 2.1))#
+      for(n in c(50, 100, 250, 500)){#
+        tmp <- glm_rslt[glm_rslt$n == n, ]#
+        tmp5 <- tmp[tmp$K == 5,]#
+        tmp10 <- tmp[tmp$K == 10,]#
+        tmp20 <- tmp[tmp$K == 20,]#
+        tmp40 <- tmp[tmp$K == 40,]#
+        # est <- c("mse_dcvtmle1","mse_donestep1","mse_emp1","mse_bootstrap")#
+        grbg <- as.matrix(rbind(tmp5[,est],tmp10[,est],tmp20[,est],tmp40[,est]))#
+        if(absolute_val){#
+          grbg <- abs(grbg)#
+        }#
+        grbg[2:4,4] <- NA#
+#
+        row.names(grbg) <- c(5,10,20,40)#
+        if(n == 50){leg.text <- est_labels}else{leg.text <- FALSE}#
+        barplot(grbg, legend.text = leg.text, args.legend = list(x = "topright"),#
+          beside=TRUE, log = "y", yaxt = "n", ... )#
+        if(n == 50){#
+          axis(side = 2)#
+          mtext(outer = FALSE, side = 2, line = 2, yaxis_label, cex = 0.75)#
+          mtext(outer = FALSE, side = 2, line = 4, "Logistic Regression", cex = 1)#
+        }else{#
+          axis(side = 2, labels = FALSE)#
+        }#
+        mtext(outer = FALSE, side = 3, line = 0.5, paste0("n = ", n))#
+      }#
+      for(n in c(50, 100, 250, 500)){#
+        tmp <- randomforest_rslt[randomforest_rslt$n == n, ]#
+        tmp5 <- tmp[tmp$K == 5,]#
+        tmp10 <- tmp[tmp$K == 10,]#
+        tmp20 <- tmp[tmp$K == 20,]#
+        tmp40 <- tmp[tmp$K == 40,]#
+        # est <- c("mse_dcvtmle1","mse_donestep1","mse_emp1","mse_bootstrap")#
+        grbg <- as.matrix(rbind(tmp5[,est],tmp10[,est],tmp20[,est],tmp40[,est]))#
+        if(absolute_val){#
+          grbg <- abs(grbg)#
+        }#
+        if(rm_last){#
+          grbg[2:4,4] <- NA#
+        }#
+        row.names(grbg) <- c(5,10,20,40)#
+        barplot(grbg,  beside=TRUE, log = "y", yaxt = "n", ...)#
+        mtext(side = 1, outer = FALSE, line = 2, xaxis_label, cex =0.75)#
+        if(n == 50){#
+          axis(side = 2)#
+          mtext(outer = FALSE, side = 2, line = 2, yaxis_label, cex = 0.75)#
+          mtext(outer = FALSE, side = 2, line = 4, "Random Forest", cex = 1)#
+        }else{#
+          axis(side = 2, labels = FALSE)#
+        }#
+      }#
+    }
+# mse by CV Repeats for CVTMLE#
+    make_side_by_side_bar_plots(glm_rslt, randomforest_rslt, #
+                                est = c("mse_dcvtmle1","mse_dcvtmle5",#
+                                        "mse_dcvtmle10","mse_dcvtmle20"),#
+                                est_label = paste0("CVTMLE ", c(1,5,10,20)," repeats"),#
+                                ylim = c(0.0001,0.01), yaxis_label = "Variance")
+Q
+make_side_by_side_bar_plots <- function(glm_rslt, randomforest_rslt,#
+                                            est, est_labels, rm_last = TRUE,#
+                                            yaxis_label, #
+                                            xaxis_label = "Number CV Folds",#
+                                            absolute_val = TRUE, ... ){#
+      layout(matrix(1:8, nrow = 2, ncol = 4,  byrow = TRUE))#
+      par(mar = c(1.6, 0.6, 0.6, 0.6), mgp = c(2.1, 0.5, 0),#
+          oma = c(2.1, 5.1, 2.1, 2.1))#
+      for(n in c(50, 100, 250, 500)){#
+        tmp <- glm_rslt[glm_rslt$n == n, ]#
+        tmp5 <- tmp[tmp$K == 5,]#
+        tmp10 <- tmp[tmp$K == 10,]#
+        tmp20 <- tmp[tmp$K == 20,]#
+        tmp40 <- tmp[tmp$K == 40,]#
+        # est <- c("mse_dcvtmle1","mse_donestep1","mse_emp1","mse_bootstrap")#
+        grbg <- as.matrix(rbind(tmp5[,est],tmp10[,est],tmp20[,est],tmp40[,est]))#
+        if(absolute_val){#
+          grbg <- abs(grbg)#
+        }#
+        grbg[2:4,4] <- NA#
+#
+        row.names(grbg) <- c(5,10,20,40)#
+        if(n == 50){leg.text <- est_labels}else{leg.text <- FALSE}#
+        barplot(grbg, legend.text = leg.text, args.legend = list(x = "topright"),#
+          beside=TRUE, log = "y", yaxt = "n", ... )#
+        if(n == 50){#
+          axis(side = 2)#
+          mtext(outer = FALSE, side = 2, line = 2, yaxis_label, cex = 0.75)#
+          mtext(outer = FALSE, side = 2, line = 4, "Logistic Regression", cex = 1)#
+        }else{#
+          axis(side = 2, labels = FALSE)#
+        }#
+        mtext(outer = FALSE, side = 3, line = 0.5, paste0("n = ", n))#
+      }#
+      for(n in c(50, 100, 250, 500)){#
+        tmp <- randomforest_rslt[randomforest_rslt$n == n, ]#
+        tmp5 <- tmp[tmp$K == 5,]#
+        tmp10 <- tmp[tmp$K == 10,]#
+        tmp20 <- tmp[tmp$K == 20,]#
+        tmp40 <- tmp[tmp$K == 40,]#
+        # est <- c("mse_dcvtmle1","mse_donestep1","mse_emp1","mse_bootstrap")#
+        grbg <- as.matrix(rbind(tmp5[,est],tmp10[,est],tmp20[,est],tmp40[,est]))#
+        if(absolute_val){#
+          grbg <- abs(grbg)#
+        }#
+        if(rm_last){#
+          grbg[2:4,4] <- NA#
+        }#
+        row.names(grbg) <- c(5,10,20,40)#
+        barplot(grbg,  beside=TRUE, log = "y", yaxt = "n", ...)#
+        mtext(side = 1, outer = FALSE, line = 2, xaxis_label, cex =0.75)#
+        if(n == 50){#
+          axis(side = 2)#
+          mtext(outer = FALSE, side = 2, line = 2, yaxis_label, cex = 0.75)#
+          mtext(outer = FALSE, side = 2, line = 4, "Random Forest", cex = 1)#
+        }else{#
+          axis(side = 2, labels = FALSE)#
+        }#
+      }#
+    }
+make_side_by_side_bar_plots(glm_rslt, randomforest_rslt, #
+                                est = c("mse_dcvtmle1","mse_dcvtmle5",#
+                                        "mse_dcvtmle10","mse_dcvtmle20"),#
+                                est_label = paste0("CVTMLE ", c(1,5,10,20)," repeats"),#
+                                ylim = c(0.0001,0.01), yaxis_label = "Variance")
+# mse by CV Repeats for CVTMLE#
+    make_side_by_side_bar_plots(glm_rslt, randomforest_rslt, #
+                                est = c("mse_dcvtmle1","mse_dcvtmle5",#
+                                        "mse_dcvtmle10","mse_dcvtmle20"),#
+                                rm_last = FALSE,#
+                                est_label = paste0("CVTMLE ", c(1,5,10,20)," repeats"),#
+                                ylim = c(0.0001,0.01), yaxis_label = "Variance")
+# mse by CV Repeats for CVTMLE#
+    make_side_by_side_bar_plots(glm_rslt, randomforest_rslt, #
+                                est = c("mse_dcvtmle1","mse_dcvtmle5",#
+                                        "mse_dcvtmle10","mse_dcvtmle20"),#
+                                rm_last = FALSE,#
+                                est_label = paste0("CVTMLE ", c(1,5,10,20)," repeats"),#
+                                ylim = c(0.0001,0.01), yaxis_label = "Variance")
+make_side_by_side_bar_plots <- function(glm_rslt, randomforest_rslt,#
                                             est, est_labels, rm_last = TRUE,#
                                             yaxis_label, #
                                             xaxis_label = "Number CV Folds",#
@@ -291,519 +1113,39 @@ load("allOut_cvtn.RData")
           axis(side = 2, labels = FALSE)#
         }#
       }#
-    }#
-#
-    library(RColorBrewer)#
-    my_col <- brewer.pallette(5,"Grays")
-my_col <- brewer.pal(5,"Grays")
-my_col <- brewer.pal(5,"Greys")
-# mse#
+    }
+make_side_by_side_bar_plots(glm_rslt, randomforest_rslt, #
+                                est = c("mse_dcvtmle1","mse_dcvtmle5",#
+                                        "mse_dcvtmle10","mse_dcvtmle20"),#
+                                rm_last = FALSE,#
+                                est_label = paste0("CVTMLE ", c(1,5,10,20)," repeats"),#
+                                ylim = c(0.0001,0.01), yaxis_label = "Variance")
+make_side_by_side_bar_plots(glm_rslt, randomforest_rslt, #
+                                est = c("bias_dcvtmle1","bias_dcvtmle5",#
+                                        "bias_dcvtmle10","bias_dcvtmle20"),#
+                                rm_last = FALSE,#
+                                est_label = paste0("CVTMLE ", c(1,5,10,20)," repeats"),#
+                                ylim = c(0.00001,100), yaxis_label = "Absolute bias")
+# variance by CV Repeats for CVTMLE#
     make_side_by_side_bar_plots(glm_rslt, randomforest_rslt, #
-                                est = c("mse_dcvtmle1","mse_donestep1",#
-                                        "mse_emp1","mse_bootstrap"),#
-                                est_label = c("CVTMLE", "CVOS","Empirical","Bootstrap"),#
-                                ylim = c(0.0001,100), yaxis_label = "Mean squared-error",#
-                                col = my_col[sort(rep(1:4,4))])
-?barplot
-make_side_by_side_bar_plots <- function(glm_rslt, randomforest_rslt,#
-                                            est, est_labels, rm_last = TRUE,#
-                                            yaxis_label, #
-                                            xaxis_label = "Number CV Folds",#
-                                            absolute_val = TRUE, ... ){#
-      layout(matrix(1:8, nrow = 2, ncol = 4,  byrow = TRUE))#
-      par(mar = c(1.6, 0.6, 0.6, 0.6), mgp = c(2.1, 0.5, 0),#
-          oma = c(2.1, 5.1, 2.1, 2.1))#
-      for(n in c(50, 100, 250, 500)){#
-        tmp <- glm_rslt[glm_rslt$n == n, ]#
-        tmp5 <- tmp[tmp$K == 5,]#
-        tmp10 <- tmp[tmp$K == 10,]#
-        tmp20 <- tmp[tmp$K == 20,]#
-        tmp40 <- tmp[tmp$K == 40,]#
-        # est <- c("mse_dcvtmle1","mse_donestep1","mse_emp1","mse_bootstrap")#
-        grbg <- as.matrix(rbind(tmp5[,est],tmp10[,est],tmp20[,est],tmp40[,est]))#
-        if(absolute_val){#
-          grbg <- abs(grbg)#
-        }#
-        if(rm_last){#
-          grbg[2:4,4] <- NA#
-        }#
-        row.names(grbg) <- c(5,10,20,40)#
-        if(n == 50){leg.text <- est_labels}else{leg.text <- FALSE}#
-        tmp <- barplot(grbg, legend.text = leg.text, args.legend = list(x = "topright"),#
-          beside=TRUE, log = "y", yaxt = "n", names.arg = "", ... )#
-        if(n == 50){#
-          axis(side = 2)#
-          mtext(outer = FALSE, side = 2, line = 2, yaxis_label, cex = 0.75)#
-          mtext(outer = FALSE, side = 2, line = 4, "Logistic Regression", cex = 1)#
-        }else{#
-          axis(side = 2, labels = FALSE)#
-        }#
-        mtext(outer = FALSE, side = 3, line = 0.5, paste0("n = ", n))#
-      }#
-      for(n in c(50, 100, 250, 500)){#
-        tmp <- randomforest_rslt[randomforest_rslt$n == n, ]#
-        tmp5 <- tmp[tmp$K == 5,]#
-        tmp10 <- tmp[tmp$K == 10,]#
-        tmp20 <- tmp[tmp$K == 20,]#
-        tmp40 <- tmp[tmp$K == 40,]#
-        # est <- c("mse_dcvtmle1","mse_donestep1","mse_emp1","mse_bootstrap")#
-        grbg <- as.matrix(rbind(tmp5[,est],tmp10[,est],tmp20[,est],tmp40[,est]))#
-        if(absolute_val){#
-          grbg <- abs(grbg)#
-        }#
-        if(rm_last){#
-          grbg[2:4,4] <- NA#
-        }#
-        row.names(grbg) <- c(5,10,20,40)#
-        tmp <- barplot(grbg,  beside=TRUE, log = "y", yaxt = "n", names.arg = "", ...)#
-        mtext(side = 1, outer = FALSE, line = 2, xaxis_label, cex =0.75)#
-        if(n == 50){#
-          axis(side = 2)#
-          mtext(outer = FALSE, side = 2, line = 2, yaxis_label, cex = 0.75)#
-          mtext(outer = FALSE, side = 2, line = 4, "Random Forest", cex = 1)#
-        }else{#
-          axis(side = 2, labels = FALSE)#
-        }#
-      }#
-    }
-debug(make_side_by_side_bar_plots)
+                                est = c("var_dcvtmle1","var_dcvtmle5",#
+                                        "var_dcvtmle10","var_dcvtmle20"),#
+                                rm_last = FALSE,#
+                                est_label = paste0("CVTMLE ", c(1,5,10,20)," repeats"),#
+                                ylim = c(0.0001,0.01), yaxis_label = "Variance")
 make_side_by_side_bar_plots(glm_rslt, randomforest_rslt, #
-                                est = c("mse_dcvtmle1","mse_donestep1",#
-                                        "mse_emp1","mse_bootstrap"),#
-                                est_label = c("CVTMLE", "CVOS","Empirical","Bootstrap"),#
-                                ylim = c(0.0001,100), yaxis_label = "Mean squared-error",#
-                                col = my_col[sort(rep(1:4,4))])
-make_side_by_side_bar_plots <- function(glm_rslt, randomforest_rslt,#
-                                            est, est_labels, rm_last = TRUE,#
-                                            yaxis_label, #
-                                            xaxis_label = "Number CV Folds",#
-                                            absolute_val = TRUE, ... ){#
-      layout(matrix(1:8, nrow = 2, ncol = 4,  byrow = TRUE))#
-      par(mar = c(1.6, 0.6, 0.6, 0.6), mgp = c(2.1, 0.5, 0),#
-          oma = c(2.1, 5.1, 2.1, 2.1))#
-      for(n in c(50, 100, 250, 500)){#
-        tmp <- glm_rslt[glm_rslt$n == n, ]#
-        tmp5 <- tmp[tmp$K == 5,]#
-        tmp10 <- tmp[tmp$K == 10,]#
-        tmp20 <- tmp[tmp$K == 20,]#
-        tmp40 <- tmp[tmp$K == 40,]#
-        # est <- c("mse_dcvtmle1","mse_donestep1","mse_emp1","mse_bootstrap")#
-        grbg <- as.matrix(rbind(tmp5[,est],tmp10[,est],tmp20[,est],tmp40[,est]))#
-        if(absolute_val){#
-          grbg <- abs(grbg)#
-        }#
-        if(rm_last){#
-          grbg[2:4,4] <- NA#
-        }#
-        row.names(grbg) <- c(5,10,20,40)#
-        if(n == 50){leg.text <- est_labels}else{leg.text <- FALSE}#
-        tmp <- barplot(grbg, legend.text = leg.text, args.legend = list(x = "topright"),#
-          beside=TRUE, log = "y", yaxt = "n", names.arg = rep("",4), ... )#
-        if(n == 50){#
-          axis(side = 2)#
-          mtext(outer = FALSE, side = 2, line = 2, yaxis_label, cex = 0.75)#
-          mtext(outer = FALSE, side = 2, line = 4, "Logistic Regression", cex = 1)#
-        }else{#
-          axis(side = 2, labels = FALSE)#
-        }#
-        mtext(outer = FALSE, side = 3, line = 0.5, paste0("n = ", n))#
-      }#
-      for(n in c(50, 100, 250, 500)){#
-        tmp <- randomforest_rslt[randomforest_rslt$n == n, ]#
-        tmp5 <- tmp[tmp$K == 5,]#
-        tmp10 <- tmp[tmp$K == 10,]#
-        tmp20 <- tmp[tmp$K == 20,]#
-        tmp40 <- tmp[tmp$K == 40,]#
-        # est <- c("mse_dcvtmle1","mse_donestep1","mse_emp1","mse_bootstrap")#
-        grbg <- as.matrix(rbind(tmp5[,est],tmp10[,est],tmp20[,est],tmp40[,est]))#
-        if(absolute_val){#
-          grbg <- abs(grbg)#
-        }#
-        if(rm_last){#
-          grbg[2:4,4] <- NA#
-        }#
-        row.names(grbg) <- c(5,10,20,40)#
-        tmp <- barplot(grbg,  beside=TRUE, log = "y", yaxt = "n", names.arg = rep("",4), ...)#
-        mtext(side = 1, outer = FALSE, line = 2, xaxis_label, cex =0.75)#
-        if(n == 50){#
-          axis(side = 2)#
-          mtext(outer = FALSE, side = 2, line = 2, yaxis_label, cex = 0.75)#
-          mtext(outer = FALSE, side = 2, line = 4, "Random Forest", cex = 1)#
-        }else{#
-          axis(side = 2, labels = FALSE)#
-        }#
-      }#
-    }
-debug(make_side_by_side_bar_plots)#
+                                est = c("mse_dcvtmle1","mse_dcvtmle5",#
+                                        "mse_dcvtmle10","mse_dcvtmle20"),#
+                                rm_last = FALSE,#
+                                est_label = paste0("CVTMLE ", c(1,5,10,20)," repeats"),#
+                                ylim = c(0.0001,0.01), yaxis_label = "Variance")
+# bias by CV Repeats for CVTMLE#
     make_side_by_side_bar_plots(glm_rslt, randomforest_rslt, #
-                                est = c("mse_dcvtmle1","mse_donestep1",#
-                                        "mse_emp1","mse_bootstrap"),#
-                                est_label = c("CVTMLE", "CVOS","Empirical","Bootstrap"),#
-                                ylim = c(0.0001,100), yaxis_label = "Mean squared-error",#
-                                col = my_col[sort(rep(1:4,4))])
-names(tmp)
-class(tmp)
-tmp
-abline(v = tmp[,1])
-?par
-?mtext
-mtext(side = 1, outer = FALSE, line = 0, text = c(5,10,20,40), cex =0.5, #
-              pos = 4, las = 2, at = c(tmp[,1],tmp[,2],tmp[,3])#
-        if(n == 50){#
-          axis(side = 2)#
-          mtext(outer = FALSE, side = 2, line = 2, yaxis_label, cex = 0.75)#
-          mtext(outer = FALSE, side = 2, line = 4, "Random Forest", cex = 1)#
-        }else{#
-          axis(side = 2, labels = FALSE)#
-        }#
-      }
-mtext(side = 1, outer = FALSE, line = 0, text = c(5,10,20,40), cex =0.5, #
-              pos = 4, las = 2, at = c(tmp[,1],tmp[,2],tmp[,3]))
-mtext(side = 1, outer = FALSE, line = 0, text = c(5,10,20,40), cex =0.5, #
-              las = 2, at = c(tmp[,1],tmp[,2],tmp[,3]))
-mtext(side = 1, outer = FALSE, line = 0.02, text = c(5,10,20,40), cex =0.5, #
-              las = 2, at = c(tmp[,1],tmp[,2],tmp[,3]))
-Q
-make_side_by_side_bar_plots <- function(glm_rslt, randomforest_rslt,#
-                                            est, est_labels, rm_last = TRUE,#
-                                            yaxis_label, #
-                                            xaxis_label = "Number CV Folds",#
-                                            absolute_val = TRUE, ... ){#
-      layout(matrix(1:8, nrow = 2, ncol = 4,  byrow = TRUE))#
-      par(mar = c(1.6, 0.6, 0.6, 0.6), mgp = c(2.1, 0.5, 0),#
-          oma = c(2.1, 5.1, 2.1, 2.1))#
-      for(n in c(50, 100, 250, 500)){#
-        tmp <- glm_rslt[glm_rslt$n == n, ]#
-        tmp5 <- tmp[tmp$K == 5,]#
-        tmp10 <- tmp[tmp$K == 10,]#
-        tmp20 <- tmp[tmp$K == 20,]#
-        tmp40 <- tmp[tmp$K == 40,]#
-        # est <- c("mse_dcvtmle1","mse_donestep1","mse_emp1","mse_bootstrap")#
-        grbg <- as.matrix(rbind(tmp5[,est],tmp10[,est],tmp20[,est],tmp40[,est]))#
-        if(absolute_val){#
-          grbg <- abs(grbg)#
-        }#
-        if(rm_last){#
-          grbg[2:4,4] <- NA#
-        }#
-        row.names(grbg) <- c(5,10,20,40)#
-        if(n == 50){leg.text <- est_labels}else{leg.text <- FALSE}#
-        tmp <- barplot(grbg, legend.text = leg.text, args.legend = list(x = "topright"),#
-          beside=TRUE, log = "y", yaxt = "n", names.arg = rep("",4), ... )#
-        if(n == 50){#
-          axis(side = 2)#
-          mtext(outer = FALSE, side = 2, line = 2, yaxis_label, cex = 0.75)#
-          mtext(outer = FALSE, side = 2, line = 4, "Logistic Regression", cex = 1)#
-        }else{#
-          axis(side = 2, labels = FALSE)#
-        }#
-        mtext(outer = FALSE, side = 3, line = 0.5, paste0("n = ", n))#
-      }#
-      for(n in c(50, 100, 250, 500)){#
-        tmp <- randomforest_rslt[randomforest_rslt$n == n, ]#
-        tmp5 <- tmp[tmp$K == 5,]#
-        tmp10 <- tmp[tmp$K == 10,]#
-        tmp20 <- tmp[tmp$K == 20,]#
-        tmp40 <- tmp[tmp$K == 40,]#
-        # est <- c("mse_dcvtmle1","mse_donestep1","mse_emp1","mse_bootstrap")#
-        grbg <- as.matrix(rbind(tmp5[,est],tmp10[,est],tmp20[,est],tmp40[,est]))#
-        if(absolute_val){#
-          grbg <- abs(grbg)#
-        }#
-        if(rm_last){#
-          grbg[2:4,4] <- NA#
-        }#
-        row.names(grbg) <- c(5,10,20,40)#
-        tmp <- barplot(grbg,  beside=TRUE, log = "y", yaxt = "n", names.arg = rep("",4), ...)#
-        mtext(side = 1, outer = FALSE, line = 0.02, text = c(5,10,20,40), cex =0.5, #
-              las = 2, at = c(tmp[,1],tmp[,2],tmp[,3]))#
-        # mtext(side = 1, outer = FALSE, line = 0.02, text = c(5,10,20,40), cex =0.5, #
-        #       at = c(mean(tmp[2:3,1]),mean(tmp[2:3,2]),mean(tmp[2:3,3])))#
-        if(n == 50){#
-          axis(side = 2)#
-          mtext(outer = FALSE, side = 2, line = 2, yaxis_label, cex = 0.75)#
-          mtext(outer = FALSE, side = 2, line = 4, "Random Forest", cex = 1)#
-        }else{#
-          axis(side = 2, labels = FALSE)#
-        }#
-      }#
-    }
-make_side_by_side_bar_plots(glm_rslt, randomforest_rslt, #
-                                est = c("bias_dcvtmle1","bias_donestep1",#
-                                        "bias_emp1","bias_bootstrap"),#
-                                est_label = c("CVTMLE", "CVOS","Empirical","Bootstrap"),#
-                                ylim = c(0.0001,100), yaxis_label = "Absolute Bias",#
-                                col = my_col[sort(rep(1:4,4))])
-make_side_by_side_bar_plots <- function(glm_rslt, randomforest_rslt,#
-                                            est, est_labels, rm_last = TRUE,#
-                                            yaxis_label, #
-                                            xaxis_label = "Number CV Folds",#
-                                            absolute_val = TRUE, ... ){#
-      layout(matrix(1:8, nrow = 2, ncol = 4,  byrow = TRUE))#
-      par(mar = c(1.6, 0.6, 1.6, 0.6), mgp = c(2.1, 0.5, 0),#
-          oma = c(2.1, 5.1, 2.1, 2.1))#
-      for(n in c(50, 100, 250, 500)){#
-        tmp <- glm_rslt[glm_rslt$n == n, ]#
-        tmp5 <- tmp[tmp$K == 5,]#
-        tmp10 <- tmp[tmp$K == 10,]#
-        tmp20 <- tmp[tmp$K == 20,]#
-        tmp40 <- tmp[tmp$K == 40,]#
-        # est <- c("mse_dcvtmle1","mse_donestep1","mse_emp1","mse_bootstrap")#
-        grbg <- as.matrix(rbind(tmp5[,est],tmp10[,est],tmp20[,est],tmp40[,est]))#
-        if(absolute_val){#
-          grbg <- abs(grbg)#
-        }#
-        if(rm_last){#
-          grbg[2:4,4] <- NA#
-        }#
-        row.names(grbg) <- c(5,10,20,40)#
-        if(n == 50){leg.text <- est_labels}else{leg.text <- FALSE}#
-        tmp <- barplot(grbg, legend.text = leg.text, args.legend = list(x = "topright"),#
-          beside=TRUE, log = "y", yaxt = "n", names.arg = rep("",4), ... )#
-        if(n == 50){#
-          axis(side = 2)#
-          mtext(outer = FALSE, side = 2, line = 2, yaxis_label, cex = 0.75)#
-          mtext(outer = FALSE, side = 2, line = 4, "Logistic Regression", cex = 1)#
-        }else{#
-          axis(side = 2, labels = FALSE)#
-        }#
-        mtext(outer = FALSE, side = 3, line = 0.5, paste0("n = ", n))#
-      }#
-      for(n in c(50, 100, 250, 500)){#
-        tmp <- randomforest_rslt[randomforest_rslt$n == n, ]#
-        tmp5 <- tmp[tmp$K == 5,]#
-        tmp10 <- tmp[tmp$K == 10,]#
-        tmp20 <- tmp[tmp$K == 20,]#
-        tmp40 <- tmp[tmp$K == 40,]#
-        # est <- c("mse_dcvtmle1","mse_donestep1","mse_emp1","mse_bootstrap")#
-        grbg <- as.matrix(rbind(tmp5[,est],tmp10[,est],tmp20[,est],tmp40[,est]))#
-        if(absolute_val){#
-          grbg <- abs(grbg)#
-        }#
-        if(rm_last){#
-          grbg[2:4,4] <- NA#
-        }#
-        row.names(grbg) <- c(5,10,20,40)#
-        tmp <- barplot(grbg,  beside=TRUE, log = "y", yaxt = "n", names.arg = rep("",4), ...)#
-        mtext(side = 1, outer = FALSE, line = 0.02, text = c(5,10,20,40), cex =0.5, #
-              at = c(tmp[,1],tmp[,2],tmp[,3]))#
-        # mtext(side = 1, outer = FALSE, line = 0.02, text = c(5,10,20,40), cex =0.5, #
-        #       at = c(mean(tmp[2:3,1]),mean(tmp[2:3,2]),mean(tmp[2:3,3])))#
-        if(n == 50){#
-          axis(side = 2)#
-          mtext(outer = FALSE, side = 2, line = 2, yaxis_label, cex = 0.75)#
-          mtext(outer = FALSE, side = 2, line = 4, "Random Forest", cex = 1)#
-        }else{#
-          axis(side = 2, labels = FALSE)#
-        }#
-      }#
-    }
-make_side_by_side_bar_plots(glm_rslt, randomforest_rslt, #
-                                est = c("bias_dcvtmle1","bias_donestep1",#
-                                        "bias_emp1","bias_bootstrap"),#
-                                est_label = c("CVTMLE", "CVOS","Empirical","Bootstrap"),#
-                                ylim = c(0.0001,100), yaxis_label = "Absolute Bias",#
-                                col = my_col[sort(rep(1:4,4))])
-sort(rep(1:4,4)
-make_side_by_side_bar_plots <- function(glm_rslt, randomforest_rslt,#
-                                            est, est_labels, rm_last = TRUE,#
-                                            yaxis_label, #
-                                            xaxis_label = "Number CV Folds",#
-                                            absolute_val = TRUE, ... ){#
-      layout(matrix(1:8, nrow = 2, ncol = 4,  byrow = TRUE))#
-      par(mar = c(1.6, 0.6, 1.6, 0.6), mgp = c(2.1, 0.5, 0),#
-          oma = c(2.1, 5.1, 2.1, 2.1))#
-      for(n in c(50, 100, 250, 500)){#
-        tmp <- glm_rslt[glm_rslt$n == n, ]#
-        tmp5 <- tmp[tmp$K == 5,]#
-        tmp10 <- tmp[tmp$K == 10,]#
-        tmp20 <- tmp[tmp$K == 20,]#
-        tmp40 <- tmp[tmp$K == 40,]#
-        # est <- c("mse_dcvtmle1","mse_donestep1","mse_emp1","mse_bootstrap")#
-        grbg <- as.matrix(rbind(tmp5[,est],tmp10[,est],tmp20[,est],tmp40[,est]))#
-        if(absolute_val){#
-          grbg <- abs(grbg)#
-        }#
-        if(rm_last){#
-          grbg[2:4,4] <- NA#
-        }#
-        row.names(grbg) <- c(5,10,20,40)#
-        if(n == 50){leg.text <- est_labels}else{leg.text <- FALSE}#
-        tmp <- barplot(grbg, legend.text = leg.text, args.legend = list(x = "topright"),#
-          beside=TRUE, log = "y", yaxt = "n", names.arg = rep("",4), ... )#
-        mtext(side  = 1, outer = FALSE, line = 0.02, text = c(5,10,20,40), cex =0.5, #
-        at = c(tmp[,1],tmp[,2],tmp[,3]))#
-        if(n == 50){#
-          axis(side = 2)#
-          mtext(outer = FALSE, side = 2, line = 2, yaxis_label, cex = 0.75)#
-          mtext(outer = FALSE, side = 2, line = 4, "Logistic Regression", cex = 1)#
-        }else{#
-          axis(side = 2, labels = FALSE)#
-        }#
-        mtext(outer = FALSE, side = 3, line = 0.5, paste0("n = ", n))#
-      }#
-      for(n in c(50, 100, 250, 500)){#
-        tmp <- randomforest_rslt[randomforest_rslt$n == n, ]#
-        tmp5 <- tmp[tmp$K == 5,]#
-        tmp10 <- tmp[tmp$K == 10,]#
-        tmp20 <- tmp[tmp$K == 20,]#
-        tmp40 <- tmp[tmp$K == 40,]#
-        # est <- c("mse_dcvtmle1","mse_donestep1","mse_emp1","mse_bootstrap")#
-        grbg <- as.matrix(rbind(tmp5[,est],tmp10[,est],tmp20[,est],tmp40[,est]))#
-        if(absolute_val){#
-          grbg <- abs(grbg)#
-        }#
-        if(rm_last){#
-          grbg[2:4,4] <- NA#
-        }#
-        row.names(grbg) <- c(5,10,20,40)#
-        tmp <- barplot(grbg,  beside=TRUE, log = "y", yaxt = "n", names.arg = rep("",4), ...)#
-        mtext(side = 1, outer = FALSE, line = 0.02, text = c(5,10,20,40), cex =0.5, #
-              at = c(tmp[,1],tmp[,2],tmp[,3]))#
-        # mtext(side = 1, outer = FALSE, line = 0.02, text = c(5,10,20,40), cex =0.5, #
-        #       at = c(mean(tmp[2:3,1]),mean(tmp[2:3,2]),mean(tmp[2:3,3])))#
-        if(n == 50){#
-          axis(side = 2)#
-          mtext(outer = FALSE, side = 2, line = 2, yaxis_label, cex = 0.75)#
-          mtext(outer = FALSE, side = 2, line = 4, "Random Forest", cex = 1)#
-        }else{#
-          axis(side = 2, labels = FALSE)#
-        }#
-      }#
-    }
-make_side_by_side_bar_plots <- function(glm_rslt, randomforest_rslt,#
-                                            est, est_labels, rm_last = TRUE,#
-                                            yaxis_label, #
-                                            xaxis_label = "Number CV Folds",#
-                                            absolute_val = TRUE, ... ){#
-      layout(matrix(1:8, nrow = 2, ncol = 4,  byrow = TRUE))#
-      par(mar = c(1.6, 0.6, 1.6, 0.6), mgp = c(2.1, 0.5, 0),#
-          oma = c(2.1, 5.1, 2.1, 2.1))#
-      for(n in c(50, 100, 250, 500)){#
-        tmp <- glm_rslt[glm_rslt$n == n, ]#
-        tmp5 <- tmp[tmp$K == 5,]#
-        tmp10 <- tmp[tmp$K == 10,]#
-        tmp20 <- tmp[tmp$K == 20,]#
-        tmp40 <- tmp[tmp$K == 40,]#
-        # est <- c("mse_dcvtmle1","mse_donestep1","mse_emp1","mse_bootstrap")#
-        grbg <- as.matrix(rbind(tmp5[,est],tmp10[,est],tmp20[,est],tmp40[,est]))#
-        if(absolute_val){#
-          grbg <- abs(grbg)#
-        }#
-        if(rm_last){#
-          grbg[2:4,4] <- NA#
-        }#
-        row.names(grbg) <- c(5,10,20,40)#
-        if(n == 50){leg.text <- est_labels}else{leg.text <- FALSE}#
-        tmp <- barplot(grbg, legend.text = leg.text, args.legend = list(x = "topright"),#
-          beside=TRUE, log = "y", yaxt = "n", names.arg = rep("",4), ... )#
-          mtext(side = 1, outer = FALSE, line = 0.02, text = c(5,10,20,40), cex =0.5, #
-        at = c(tmp[,1],tmp[,2],tmp[,3]))#
-        if(n == 50){#
-          axis(side = 2)#
-          mtext(outer = FALSE, side = 2, line = 2, yaxis_label, cex = 0.75)#
-          mtext(outer = FALSE, side = 2, line = 4, "Logistic Regression", cex = 1)#
-        }else{#
-          axis(side = 2, labels = FALSE)#
-        }#
-        mtext(outer = FALSE, side = 3, line = 0.5, paste0("n = ", n))#
-      }#
-      for(n in c(50, 100, 250, 500)){#
-        tmp <- randomforest_rslt[randomforest_rslt$n == n, ]#
-        tmp5 <- tmp[tmp$K == 5,]#
-        tmp10 <- tmp[tmp$K == 10,]#
-        tmp20 <- tmp[tmp$K == 20,]#
-        tmp40 <- tmp[tmp$K == 40,]#
-        # est <- c("mse_dcvtmle1","mse_donestep1","mse_emp1","mse_bootstrap")#
-        grbg <- as.matrix(rbind(tmp5[,est],tmp10[,est],tmp20[,est],tmp40[,est]))#
-        if(absolute_val){#
-          grbg <- abs(grbg)#
-        }#
-        if(rm_last){#
-          grbg[2:4,4] <- NA#
-        }#
-        row.names(grbg) <- c(5,10,20,40)#
-        tmp <- barplot(grbg,  beside=TRUE, log = "y", yaxt = "n", names.arg = rep("",4), ...)#
-        mtext(side = 1, outer = FALSE, line = 0.02, text = c(5,10,20,40), cex =0.5, #
-              at = c(tmp[,1],tmp[,2],tmp[,3]))#
-        # mtext(side = 1, outer = FALSE, line = 0.02, text = c(5,10,20,40), cex =0.5, #
-        #       at = c(mean(tmp[2:3,1]),mean(tmp[2:3,2]),mean(tmp[2:3,3])))#
-        if(n == 50){#
-          axis(side = 2)#
-          mtext(outer = FALSE, side = 2, line = 2, yaxis_label, cex = 0.75)#
-          mtext(outer = FALSE, side = 2, line = 4, "Random Forest", cex = 1)#
-        }else{#
-          axis(side = 2, labels = FALSE)#
-        }#
-      }#
-    }
-make_side_by_side_bar_plots <- function(glm_rslt, randomforest_rslt,#
-                                            est, est_labels, rm_last = TRUE,#
-                                            yaxis_label, #
-                                            xaxis_label = "Number CV Folds",#
-                                            absolute_val = TRUE, ... ){#
-      layout(matrix(1:8, nrow = 2, ncol = 4,  byrow = TRUE))#
-      par(mar = c(1.6, 0.6, 1.6, 0.6), mgp = c(2.1, 0.5, 0),#
-          oma = c(2.1, 5.1, 2.1, 2.1))#
-      for(n in c(50, 100, 250, 500)){#
-        tmp <- glm_rslt[glm_rslt$n == n, ]#
-        tmp5 <- tmp[tmp$K == 5,]#
-        tmp10 <- tmp[tmp$K == 10,]#
-        tmp20 <- tmp[tmp$K == 20,]#
-        tmp40 <- tmp[tmp$K == 40,]#
-        # est <- c("mse_dcvtmle1","mse_donestep1","mse_emp1","mse_bootstrap")#
-        grbg <- as.matrix(rbind(tmp5[,est],tmp10[,est],tmp20[,est],tmp40[,est]))#
-        if(absolute_val){#
-          grbg <- abs(grbg)#
-        }#
-        if(rm_last){#
-          grbg[2:4,4] <- NA#
-        }#
-        row.names(grbg) <- c(5,10,20,40)#
-        if(n == 50){leg.text <- est_labels}else{leg.text <- FALSE}#
-        tmp <- barplot(grbg, legend.text = leg.text, args.legend = list(x = "topright",#
-                                                                        col = col),#
-          beside=TRUE, log = "y", yaxt = "n", names.arg = rep("",4), ... )#
-          mtext(side = 1, outer = FALSE, line = 0.02, text = c(5,10,20,40), cex =0.5, #
-        at = c(tmp[,1],tmp[,2],tmp[,3]))#
-        if(n == 50){#
-          axis(side = 2)#
-          mtext(outer = FALSE, side = 2, line = 2, yaxis_label, cex = 0.75)#
-          mtext(outer = FALSE, side = 2, line = 4, "Logistic Regression", cex = 1)#
-        }else{#
-          axis(side = 2, labels = FALSE)#
-        }#
-        mtext(outer = FALSE, side = 3, line = 0.5, paste0("n = ", n))#
-      }#
-      for(n in c(50, 100, 250, 500)){#
-        tmp <- randomforest_rslt[randomforest_rslt$n == n, ]#
-        tmp5 <- tmp[tmp$K == 5,]#
-        tmp10 <- tmp[tmp$K == 10,]#
-        tmp20 <- tmp[tmp$K == 20,]#
-        tmp40 <- tmp[tmp$K == 40,]#
-        # est <- c("mse_dcvtmle1","mse_donestep1","mse_emp1","mse_bootstrap")#
-        grbg <- as.matrix(rbind(tmp5[,est],tmp10[,est],tmp20[,est],tmp40[,est]))#
-        if(absolute_val){#
-          grbg <- abs(grbg)#
-        }#
-        if(rm_last){#
-          grbg[2:4,4] <- NA#
-        }#
-        row.names(grbg) <- c(5,10,20,40)#
-        tmp <- barplot(grbg,  beside=TRUE, log = "y", yaxt = "n", names.arg = rep("",4), ...)#
-        mtext(side = 1, outer = FALSE, line = 0.02, text = c(5,10,20,40), cex =0.5, #
-              at = c(tmp[,1],tmp[,2],tmp[,3]))#
-        # mtext(side = 1, outer = FALSE, line = 0.02, text = c(5,10,20,40), cex =0.5, #
-        #       at = c(mean(tmp[2:3,1]),mean(tmp[2:3,2]),mean(tmp[2:3,3])))#
-        if(n == 50){#
-          axis(side = 2)#
-          mtext(outer = FALSE, side = 2, line = 2, yaxis_label, cex = 0.75)#
-          mtext(outer = FALSE, side = 2, line = 4, "Random Forest", cex = 1)#
-        }else{#
-          axis(side = 2, labels = FALSE)#
-        }#
-      }#
-    }
+                                est = c("bias_dcvtmle1","bias_dcvtmle5",#
+                                        "bias_dcvtmle10","bias_dcvtmle20"),#
+                                rm_last = FALSE,#
+                                est_label = paste0("CVTMLE ", c(1,5,10,20)," repeats"),#
+                                ylim = c(0.00001,100), yaxis_label = "Absolute bias")
 # bias#
     make_side_by_side_bar_plots(glm_rslt, randomforest_rslt, #
                                 est = c("bias_dcvtmle1","bias_donestep1",#
@@ -811,744 +1153,25 @@ make_side_by_side_bar_plots <- function(glm_rslt, randomforest_rslt,#
                                 est_label = c("CVTMLE", "CVOS","Empirical","Bootstrap"),#
                                 ylim = c(0.0001,100), yaxis_label = "Absolute Bias",#
                                 col = my_col[sort(rep(1:4,4))])
-?barplot
-make_side_by_side_bar_plots <- function(glm_rslt, randomforest_rslt,#
-                                            est, est_labels, rm_last = TRUE,#
-                                            yaxis_label, #
-                                            xaxis_label = "Number CV Folds",#
-                                            absolute_val = TRUE, ... ){#
-      layout(matrix(1:8, nrow = 2, ncol = 4,  byrow = TRUE))#
-      par(mar = c(1.6, 0.6, 1.6, 0.6), mgp = c(2.1, 0.5, 0),#
-          oma = c(2.1, 5.1, 2.1, 2.1))#
-      for(n in c(50, 100, 250, 500)){#
-        tmp <- glm_rslt[glm_rslt$n == n, ]#
-        tmp5 <- tmp[tmp$K == 5,]#
-        tmp10 <- tmp[tmp$K == 10,]#
-        tmp20 <- tmp[tmp$K == 20,]#
-        tmp40 <- tmp[tmp$K == 40,]#
-        # est <- c("mse_dcvtmle1","mse_donestep1","mse_emp1","mse_bootstrap")#
-        grbg <- as.matrix(rbind(tmp5[,est],tmp10[,est],tmp20[,est],tmp40[,est]))#
-        if(absolute_val){#
-          grbg <- abs(grbg)#
-        }#
-        if(rm_last){#
-          grbg[2:4,4] <- NA#
-        }#
-        row.names(grbg) <- c(5,10,20,40)#
-        if(n == 50){leg.text <- est_labels}else{leg.text <- FALSE}#
-        tmp <- barplot(grbg, legend.text = NULL, #
-          beside=TRUE, log = "y", yaxt = "n", names.arg = rep("",4), ... )#
-          mtext(side = 1, outer = FALSE, line = 0.02, text = c(5,10,20,40), cex =0.5, #
-        at = c(tmp[,1],tmp[,2],tmp[,3]))#
-          legend(x = "topright", col = unqiue(col), legend = leg.text)#
-        if(n == 50){#
-          axis(side = 2)#
-          mtext(outer = FALSE, side = 2, line = 2, yaxis_label, cex = 0.75)#
-          mtext(outer = FALSE, side = 2, line = 4, "Logistic Regression", cex = 1)#
-        }else{#
-          axis(side = 2, labels = FALSE)#
-        }#
-        mtext(outer = FALSE, side = 3, line = 0.5, paste0("n = ", n))#
-      }#
-      for(n in c(50, 100, 250, 500)){#
-        tmp <- randomforest_rslt[randomforest_rslt$n == n, ]#
-        tmp5 <- tmp[tmp$K == 5,]#
-        tmp10 <- tmp[tmp$K == 10,]#
-        tmp20 <- tmp[tmp$K == 20,]#
-        tmp40 <- tmp[tmp$K == 40,]#
-        # est <- c("mse_dcvtmle1","mse_donestep1","mse_emp1","mse_bootstrap")#
-        grbg <- as.matrix(rbind(tmp5[,est],tmp10[,est],tmp20[,est],tmp40[,est]))#
-        if(absolute_val){#
-          grbg <- abs(grbg)#
-        }#
-        if(rm_last){#
-          grbg[2:4,4] <- NA#
-        }#
-        row.names(grbg) <- c(5,10,20,40)#
-        tmp <- barplot(grbg,  beside=TRUE, log = "y", yaxt = "n", names.arg = rep("",4), ...)#
-        mtext(side = 1, outer = FALSE, line = 0.02, text = c(5,10,20,40), cex =0.5, #
-              at = c(tmp[,1],tmp[,2],tmp[,3]))#
-        # mtext(side = 1, outer = FALSE, line = 0.02, text = c(5,10,20,40), cex =0.5, #
-        #       at = c(mean(tmp[2:3,1]),mean(tmp[2:3,2]),mean(tmp[2:3,3])))#
-        if(n == 50){#
-          axis(side = 2)#
-          mtext(outer = FALSE, side = 2, line = 2, yaxis_label, cex = 0.75)#
-          mtext(outer = FALSE, side = 2, line = 4, "Random Forest", cex = 1)#
-        }else{#
-          axis(side = 2, labels = FALSE)#
-        }#
-      }#
-    }#
-#
-    library(RColorBrewer)#
-    my_col <- brewer.pal(5,"Greys")#
-    # bias#
-    make_side_by_side_bar_plots(glm_rslt, randomforest_rslt, #
-                                est = c("bias_dcvtmle1","bias_donestep1",#
-                                        "bias_emp1","bias_bootstrap"),#
+make_side_by_side_bar_plots(glm_rslt, randomforest_rslt, #
+                                est = c("var_dcvtmle1","var_donestep1",#
+                                        "var_emp1","var_bootstrap"),#
                                 est_label = c("CVTMLE", "CVOS","Empirical","Bootstrap"),#
-                                ylim = c(0.0001,100), yaxis_label = "Absolute Bias",#
-                                col = my_col[sort(rep(1:4,4))])#
-    # variance
-make_side_by_side_bar_plots <- function(glm_rslt, randomforest_rslt,#
-                                            est, est_labels, rm_last = TRUE,#
-                                            yaxis_label, #
-                                            xaxis_label = "Number CV Folds",#
-                                            absolute_val = TRUE, ... ){#
-      layout(matrix(1:8, nrow = 2, ncol = 4,  byrow = TRUE))#
-      par(mar = c(1.6, 0.6, 1.6, 0.6), mgp = c(2.1, 0.5, 0),#
-          oma = c(2.1, 5.1, 2.1, 2.1))#
-      for(n in c(50, 100, 250, 500)){#
-        tmp <- glm_rslt[glm_rslt$n == n, ]#
-        tmp5 <- tmp[tmp$K == 5,]#
-        tmp10 <- tmp[tmp$K == 10,]#
-        tmp20 <- tmp[tmp$K == 20,]#
-        tmp40 <- tmp[tmp$K == 40,]#
-        # est <- c("mse_dcvtmle1","mse_donestep1","mse_emp1","mse_bootstrap")#
-        grbg <- as.matrix(rbind(tmp5[,est],tmp10[,est],tmp20[,est],tmp40[,est]))#
-        if(absolute_val){#
-          grbg <- abs(grbg)#
-        }#
-        if(rm_last){#
-          grbg[2:4,4] <- NA#
-        }#
-        row.names(grbg) <- c(5,10,20,40)#
-        if(n == 50){leg.text <- est_labels}else{leg.text <- FALSE}#
-        tmp <- barplot(grbg, legend.text = NULL, #
-          beside=TRUE, log = "y", yaxt = "n", names.arg = rep("",4), ... )#
-          mtext(side = 1, outer = FALSE, line = 0.02, text = c(5,10,20,40), cex =0.5, #
-        at = c(tmp[,1],tmp[,2],tmp[,3]))#
-          if(!is.null(leg.text)){#
-          legend(x = "topright", fill = unqiue(col), legend = leg.text)#
-        }#
-        if(n == 50){#
-          axis(side = 2)#
-          mtext(outer = FALSE, side = 2, line = 2, yaxis_label, cex = 0.75)#
-          mtext(outer = FALSE, side = 2, line = 4, "Logistic Regression", cex = 1)#
-        }else{#
-          axis(side = 2, labels = FALSE)#
-        }#
-        mtext(outer = FALSE, side = 3, line = 0.5, paste0("n = ", n))#
-      }#
-      for(n in c(50, 100, 250, 500)){#
-        tmp <- randomforest_rslt[randomforest_rslt$n == n, ]#
-        tmp5 <- tmp[tmp$K == 5,]#
-        tmp10 <- tmp[tmp$K == 10,]#
-        tmp20 <- tmp[tmp$K == 20,]#
-        tmp40 <- tmp[tmp$K == 40,]#
-        # est <- c("mse_dcvtmle1","mse_donestep1","mse_emp1","mse_bootstrap")#
-        grbg <- as.matrix(rbind(tmp5[,est],tmp10[,est],tmp20[,est],tmp40[,est]))#
-        if(absolute_val){#
-          grbg <- abs(grbg)#
-        }#
-        if(rm_last){#
-          grbg[2:4,4] <- NA#
-        }#
-        row.names(grbg) <- c(5,10,20,40)#
-        tmp <- barplot(grbg,  beside=TRUE, log = "y", yaxt = "n", names.arg = rep("",4), ...)#
-        mtext(side = 1, outer = FALSE, line = 0.02, text = c(5,10,20,40), cex =0.5, #
-              at = c(tmp[,1],tmp[,2],tmp[,3]))#
-        # mtext(side = 1, outer = FALSE, line = 0.02, text = c(5,10,20,40), cex =0.5, #
-        #       at = c(mean(tmp[2:3,1]),mean(tmp[2:3,2]),mean(tmp[2:3,3])))#
-        if(n == 50){#
-          axis(side = 2)#
-          mtext(outer = FALSE, side = 2, line = 2, yaxis_label, cex = 0.75)#
-          mtext(outer = FALSE, side = 2, line = 4, "Random Forest", cex = 1)#
-        }else{#
-          axis(side = 2, labels = FALSE)#
-        }#
-      }#
-    }#
-#
-    library(RColorBrewer)#
-    my_col <- brewer.pal(5,"Greys")#
-    # bias#
+                                ylim = c(0.0001,50), yaxis_label = "Variance",#
+                                col = my_col[sort(rep(1:4,4))])
+# mse#
     make_side_by_side_bar_plots(glm_rslt, randomforest_rslt, #
-                                est = c("bias_dcvtmle1","bias_donestep1",#
-                                        "bias_emp1","bias_bootstrap"),#
+                                est = c("mse_dcvtmle1","mse_donestep1",#
+                                        "mse_emp1","mse_bootstrap"),#
                                 est_label = c("CVTMLE", "CVOS","Empirical","Bootstrap"),#
-                                ylim = c(0.0001,100), yaxis_label = "Absolute Bias",#
-                                col = my_col[sort(rep(1:4,4))])#
-    # variance
-make_side_by_side_bar_plots <- function(glm_rslt, randomforest_rslt,#
-                                            est, est_labels, rm_last = TRUE,#
-                                            yaxis_label, #
-                                            xaxis_label = "Number CV Folds",#
-                                            absolute_val = TRUE, ... ){#
-      layout(matrix(1:8, nrow = 2, ncol = 4,  byrow = TRUE))#
-      par(mar = c(1.6, 0.6, 1.6, 0.6), mgp = c(2.1, 0.5, 0),#
-          oma = c(2.1, 5.1, 2.1, 2.1))#
-      for(n in c(50, 100, 250, 500)){#
-        tmp <- glm_rslt[glm_rslt$n == n, ]#
-        tmp5 <- tmp[tmp$K == 5,]#
-        tmp10 <- tmp[tmp$K == 10,]#
-        tmp20 <- tmp[tmp$K == 20,]#
-        tmp40 <- tmp[tmp$K == 40,]#
-        # est <- c("mse_dcvtmle1","mse_donestep1","mse_emp1","mse_bootstrap")#
-        grbg <- as.matrix(rbind(tmp5[,est],tmp10[,est],tmp20[,est],tmp40[,est]))#
-        if(absolute_val){#
-          grbg <- abs(grbg)#
-        }#
-        if(rm_last){#
-          grbg[2:4,4] <- NA#
-        }#
-        row.names(grbg) <- c(5,10,20,40)#
-        if(n == 50){leg.text <- est_labels}else{leg.text <- FALSE}#
-        tmp <- barplot(grbg, legend.text = NULL, #
-          beside=TRUE, log = "y", yaxt = "n", names.arg = rep("",4), ... )#
-          mtext(side = 1, outer = FALSE, line = 0.02, text = c(5,10,20,40), cex =0.5, #
-        at = c(tmp[,1],tmp[,2],tmp[,3]))#
-          if(!is.null(leg.text)){#
-          legend(x = "topright", fill = unique(col), legend = leg.text)#
-        }#
-        if(n == 50){#
-          axis(side = 2)#
-          mtext(outer = FALSE, side = 2, line = 2, yaxis_label, cex = 0.75)#
-          mtext(outer = FALSE, side = 2, line = 4, "Logistic Regression", cex = 1)#
-        }else{#
-          axis(side = 2, labels = FALSE)#
-        }#
-        mtext(outer = FALSE, side = 3, line = 0.5, paste0("n = ", n))#
-      }#
-      for(n in c(50, 100, 250, 500)){#
-        tmp <- randomforest_rslt[randomforest_rslt$n == n, ]#
-        tmp5 <- tmp[tmp$K == 5,]#
-        tmp10 <- tmp[tmp$K == 10,]#
-        tmp20 <- tmp[tmp$K == 20,]#
-        tmp40 <- tmp[tmp$K == 40,]#
-        # est <- c("mse_dcvtmle1","mse_donestep1","mse_emp1","mse_bootstrap")#
-        grbg <- as.matrix(rbind(tmp5[,est],tmp10[,est],tmp20[,est],tmp40[,est]))#
-        if(absolute_val){#
-          grbg <- abs(grbg)#
-        }#
-        if(rm_last){#
-          grbg[2:4,4] <- NA#
-        }#
-        row.names(grbg) <- c(5,10,20,40)#
-        tmp <- barplot(grbg,  beside=TRUE, log = "y", yaxt = "n", names.arg = rep("",4), ...)#
-        mtext(side = 1, outer = FALSE, line = 0.02, text = c(5,10,20,40), cex =0.5, #
-              at = c(tmp[,1],tmp[,2],tmp[,3]))#
-        # mtext(side = 1, outer = FALSE, line = 0.02, text = c(5,10,20,40), cex =0.5, #
-        #       at = c(mean(tmp[2:3,1]),mean(tmp[2:3,2]),mean(tmp[2:3,3])))#
-        if(n == 50){#
-          axis(side = 2)#
-          mtext(outer = FALSE, side = 2, line = 2, yaxis_label, cex = 0.75)#
-          mtext(outer = FALSE, side = 2, line = 4, "Random Forest", cex = 1)#
-        }else{#
-          axis(side = 2, labels = FALSE)#
-        }#
-      }#
-    }#
-#
-    library(RColorBrewer)#
-    my_col <- brewer.pal(5,"Greys")#
-    # bias#
-    make_side_by_side_bar_plots(glm_rslt, randomforest_rslt, #
-                                est = c("bias_dcvtmle1","bias_donestep1",#
-                                        "bias_emp1","bias_bootstrap"),#
-                                est_label = c("CVTMLE", "CVOS","Empirical","Bootstrap"),#
-                                ylim = c(0.0001,100), yaxis_label = "Absolute Bias",#
-                                col = my_col[sort(rep(1:4,4))])#
-    # variance
-make_side_by_side_bar_plots <- function(glm_rslt, randomforest_rslt,#
-                                            est, est_labels, rm_last = TRUE,#
-                                            yaxis_label, #
-                                            xaxis_label = "Number CV Folds",#
-                                            absolute_val = TRUE, col, ...){#
-      layout(matrix(1:8, nrow = 2, ncol = 4,  byrow = TRUE))#
-      par(mar = c(1.6, 0.6, 1.6, 0.6), mgp = c(2.1, 0.5, 0),#
-          oma = c(2.1, 5.1, 2.1, 2.1))#
-      for(n in c(50, 100, 250, 500)){#
-        tmp <- glm_rslt[glm_rslt$n == n, ]#
-        tmp5 <- tmp[tmp$K == 5,]#
-        tmp10 <- tmp[tmp$K == 10,]#
-        tmp20 <- tmp[tmp$K == 20,]#
-        tmp40 <- tmp[tmp$K == 40,]#
-        # est <- c("mse_dcvtmle1","mse_donestep1","mse_emp1","mse_bootstrap")#
-        grbg <- as.matrix(rbind(tmp5[,est],tmp10[,est],tmp20[,est],tmp40[,est]))#
-        if(absolute_val){#
-          grbg <- abs(grbg)#
-        }#
-        if(rm_last){#
-          grbg[2:4,4] <- NA#
-        }#
-        row.names(grbg) <- c(5,10,20,40)#
-        if(n == 50){leg.text <- est_labels}else{leg.text <- FALSE}#
-        tmp <- barplot(grbg, legend.text = NULL, #
-          beside=TRUE, log = "y", yaxt = "n", names.arg = rep("",4), col = col, ... )#
-          mtext(side = 1, outer = FALSE, line = 0.02, text = c(5,10,20,40), cex =0.5, #
-        at = c(tmp[,1],tmp[,2],tmp[,3]))#
-          if(!is.null(leg.text)){#
-          legend(x = "topright", fill = unique(col), legend = leg.text)#
-        }#
-        if(n == 50){#
-          axis(side = 2)#
-          mtext(outer = FALSE, side = 2, line = 2, yaxis_label, cex = 0.75)#
-          mtext(outer = FALSE, side = 2, line = 4, "Logistic Regression", cex = 1)#
-        }else{#
-          axis(side = 2, labels = FALSE)#
-        }#
-        mtext(outer = FALSE, side = 3, line = 0.5, paste0("n = ", n))#
-      }#
-      for(n in c(50, 100, 250, 500)){#
-        tmp <- randomforest_rslt[randomforest_rslt$n == n, ]#
-        tmp5 <- tmp[tmp$K == 5,]#
-        tmp10 <- tmp[tmp$K == 10,]#
-        tmp20 <- tmp[tmp$K == 20,]#
-        tmp40 <- tmp[tmp$K == 40,]#
-        # est <- c("mse_dcvtmle1","mse_donestep1","mse_emp1","mse_bootstrap")#
-        grbg <- as.matrix(rbind(tmp5[,est],tmp10[,est],tmp20[,est],tmp40[,est]))#
-        if(absolute_val){#
-          grbg <- abs(grbg)#
-        }#
-        if(rm_last){#
-          grbg[2:4,4] <- NA#
-        }#
-        row.names(grbg) <- c(5,10,20,40)#
-        tmp <- barplot(grbg,  beside=TRUE, log = "y", yaxt = "n", names.arg = rep("",4), ...)#
-        mtext(side = 1, outer = FALSE, line = 0.02, text = c(5,10,20,40), cex =0.5, #
-              at = c(tmp[,1],tmp[,2],tmp[,3]))#
-        # mtext(side = 1, outer = FALSE, line = 0.02, text = c(5,10,20,40), cex =0.5, #
-        #       at = c(mean(tmp[2:3,1]),mean(tmp[2:3,2]),mean(tmp[2:3,3])))#
-        if(n == 50){#
-          axis(side = 2)#
-          mtext(outer = FALSE, side = 2, line = 2, yaxis_label, cex = 0.75)#
-          mtext(outer = FALSE, side = 2, line = 4, "Random Forest", cex = 1)#
-        }else{#
-          axis(side = 2, labels = FALSE)#
-        }#
-      }#
-    }#
-#
-    library(RColorBrewer)#
-    my_col <- brewer.pal(5,"Greys")#
-    # bias#
-    make_side_by_side_bar_plots(glm_rslt, randomforest_rslt, #
-                                est = c("bias_dcvtmle1","bias_donestep1",#
-                                        "bias_emp1","bias_bootstrap"),#
-                                est_label = c("CVTMLE", "CVOS","Empirical","Bootstrap"),#
-                                ylim = c(0.0001,100), yaxis_label = "Absolute Bias",#
-                                col = my_col[sort(rep(1:4,4))])#
-    # variance
-make_side_by_side_bar_plots <- function(glm_rslt, randomforest_rslt,#
-                                            est, est_labels, rm_last = TRUE,#
-                                            yaxis_label, #
-                                            xaxis_label = "Number CV Folds",#
-                                            absolute_val = TRUE, col, ...){#
-      layout(matrix(1:8, nrow = 2, ncol = 4,  byrow = TRUE))#
-      par(mar = c(1.6, 0.6, 1.6, 0.6), mgp = c(2.1, 0.5, 0),#
-          oma = c(2.1, 5.1, 2.1, 2.1))#
-      for(n in c(50, 100, 250, 500)){#
-        tmp <- glm_rslt[glm_rslt$n == n, ]#
-        tmp5 <- tmp[tmp$K == 5,]#
-        tmp10 <- tmp[tmp$K == 10,]#
-        tmp20 <- tmp[tmp$K == 20,]#
-        tmp40 <- tmp[tmp$K == 40,]#
-        # est <- c("mse_dcvtmle1","mse_donestep1","mse_emp1","mse_bootstrap")#
-        grbg <- as.matrix(rbind(tmp5[,est],tmp10[,est],tmp20[,est],tmp40[,est]))#
-        if(absolute_val){#
-          grbg <- abs(grbg)#
-        }#
-        if(rm_last){#
-          grbg[2:4,4] <- NA#
-        }#
-        row.names(grbg) <- c(5,10,20,40)#
-        if(n == 50){leg.text <- est_labels}else{leg.text <- FALSE}#
-        tmp <- barplot(grbg, #
-          beside=TRUE, log = "y", yaxt = "n", names.arg = rep("",4), col = col, ... )#
-          mtext(side = 1, outer = FALSE, line = 0.02, text = c(5,10,20,40), cex =0.5, #
-        at = c(tmp[,1],tmp[,2],tmp[,3]))#
-          if(!is.null(leg.text)){#
-          legend(x = "topright", fill = unique(col), legend = leg.text)#
-        }#
-        if(n == 50){#
-          axis(side = 2)#
-          mtext(outer = FALSE, side = 2, line = 2, yaxis_label, cex = 0.75)#
-          mtext(outer = FALSE, side = 2, line = 4, "Logistic Regression", cex = 1)#
-        }else{#
-          axis(side = 2, labels = FALSE)#
-        }#
-        mtext(outer = FALSE, side = 3, line = 0.5, paste0("n = ", n))#
-      }#
-      for(n in c(50, 100, 250, 500)){#
-        tmp <- randomforest_rslt[randomforest_rslt$n == n, ]#
-        tmp5 <- tmp[tmp$K == 5,]#
-        tmp10 <- tmp[tmp$K == 10,]#
-        tmp20 <- tmp[tmp$K == 20,]#
-        tmp40 <- tmp[tmp$K == 40,]#
-        # est <- c("mse_dcvtmle1","mse_donestep1","mse_emp1","mse_bootstrap")#
-        grbg <- as.matrix(rbind(tmp5[,est],tmp10[,est],tmp20[,est],tmp40[,est]))#
-        if(absolute_val){#
-          grbg <- abs(grbg)#
-        }#
-        if(rm_last){#
-          grbg[2:4,4] <- NA#
-        }#
-        row.names(grbg) <- c(5,10,20,40)#
-        tmp <- barplot(grbg,  beside=TRUE, log = "y", yaxt = "n", names.arg = rep("",4), #
-                       col = col, ...)#
-        mtext(side = 1, outer = FALSE, line = 0.02, text = c(5,10,20,40), cex =0.5, #
-              at = c(tmp[,1],tmp[,2],tmp[,3]))#
-        # mtext(side = 1, outer = FALSE, line = 0.02, text = c(5,10,20,40), cex =0.5, #
-        #       at = c(mean(tmp[2:3,1]),mean(tmp[2:3,2]),mean(tmp[2:3,3])))#
-        if(n == 50){#
-          axis(side = 2)#
-          mtext(outer = FALSE, side = 2, line = 2, yaxis_label, cex = 0.75)#
-          mtext(outer = FALSE, side = 2, line = 4, "Random Forest", cex = 1)#
-        }else{#
-          axis(side = 2, labels = FALSE)#
-        }#
-      }#
-    }#
-#
-    library(RColorBrewer)#
-    my_col <- brewer.pal(5,"Greys")#
-    # bias#
-    make_side_by_side_bar_plots(glm_rslt, randomforest_rslt, #
-                                est = c("bias_dcvtmle1","bias_donestep1",#
-                                        "bias_emp1","bias_bootstrap"),#
-                                est_label = c("CVTMLE", "CVOS","Empirical","Bootstrap"),#
-                                ylim = c(0.0001,100), yaxis_label = "Absolute Bias",#
-                                col = my_col[sort(rep(1:4,4))])#
-    # variance
-?barplot
-make_side_by_side_bar_plots <- function(glm_rslt, randomforest_rslt,#
-                                            est, est_labels, rm_last = TRUE,#
-                                            yaxis_label, #
-                                            xaxis_label = "Number CV Folds",#
-                                            absolute_val = TRUE, col, ...){#
-      layout(matrix(1:8, nrow = 2, ncol = 4,  byrow = TRUE))#
-      par(mar = c(1.6, 0.6, 1.6, 0.6), mgp = c(2.1, 0.5, 0),#
-          oma = c(2.1, 5.1, 2.1, 2.1))#
-      for(n in c(50, 100, 250, 500)){#
-        tmp <- glm_rslt[glm_rslt$n == n, ]#
-        tmp5 <- tmp[tmp$K == 5,]#
-        tmp10 <- tmp[tmp$K == 10,]#
-        tmp20 <- tmp[tmp$K == 20,]#
-        tmp40 <- tmp[tmp$K == 40,]#
-        # est <- c("mse_dcvtmle1","mse_donestep1","mse_emp1","mse_bootstrap")#
-        grbg <- as.matrix(rbind(tmp5[,est],tmp10[,est],tmp20[,est],tmp40[,est]))#
-        if(absolute_val){#
-          grbg <- abs(grbg)#
-        }#
-        if(rm_last){#
-          grbg[2:4,4] <- NA#
-        }#
-        row.names(grbg) <- c(5,10,20,40)#
-        if(n == 50){leg.text <- est_labels}else{leg.text <- FALSE}#
-        tmp <- barplot(grbg, leg.text = FALSE,#
-          beside=TRUE, log = "y", yaxt = "n", names.arg = rep("",4), col = col, ... )#
-          mtext(side = 1, outer = FALSE, line = 0.02, text = c(5,10,20,40), cex =0.5, #
-        at = c(tmp[,1],tmp[,2],tmp[,3]))#
-          if(!is.null(leg.text)){#
-          legend(x = "topright", fill = unique(col), legend = leg.text)#
-        }#
-        if(n == 50){#
-          axis(side = 2)#
-          mtext(outer = FALSE, side = 2, line = 2, yaxis_label, cex = 0.75)#
-          mtext(outer = FALSE, side = 2, line = 4, "Logistic Regression", cex = 1)#
-        }else{#
-          axis(side = 2, labels = FALSE)#
-        }#
-        mtext(outer = FALSE, side = 3, line = 0.5, paste0("n = ", n))#
-      }#
-      for(n in c(50, 100, 250, 500)){#
-        tmp <- randomforest_rslt[randomforest_rslt$n == n, ]#
-        tmp5 <- tmp[tmp$K == 5,]#
-        tmp10 <- tmp[tmp$K == 10,]#
-        tmp20 <- tmp[tmp$K == 20,]#
-        tmp40 <- tmp[tmp$K == 40,]#
-        # est <- c("mse_dcvtmle1","mse_donestep1","mse_emp1","mse_bootstrap")#
-        grbg <- as.matrix(rbind(tmp5[,est],tmp10[,est],tmp20[,est],tmp40[,est]))#
-        if(absolute_val){#
-          grbg <- abs(grbg)#
-        }#
-        if(rm_last){#
-          grbg[2:4,4] <- NA#
-        }#
-        row.names(grbg) <- c(5,10,20,40)#
-        tmp <- barplot(grbg,  beside=TRUE, log = "y", yaxt = "n", names.arg = rep("",4), #
-                       col = col, ...)#
-        mtext(side = 1, outer = FALSE, line = 0.02, text = c(5,10,20,40), cex =0.5, #
-              at = c(tmp[,1],tmp[,2],tmp[,3]))#
-        # mtext(side = 1, outer = FALSE, line = 0.02, text = c(5,10,20,40), cex =0.5, #
-        #       at = c(mean(tmp[2:3,1]),mean(tmp[2:3,2]),mean(tmp[2:3,3])))#
-        if(n == 50){#
-          axis(side = 2)#
-          mtext(outer = FALSE, side = 2, line = 2, yaxis_label, cex = 0.75)#
-          mtext(outer = FALSE, side = 2, line = 4, "Random Forest", cex = 1)#
-        }else{#
-          axis(side = 2, labels = FALSE)#
-        }#
-      }#
-    }#
-#
-    library(RColorBrewer)#
-    my_col <- brewer.pal(5,"Greys")#
-    # bias#
-    make_side_by_side_bar_plots(glm_rslt, randomforest_rslt, #
-                                est = c("bias_dcvtmle1","bias_donestep1",#
-                                        "bias_emp1","bias_bootstrap"),#
-                                est_label = c("CVTMLE", "CVOS","Empirical","Bootstrap"),#
-                                ylim = c(0.0001,100), yaxis_label = "Absolute Bias",#
-                                col = my_col[sort(rep(1:4,4))])#
-    # variance
-warnings()
-?barplot
-make_side_by_side_bar_plots <- function(glm_rslt, randomforest_rslt,#
-                                            est, est_labels, rm_last = TRUE,#
-                                            yaxis_label, #
-                                            xaxis_label = "Number CV Folds",#
-                                            absolute_val = TRUE, col, ...){#
-      layout(matrix(1:8, nrow = 2, ncol = 4,  byrow = TRUE))#
-      par(mar = c(1.6, 0.6, 1.6, 0.6), mgp = c(2.1, 0.5, 0),#
-          oma = c(2.1, 5.1, 2.1, 2.1))#
-      for(n in c(50, 100, 250, 500)){#
-        tmp <- glm_rslt[glm_rslt$n == n, ]#
-        tmp5 <- tmp[tmp$K == 5,]#
-        tmp10 <- tmp[tmp$K == 10,]#
-        tmp20 <- tmp[tmp$K == 20,]#
-        tmp40 <- tmp[tmp$K == 40,]#
-        # est <- c("mse_dcvtmle1","mse_donestep1","mse_emp1","mse_bootstrap")#
-        grbg <- as.matrix(rbind(tmp5[,est],tmp10[,est],tmp20[,est],tmp40[,est]))#
-        if(absolute_val){#
-          grbg <- abs(grbg)#
-        }#
-        if(rm_last){#
-          grbg[2:4,4] <- NA#
-        }#
-        row.names(grbg) <- c(5,10,20,40)#
-        if(n == 50){leg.text <- est_labels}else{leg.text <- FALSE}#
-        tmp <- barplot(grbg, legend.text = FALSE,#
-          beside=TRUE, log = "y", yaxt = "n", names.arg = rep("",4), col = col, ... )#
-          mtext(side = 1, outer = FALSE, line = 0.02, text = c(5,10,20,40), cex =0.5, #
-        at = c(tmp[,1],tmp[,2],tmp[,3]))#
-          if(!is.null(leg.text)){#
-          legend(x = "topright", fill = unique(col), legend = leg.text)#
-        }#
-        if(n == 50){#
-          axis(side = 2)#
-          mtext(outer = FALSE, side = 2, line = 2, yaxis_label, cex = 0.75)#
-          mtext(outer = FALSE, side = 2, line = 4, "Logistic Regression", cex = 1)#
-        }else{#
-          axis(side = 2, labels = FALSE)#
-        }#
-        mtext(outer = FALSE, side = 3, line = 0.5, paste0("n = ", n))#
-      }#
-      for(n in c(50, 100, 250, 500)){#
-        tmp <- randomforest_rslt[randomforest_rslt$n == n, ]#
-        tmp5 <- tmp[tmp$K == 5,]#
-        tmp10 <- tmp[tmp$K == 10,]#
-        tmp20 <- tmp[tmp$K == 20,]#
-        tmp40 <- tmp[tmp$K == 40,]#
-        # est <- c("mse_dcvtmle1","mse_donestep1","mse_emp1","mse_bootstrap")#
-        grbg <- as.matrix(rbind(tmp5[,est],tmp10[,est],tmp20[,est],tmp40[,est]))#
-        if(absolute_val){#
-          grbg <- abs(grbg)#
-        }#
-        if(rm_last){#
-          grbg[2:4,4] <- NA#
-        }#
-        row.names(grbg) <- c(5,10,20,40)#
-        tmp <- barplot(grbg,  beside=TRUE, log = "y", yaxt = "n", names.arg = rep("",4), #
-                       col = col, ...)#
-        mtext(side = 1, outer = FALSE, line = 0.02, text = c(5,10,20,40), cex =0.5, #
-              at = c(tmp[,1],tmp[,2],tmp[,3]))#
-        # mtext(side = 1, outer = FALSE, line = 0.02, text = c(5,10,20,40), cex =0.5, #
-        #       at = c(mean(tmp[2:3,1]),mean(tmp[2:3,2]),mean(tmp[2:3,3])))#
-        if(n == 50){#
-          axis(side = 2)#
-          mtext(outer = FALSE, side = 2, line = 2, yaxis_label, cex = 0.75)#
-          mtext(outer = FALSE, side = 2, line = 4, "Random Forest", cex = 1)#
-        }else{#
-          axis(side = 2, labels = FALSE)#
-        }#
-      }#
-    }#
-#
-    library(RColorBrewer)#
-    my_col <- brewer.pal(5,"Greys")#
-    # bias#
-    make_side_by_side_bar_plots(glm_rslt, randomforest_rslt, #
-                                est = c("bias_dcvtmle1","bias_donestep1",#
-                                        "bias_emp1","bias_bootstrap"),#
-                                est_label = c("CVTMLE", "CVOS","Empirical","Bootstrap"),#
-                                ylim = c(0.0001,100), yaxis_label = "Absolute Bias",#
-                                col = my_col[sort(rep(1:4,4))])#
-    # variance
-make_side_by_side_bar_plots <- function(glm_rslt, randomforest_rslt,#
-                                            est, est_labels, rm_last = TRUE,#
-                                            yaxis_label, #
-                                            xaxis_label = "Number CV Folds",#
-                                            absolute_val = TRUE, col, ...){#
-      layout(matrix(1:8, nrow = 2, ncol = 4,  byrow = TRUE))#
-      par(mar = c(1.6, 0.6, 1.6, 0.6), mgp = c(2.1, 0.5, 0),#
-          oma = c(2.1, 5.1, 2.1, 2.1))#
-      for(n in c(50, 100, 250, 500)){#
-        tmp <- glm_rslt[glm_rslt$n == n, ]#
-        tmp5 <- tmp[tmp$K == 5,]#
-        tmp10 <- tmp[tmp$K == 10,]#
-        tmp20 <- tmp[tmp$K == 20,]#
-        tmp40 <- tmp[tmp$K == 40,]#
-        # est <- c("mse_dcvtmle1","mse_donestep1","mse_emp1","mse_bootstrap")#
-        grbg <- as.matrix(rbind(tmp5[,est],tmp10[,est],tmp20[,est],tmp40[,est]))#
-        if(absolute_val){#
-          grbg <- abs(grbg)#
-        }#
-        if(rm_last){#
-          grbg[2:4,4] <- NA#
-        }#
-        row.names(grbg) <- c(5,10,20,40)#
-        if(n == 50){#
-          leg.text <- est_labels#
-        }else{#
-          leg.text <- FALSE#
-        }#
-        tmp <- barplot(grbg, legend.text = FALSE,#
-          beside=TRUE, log = "y", yaxt = "n", names.arg = rep("",4), col = col, ... )#
-          mtext(side = 1, outer = FALSE, line = 0.02, text = c(5,10,20,40), cex =0.5, #
-        at = c(tmp[,1],tmp[,2],tmp[,3]))#
-        if(!leg.text){#
-          legend(x = "topright", fill = unique(col), legend = leg.text)#
-        }#
-        if(n == 50){#
-          axis(side = 2)#
-          mtext(outer = FALSE, side = 2, line = 2, yaxis_label, cex = 0.75)#
-          mtext(outer = FALSE, side = 2, line = 4, "Logistic Regression", cex = 1)#
-        }else{#
-          axis(side = 2, labels = FALSE)#
-        }#
-        mtext(outer = FALSE, side = 3, line = 0.5, paste0("n = ", n))#
-      }#
-      for(n in c(50, 100, 250, 500)){#
-        tmp <- randomforest_rslt[randomforest_rslt$n == n, ]#
-        tmp5 <- tmp[tmp$K == 5,]#
-        tmp10 <- tmp[tmp$K == 10,]#
-        tmp20 <- tmp[tmp$K == 20,]#
-        tmp40 <- tmp[tmp$K == 40,]#
-        # est <- c("mse_dcvtmle1","mse_donestep1","mse_emp1","mse_bootstrap")#
-        grbg <- as.matrix(rbind(tmp5[,est],tmp10[,est],tmp20[,est],tmp40[,est]))#
-        if(absolute_val){#
-          grbg <- abs(grbg)#
-        }#
-        if(rm_last){#
-          grbg[2:4,4] <- NA#
-        }#
-        row.names(grbg) <- c(5,10,20,40)#
-        tmp <- barplot(grbg,  beside=TRUE, log = "y", yaxt = "n", names.arg = rep("",4), #
-                       col = col, ...)#
-        mtext(side = 1, outer = FALSE, line = 0.02, text = c(5,10,20,40), cex =0.5, #
-              at = c(tmp[,1],tmp[,2],tmp[,3]))#
-        # mtext(side = 1, outer = FALSE, line = 0.02, text = c(5,10,20,40), cex =0.5, #
-        #       at = c(mean(tmp[2:3,1]),mean(tmp[2:3,2]),mean(tmp[2:3,3])))#
-        if(n == 50){#
-          axis(side = 2)#
-          mtext(outer = FALSE, side = 2, line = 2, yaxis_label, cex = 0.75)#
-          mtext(outer = FALSE, side = 2, line = 4, "Random Forest", cex = 1)#
-        }else{#
-          axis(side = 2, labels = FALSE)#
-        }#
-      }#
-    }#
-#
-    library(RColorBrewer)#
-    my_col <- brewer.pal(5,"Greys")#
-    # bias#
-    make_side_by_side_bar_plots(glm_rslt, randomforest_rslt, #
-                                est = c("bias_dcvtmle1","bias_donestep1",#
-                                        "bias_emp1","bias_bootstrap"),#
-                                est_label = c("CVTMLE", "CVOS","Empirical","Bootstrap"),#
-                                ylim = c(0.0001,100), yaxis_label = "Absolute Bias",#
-                                col = my_col[sort(rep(1:4,4))])#
-    # variance
-make_side_by_side_bar_plots <- function(glm_rslt, randomforest_rslt,#
-                                            est, est_labels, rm_last = TRUE,#
-                                            yaxis_label, #
-                                            xaxis_label = "Number CV Folds",#
-                                            absolute_val = TRUE, col, ...){#
-      layout(matrix(1:8, nrow = 2, ncol = 4,  byrow = TRUE))#
-      par(mar = c(1.6, 0.6, 1.6, 0.6), mgp = c(2.1, 0.5, 0),#
-          oma = c(2.1, 5.1, 2.1, 2.1))#
-      for(n in c(50, 100, 250, 500)){#
-        tmp <- glm_rslt[glm_rslt$n == n, ]#
-        tmp5 <- tmp[tmp$K == 5,]#
-        tmp10 <- tmp[tmp$K == 10,]#
-        tmp20 <- tmp[tmp$K == 20,]#
-        tmp40 <- tmp[tmp$K == 40,]#
-        # est <- c("mse_dcvtmle1","mse_donestep1","mse_emp1","mse_bootstrap")#
-        grbg <- as.matrix(rbind(tmp5[,est],tmp10[,est],tmp20[,est],tmp40[,est]))#
-        if(absolute_val){#
-          grbg <- abs(grbg)#
-        }#
-        if(rm_last){#
-          grbg[2:4,4] <- NA#
-        }#
-        row.names(grbg) <- c(5,10,20,40)#
-        if(n == 50){#
-          leg.text <- est_labels#
-        }else{#
-          leg.text <- FALSE#
-        }#
-        tmp <- barplot(grbg, legend.text = FALSE,#
-          beside=TRUE, log = "y", yaxt = "n", names.arg = rep("",4), col = col, ... )#
-          mtext(side = 1, outer = FALSE, line = 0.02, text = c(5,10,20,40), cex =0.5, #
-        at = c(tmp[,1],tmp[,2],tmp[,3]))#
-        if(n == 50){#
-          legend(x = "topright", fill = unique(col), legend = leg.text)#
-        }#
-        if(n == 50){#
-          axis(side = 2)#
-          mtext(outer = FALSE, side = 2, line = 2, yaxis_label, cex = 0.75)#
-          mtext(outer = FALSE, side = 2, line = 4, "Logistic Regression", cex = 1)#
-        }else{#
-          axis(side = 2, labels = FALSE)#
-        }#
-        mtext(outer = FALSE, side = 3, line = 0.5, paste0("n = ", n))#
-      }#
-      for(n in c(50, 100, 250, 500)){#
-        tmp <- randomforest_rslt[randomforest_rslt$n == n, ]#
-        tmp5 <- tmp[tmp$K == 5,]#
-        tmp10 <- tmp[tmp$K == 10,]#
-        tmp20 <- tmp[tmp$K == 20,]#
-        tmp40 <- tmp[tmp$K == 40,]#
-        # est <- c("mse_dcvtmle1","mse_donestep1","mse_emp1","mse_bootstrap")#
-        grbg <- as.matrix(rbind(tmp5[,est],tmp10[,est],tmp20[,est],tmp40[,est]))#
-        if(absolute_val){#
-          grbg <- abs(grbg)#
-        }#
-        if(rm_last){#
-          grbg[2:4,4] <- NA#
-        }#
-        row.names(grbg) <- c(5,10,20,40)#
-        tmp <- barplot(grbg,  beside=TRUE, log = "y", yaxt = "n", names.arg = rep("",4), #
-                       col = col, ...)#
-        mtext(side = 1, outer = FALSE, line = 0.02, text = c(5,10,20,40), cex =0.5, #
-              at = c(tmp[,1],tmp[,2],tmp[,3]))#
-        # mtext(side = 1, outer = FALSE, line = 0.02, text = c(5,10,20,40), cex =0.5, #
-        #       at = c(mean(tmp[2:3,1]),mean(tmp[2:3,2]),mean(tmp[2:3,3])))#
-        if(n == 50){#
-          axis(side = 2)#
-          mtext(outer = FALSE, side = 2, line = 2, yaxis_label, cex = 0.75)#
-          mtext(outer = FALSE, side = 2, line = 4, "Random Forest", cex = 1)#
-        }else{#
-          axis(side = 2, labels = FALSE)#
-        }#
-      }#
-    }#
-#
-    library(RColorBrewer)#
-    my_col <- brewer.pal(5,"Greys")#
-    # bias#
-    make_side_by_side_bar_plots(glm_rslt, randomforest_rslt, #
-                                est = c("bias_dcvtmle1","bias_donestep1",#
-                                        "bias_emp1","bias_bootstrap"),#
-                                est_label = c("CVTMLE", "CVOS","Empirical","Bootstrap"),#
-                                ylim = c(0.0001,100), yaxis_label = "Absolute Bias",#
-                                col = my_col[sort(rep(1:4,4))])#
-    # variance
-setwd("~/Dropbox/R/cvtmleauc/sandbox/simulation/")#
-  load("allOut_cvtn.RData")#
-    # load("~/cvtmleauc/out/allOut_new.RData")#
+                                ylim = c(0.0001,100), yaxis_label = "Mean squared-error",#
+                                col = my_col[sort(rep(1:4,4))])
+setwd("~/Dropbox/R/cvtmleauc/sandbox/simulation/")
+sim <- "auc"
+load(paste0("allOut_",sim,".RData"))
+sim <- "cvauc"
+load(paste0("allOut_",sim,".RData"))
+# load("~/cvtmleauc/out/allOut_new.RData")#
 #
     get_sim_rslt <- function(out, parm, wrapper, truth = "truth",#
                              estimators = c("dcvtmle1","donestep1",#
@@ -1559,7 +1182,7 @@ setwd("~/Dropbox/R/cvtmleauc/sandbox/simulation/")#
                                      "cvtmle10","onestep10","emp10",#
                                      "dcvtmle20","donestep20",#
                                      "cvtmle20","onestep20","emp20",#
-                                     "bootstrap"#
+                                     "bootstrap","lpo"#
                                      ), ...){#
       b <- v <- m <- co <- NULL#
       for(i in seq_len(length(parm[,1]))){#
@@ -1589,9 +1212,10 @@ setwd("~/Dropbox/R/cvtmleauc/sandbox/simulation/")#
                         K = c(5, 10, 20, 40))#
     glm_rslt <- get_sim_rslt(out, parm, wrapper = "glm_wrapper")#
     randomforest_rslt <- get_sim_rslt(out, parm, wrapper = "randomforest_wrapper")
+glm_rslt
 make_side_by_side_bar_plots <- function(glm_rslt, randomforest_rslt,#
                                             est, est_labels, rm_last = TRUE,#
-                                            yaxis_label, #
+                                            yaxis_label, add_ratio = TRUE, #
                                             xaxis_label = "Number CV Folds",#
                                             absolute_val = TRUE, col, ...){#
       layout(matrix(1:8, nrow = 2, ncol = 4,  byrow = TRUE))#
@@ -1632,98 +1256,9 @@ make_side_by_side_bar_plots <- function(glm_rslt, randomforest_rslt,#
           axis(side = 2, labels = FALSE)#
         }#
         mtext(outer = FALSE, side = 3, line = 0.5, paste0("n = ", n))#
-      }#
-      for(n in c(50, 100, 250, 500)){#
-        tmp <- randomforest_rslt[randomforest_rslt$n == n, ]#
-        tmp5 <- tmp[tmp$K == 5,]#
-        tmp10 <- tmp[tmp$K == 10,]#
-        tmp20 <- tmp[tmp$K == 20,]#
-        tmp40 <- tmp[tmp$K == 40,]#
-        # est <- c("mse_dcvtmle1","mse_donestep1","mse_emp1","mse_bootstrap")#
-        grbg <- as.matrix(rbind(tmp5[,est],tmp10[,est],tmp20[,est],tmp40[,est]))#
-        if(absolute_val){#
-          grbg <- abs(grbg)#
+        if(add_ratio){#
+          segments()#
         }#
-        if(rm_last){#
-          grbg[2:4,4] <- NA#
-        }#
-        row.names(grbg) <- c(5,10,20,40)#
-        tmp <- barplot(grbg,  beside=TRUE, log = "y", yaxt = "n", names.arg = rep("",4), #
-                       col = col, ...)#
-        mtext(side = 1, outer = FALSE, line = 0.02, text = c(5,10,20,40), cex =0.5, #
-              at = c(tmp[,1],tmp[,2],tmp[,3]))#
-        # mtext(side = 1, outer = FALSE, line = 0.02, text = c(5,10,20,40), cex =0.5, #
-        #       at = c(mean(tmp[2:3,1]),mean(tmp[2:3,2]),mean(tmp[2:3,3])))#
-        if(n == 50){#
-          axis(side = 2)#
-          mtext(outer = FALSE, side = 2, line = 2, yaxis_label, cex = 0.75)#
-          mtext(outer = FALSE, side = 2, line = 4, "Random Forest", cex = 1)#
-        }else{#
-          axis(side = 2, labels = FALSE)#
-        }#
-      }#
-    }
-# bias#
-    make_side_by_side_bar_plots(glm_rslt, randomforest_rslt, #
-                                est = c("bias_dcvtmle1","bias_donestep1",#
-                                        "bias_emp1","bias_bootstrap"),#
-                                est_label = c("CVTMLE", "CVOS","Empirical","Bootstrap"),#
-                                ylim = c(0.0001,100), yaxis_label = "Absolute Bias",#
-                                col = my_col[sort(rep(1:4,4))])
-debug(make_side_by_side_bar_plots)
-# bias#
-    make_side_by_side_bar_plots(glm_rslt, randomforest_rslt, #
-                                est = c("bias_dcvtmle1","bias_donestep1",#
-                                        "bias_emp1","bias_bootstrap"),#
-                                est_label = c("CVTMLE", "CVOS","Empirical","Bootstrap"),#
-                                ylim = c(0.0001,100), yaxis_label = "Absolute Bias",#
-                                col = my_col[sort(rep(1:4,4))])
-grbg
-grbg
-Q
-make_side_by_side_bar_plots <- function(glm_rslt, randomforest_rslt,#
-                                            est, est_labels, rm_last = TRUE,#
-                                            yaxis_label, #
-                                            xaxis_label = "Number CV Folds",#
-                                            absolute_val = TRUE, col, ...){#
-      layout(matrix(1:8, nrow = 2, ncol = 4,  byrow = TRUE))#
-      par(mar = c(1.6, 0.6, 1.6, 0.6), mgp = c(2.1, 0.5, 0),#
-          oma = c(2.1, 5.1, 2.1, 2.1))#
-      for(n in c(50, 100, 250, 500)){#
-        tmp <- glm_rslt[glm_rslt$n == n, ]#
-        tmp5 <- tmp[tmp$K == 5,]#
-        tmp10 <- tmp[tmp$K == 10,]#
-        tmp20 <- tmp[tmp$K == 20,]#
-        tmp40 <- tmp[tmp$K == 40,]#
-        # est <- c("mse_dcvtmle1","mse_donestep1","mse_emp1","mse_bootstrap")#
-        grbg <- as.matrix(rbind(tmp5[,est],tmp10[,est],tmp20[,est],tmp40[,est]))#
-        if(absolute_val){#
-          grbg <- abs(grbg)#
-        }#
-        if(rm_last){#
-          grbg[2:4,4] <- NA#
-        }#
-        row.names(grbg) <- c(5,10,20,40)#
-        if(n == 50){#
-          leg.text <- est_labels#
-        }else{#
-          leg.text <- FALSE#
-        }#
-        tmp <- barplot(grbg, legend.text = FALSE,#
-          beside=TRUE, log = "y", yaxt = "n", names.arg = rep("",4), col = col, ... )#
-          mtext(side = 1, outer = FALSE, line = 0.02, text = c(5,10,20,40), cex =0.5, #
-        at = c(tmp[,1],tmp[,2],tmp[,3]))#
-        if(n == 50){#
-          legend(x = "topright", fill = unique(col), legend = leg.text)#
-        }#
-        if(n == 50){#
-          axis(side = 2)#
-          mtext(outer = FALSE, side = 2, line = 2, yaxis_label, cex = 0.75)#
-          mtext(outer = FALSE, side = 2, line = 4, "Logistic Regression", cex = 1)#
-        }else{#
-          axis(side = 2, labels = FALSE)#
-        }#
-        mtext(outer = FALSE, side = 3, line = 0.5, paste0("n = ", n))#
       }#
       for(n in c(50, 100, 250, 500)){#
         tmp <- randomforest_rslt[randomforest_rslt$n == n, ]#
@@ -1757,290 +1292,327 @@ make_side_by_side_bar_plots <- function(glm_rslt, randomforest_rslt,#
     }#
 #
     library(RColorBrewer)#
+    my_col <- brewer.pal(5,"Greys")
+# bias#
+    make_side_by_side_bar_plots(glm_rslt, randomforest_rslt, #
+                                est = c("bias_dcvtmle1","bias_donestep1",#
+                                        "bias_emp1","bias_bootstrap","bias_lpo"),#
+                                est_label = c("CVTMLE", "CVOS","Empirical","Bootstrap"),#
+                                ylim = c(0.0001,100), yaxis_label = "Absolute Bias",#
+                                col = my_col[sort(rep(1:4,4))])#
+    # variance
+make_side_by_side_bar_plots(glm_rslt, randomforest_rslt, #
+                                est = c("bias_dcvtmle1","bias_donestep1",#
+                                        "bias_emp1","bias_bootstrap","bias_lpo"),#
+                                est_label = c("CVTMLE", "CVOS","Empirical","Bootstrap","LPO"),#
+                                ylim = c(0.0001,100), yaxis_label = "Absolute Bias",#
+                                col = my_col[sort(rep(1:5,4))])
+make_side_by_side_bar_plots(glm_rslt, randomforest_rslt, #
+                                est = c("bias_dcvtmle1","bias_donestep1",#
+                                        "bias_emp1","bias_bootstrap","bias_lpo"),#
+                                est_label = c("CVTMLE", "CVOS","Empirical","Bootstrap","LPO"),#
+                                ylim = c(0.0001,100), yaxis_label = "Absolute Bias",#
+                                col = my_col[sort(rep(1:5,4))])
+debug(make_side_by_side_bar_plots)
+make_side_by_side_bar_plots(glm_rslt, randomforest_rslt, #
+                                est = c("bias_dcvtmle1","bias_donestep1",#
+                                        "bias_emp1","bias_bootstrap","bias_lpo"),#
+                                est_label = c("CVTMLE", "CVOS","Empirical","Bootstrap","LPO"),#
+                                ylim = c(0.0001,100), yaxis_label = "Absolute Bias",#
+                                col = my_col[sort(rep(1:5,4))])
+grbg
+head(tmp40)
+table(tmp$K)
+tmp
+make_side_by_side_bar_plots <- function(glm_rslt, randomforest_rslt,#
+                                            est, est_labels, rm_last = TRUE,#
+                                            yaxis_label, add_ratio = TRUE, #
+                                            xaxis_label = "Number CV Folds",#
+                                            absolute_val = TRUE, col, ...){#
+      layout(matrix(1:8, nrow = 2, ncol = 4,  byrow = TRUE))#
+      par(mar = c(1.6, 0.6, 1.6, 0.6), mgp = c(2.1, 0.5, 0),#
+          oma = c(2.1, 5.1, 2.1, 2.1))#
+      for(n in c(50, 100, 250, 500)){#
+        tmp <- glm_rslt[glm_rslt$n == n, ]#
+        tmp5 <- tmp[tmp$K == 5,]#
+        tmp10 <- tmp[tmp$K == 10,]#
+        tmp20 <- tmp[tmp$K == 20,]#
+        tmp40 <- tmp[tmp$K == 40,]#
+        # est <- c("mse_dcvtmle1","mse_donestep1","mse_emp1","mse_bootstrap")#
+        grbg <- as.matrix(rbind(tmp5[,est],tmp10[,est],tmp20[,est],tmp40[,est]))#
+        if(absolute_val){#
+          grbg <- abs(grbg)#
+        }#
+        if(rm_last){#
+          grbg[2:4,4] <- NA#
+        }#
+        row.names(grbg) <- c(5,10,20,40)#
+        if(n == 50){#
+          leg.text <- est_labels#
+        }else{#
+          leg.text <- FALSE#
+        }#
+        tmp <- barplot(grbg, legend.text = FALSE,#
+          beside=TRUE, log = "y", yaxt = "n", names.arg = rep("",dim(grbg)[2]), col = col, ... )#
+          mtext(side = 1, outer = FALSE, line = 0.02, text = c(5,10,20,40), cex =0.5, #
+        at = c(tmp[,1],tmp[,2],tmp[,3]))#
+        if(n == 50){#
+          legend(x = "topright", fill = unique(col), legend = leg.text)#
+        }#
+        if(n == 50){#
+          axis(side = 2)#
+          mtext(outer = FALSE, side = 2, line = 2, yaxis_label, cex = 0.75)#
+          mtext(outer = FALSE, side = 2, line = 4, "Logistic Regression", cex = 1)#
+        }else{#
+          axis(side = 2, labels = FALSE)#
+        }#
+        mtext(outer = FALSE, side = 3, line = 0.5, paste0("n = ", n))#
+        if(add_ratio){#
+          segments()#
+        }#
+      }#
+      for(n in c(50, 100, 250, 500)){#
+        tmp <- randomforest_rslt[randomforest_rslt$n == n, ]#
+        tmp5 <- tmp[tmp$K == 5,]#
+        tmp10 <- tmp[tmp$K == 10,]#
+        tmp20 <- tmp[tmp$K == 20,]#
+        tmp40 <- tmp[tmp$K == 40,]#
+        # est <- c("mse_dcvtmle1","mse_donestep1","mse_emp1","mse_bootstrap")#
+        grbg <- as.matrix(rbind(tmp5[,est],tmp10[,est],tmp20[,est],tmp40[,est]))#
+        if(absolute_val){#
+          grbg <- abs(grbg)#
+        }#
+        if(rm_last){#
+          grbg[2:4,4] <- NA#
+        }#
+        row.names(grbg) <- c(5,10,20,40)#
+        tmp <- barplot(grbg,  beside=TRUE, log = "y", yaxt = "n", names.arg = rep("",dim(grbg)[2]), #
+                       col = col, ...)#
+        mtext(side = 1, outer = FALSE, line = 0.02, text = c(5,10,20,40), cex =0.5, #
+              at = c(tmp[,1],tmp[,2],tmp[,3]))#
+        # mtext(side = 1, outer = FALSE, line = 0.02, text = c(5,10,20,40), cex =0.5, #
+        #       at = c(mean(tmp[2:3,1]),mean(tmp[2:3,2]),mean(tmp[2:3,3])))#
+        if(n == 50){#
+          axis(side = 2)#
+          mtext(outer = FALSE, side = 2, line = 2, yaxis_label, cex = 0.75)#
+          mtext(outer = FALSE, side = 2, line = 4, "Random Forest", cex = 1)#
+        }else{#
+          axis(side = 2, labels = FALSE)#
+        }#
+      }#
+    }#
+#
+    library(RColorBrewer)#
     my_col <- brewer.pal(5,"Greys")#
     # bias#
     make_side_by_side_bar_plots(glm_rslt, randomforest_rslt, #
                                 est = c("bias_dcvtmle1","bias_donestep1",#
-                                        "bias_emp1","bias_bootstrap"),#
-                                est_label = c("CVTMLE", "CVOS","Empirical","Bootstrap"),#
+                                        "bias_emp1","bias_bootstrap","bias_lpo"),#
+                                est_label = c("CVTMLE", "CVOS","Empirical","Bootstrap","LPO"),#
                                 ylim = c(0.0001,100), yaxis_label = "Absolute Bias",#
-                                col = my_col[sort(rep(1:4,4))])
-make_side_by_side_bar_plots(glm_rslt, randomforest_rslt, #
-                                est = c("mse_dcvtmle1","mse_donestep1",#
-                                        "mse_emp1","mse_bootstrap"),#
-                                est_label = c("CVTMLE", "CVOS","Empirical","Bootstrap"),#
-                                ylim = c(0.0001,100), yaxis_label = "Mean squared-error",#
-                                col = my_col[sort(rep(1:4,4))])
-make_side_by_side_bar_plots(glm_rslt, randomforest_rslt, #
+                                col = my_col[sort(rep(1:5,4))])
+make_side_by_side_bar_plots <- function(glm_rslt, randomforest_rslt,#
+                                            est, est_labels, rm_last = TRUE,#
+                                            yaxis_label, add_ratio = FALSE, #
+                                            xaxis_label = "Number CV Folds",#
+                                            absolute_val = TRUE, col, ...){#
+      layout(matrix(1:8, nrow = 2, ncol = 4,  byrow = TRUE))#
+      par(mar = c(1.6, 0.6, 1.6, 0.6), mgp = c(2.1, 0.5, 0),#
+          oma = c(2.1, 5.1, 2.1, 2.1))#
+      for(n in c(50, 100, 250, 500)){#
+        tmp <- glm_rslt[glm_rslt$n == n, ]#
+        tmp5 <- tmp[tmp$K == 5,]#
+        tmp10 <- tmp[tmp$K == 10,]#
+        tmp20 <- tmp[tmp$K == 20,]#
+        tmp40 <- tmp[tmp$K == 40,]#
+        # est <- c("mse_dcvtmle1","mse_donestep1","mse_emp1","mse_bootstrap")#
+        grbg <- as.matrix(rbind(tmp5[,est],tmp10[,est],tmp20[,est],tmp40[,est]))#
+        if(absolute_val){#
+          grbg <- abs(grbg)#
+        }#
+        if(rm_last){#
+          grbg[2:4,4] <- NA#
+        }#
+        row.names(grbg) <- c(5,10,20,40)#
+        if(n == 50){#
+          leg.text <- est_labels#
+        }else{#
+          leg.text <- FALSE#
+        }#
+        tmp <- barplot(grbg, legend.text = FALSE,#
+          beside=TRUE, log = "y", yaxt = "n", names.arg = rep("",dim(grbg)[2]), col = col, ... )#
+          mtext(side = 1, outer = FALSE, line = 0.02, text = c(5,10,20,40), cex =0.5, #
+        at = c(tmp[,1],tmp[,2],tmp[,3]))#
+        if(n == 50){#
+          legend(x = "topright", fill = unique(col), legend = leg.text)#
+        }#
+        if(n == 50){#
+          axis(side = 2)#
+          mtext(outer = FALSE, side = 2, line = 2, yaxis_label, cex = 0.75)#
+          mtext(outer = FALSE, side = 2, line = 4, "Logistic Regression", cex = 1)#
+        }else{#
+          axis(side = 2, labels = FALSE)#
+        }#
+        mtext(outer = FALSE, side = 3, line = 0.5, paste0("n = ", n))#
+#
+      }#
+      for(n in c(50, 100, 250, 500)){#
+        tmp <- randomforest_rslt[randomforest_rslt$n == n, ]#
+        tmp5 <- tmp[tmp$K == 5,]#
+        tmp10 <- tmp[tmp$K == 10,]#
+        tmp20 <- tmp[tmp$K == 20,]#
+        tmp40 <- tmp[tmp$K == 40,]#
+        # est <- c("mse_dcvtmle1","mse_donestep1","mse_emp1","mse_bootstrap")#
+        grbg <- as.matrix(rbind(tmp5[,est],tmp10[,est],tmp20[,est],tmp40[,est]))#
+        if(absolute_val){#
+          grbg <- abs(grbg)#
+        }#
+        if(rm_last){#
+          grbg[2:4,4] <- NA#
+        }#
+        row.names(grbg) <- c(5,10,20,40)#
+        tmp <- barplot(grbg,  beside=TRUE, log = "y", yaxt = "n", names.arg = rep("",dim(grbg)[2]), #
+                       col = col, ...)#
+        mtext(side = 1, outer = FALSE, line = 0.02, text = c(5,10,20,40), cex =0.5, #
+              at = c(tmp[,1],tmp[,2],tmp[,3]))#
+        # mtext(side = 1, outer = FALSE, line = 0.02, text = c(5,10,20,40), cex =0.5, #
+        #       at = c(mean(tmp[2:3,1]),mean(tmp[2:3,2]),mean(tmp[2:3,3])))#
+        if(n == 50){#
+          axis(side = 2)#
+          mtext(outer = FALSE, side = 2, line = 2, yaxis_label, cex = 0.75)#
+          mtext(outer = FALSE, side = 2, line = 4, "Random Forest", cex = 1)#
+        }else{#
+          axis(side = 2, labels = FALSE)#
+        }#
+      }#
+    }#
+#
+    library(RColorBrewer)#
+    my_col <- brewer.pal(5,"Greys")#
+    # bias#
+    make_side_by_side_bar_plots(glm_rslt, randomforest_rslt, #
+                                est = c("bias_dcvtmle1","bias_donestep1",#
+                                        "bias_emp1","bias_bootstrap","bias_lpo"),#
+                                est_label = c("CVTMLE", "CVOS","Empirical","Bootstrap","LPO"),#
+                                ylim = c(0.0001,100), yaxis_label = "Absolute Bias",#
+                                col = my_col[sort(rep(1:5,4))])#
+    # variance
+# debug(make_side_by_side_bar_plots)#
+    make_side_by_side_bar_plots(glm_rslt, randomforest_rslt, #
                                 est = c("mse_donestep1","mse_dcvtmle1",#
-                                        "mse_emp1","mse_bootstrap"),#
+                                        "mse_emp1","mse_bootstrap","mse_lpo"),#
                                 est_label = c("CVOS", "CVTMLE","Empirical","Bootstrap"),#
                                 ylim = c(0.0001,100), yaxis_label = "Mean squared-error",#
-                                col = my_col[sort(rep(1:4,4))])
-head(dat$W)
-algo <- c("SL.glm","SL.hal9001")
-library(hal9001)
-debug(get_all_ates)#
-    out <- get_all_ates(Y = dat$Y$Y, A = dat$A$A, W = dat$W, #
-                        V = 6, learners = algo, #
-                        # remove_learner = "SL.hal9001",#
-                        which_Match = algo,#
-                        which_dr_tmle = algo,#
-                        which_dr_iptw = algo)
-debug(get_all_ates)#
-    out <- get_all_ates(Y = dat$Y$Y, A = dat$A$A, W = dat$W, #
-                        V = 6, learners = algo, #
-                        # remove_learner = "SL.hal9001",#
-                        which_Match = algo,#
-                        which_dr_tmle = algo,#
-                        which_dr_iptw = algo)
-debug(estimate_nuisance)
-Q
-debug(get_all_ates)#
-    out <- get_all_ates(Y = dat$Y$Y, A = dat$A$A, W = dat$W, #
-                        V = 4, learners = algo, #
-                        # remove_learner = "SL.hal9001",#
-                        which_Match = algo,#
-                        which_dr_tmle = algo,#
-                        which_dr_iptw = algo)
-all_fit_tasks[[1]]
-which_ctmle <- "SL.hal9001"
-full_hal_idx <- cvma:::search_fits_for_learner(training_folds = seq_len(V),#
-                                          fits = all_fits, #
-                                          learner = which_ctmle,#
-                                          y = "A")
-full_hal_idx
-names(all_fits[[full_hal_idx]])
-grbg <- all_fits[[2]]$fit
-names(grbg)
-class(grbg)
-class(grbg$object)
-hal_fit <- all_fits[[full_hal_idx]]$fit$object
-names(hal_fit)
-SL.hal9001
-hal_fit$coefs
-?fit_hal
-Q
-install_github("benkeser/hal9001")
-load_all("~/Dropbox/R/haltmle.sim")
-debug(get_all_ates)#
-    out <- get_all_ates(Y = dat$Y$Y, A = dat$A$A, W = dat$W, #
-                        V = 4, learners = algo, #
-                        # remove_learner = "SL.hal9001",#
-                        which_Match = algo,#
-                        which_dr_tmle = algo,#
-                        which_dr_iptw = algo)
-debug(estimate_nuisance)
-install_github("benkeser/hal9001")
-debug(get_all_ates)#
-    out <- get_all_ates(Y = dat$Y$Y, A = dat$A$A, W = dat$W, #
-                        V = 4, learners = algo, #
-                        # remove_learner = "SL.hal9001",#
-                        which_Match = algo,#
-                        which_dr_tmle = algo,#
-                        which_dr_iptw = algo)
-debug(estimate_nuisance)
-full_hal_idx <- cvma:::search_fits_for_learner(training_folds = seq_len(V),#
-                                          fits = all_fits, #
-                                          learner = which_ctmle,#
-                                          y = "A")
-hal_fit <- all_fits[[full_hal_idx]]$fit$object
-names(hal_fit)
-class(hal_fit$hal_lasso)
-hal_fit$hal_lasso
-fit_hal
-Q
-algo <- c("SL.glm","SL.hal9002")
-debug(get_all_ates)#
-    out <- get_all_ates(Y = dat$Y$Y, A = dat$A$A, W = dat$W, #
-                        V = 4, learners = algo, #
-                        # remove_learner = "SL.hal9001",#
-                        which_Match = algo,#
-                        which_dr_tmle = algo,#
-                        which_dr_iptw = algo)
-c
-full_hal_idx <- cvma:::search_fits_for_learner(training_folds = seq_len(V),#
-                                          fits = all_fits, #
-                                          learner = which_ctmle,#
-                                          y = "A")
-hal_fit <- all_fits[[full_hal_idx]]$fit$object
-which_ctmle <- "SL.hal9002"
-full_hal_idx <- cvma:::search_fits_for_learner(training_folds = seq_len(V),#
-                                          fits = all_fits, #
-                                          learner = which_ctmle,#
-                                          y = "A")
-hal_fit <- all_fits[[full_hal_idx]]$fit$object
-names(hal_fit)
-class(hal_fit$hal_lasso)
-class(hal_fit$hal_lasso$lamba)
-class(hal_fit$hal_lasso$lambda)
-hal_fit$hal_lasso$lambda
-g_matrix <- sapply(hal_fit$hal_lasso$lambda, function(l){#
-                     predict(hal_fit$hal_lasso, lambda = l)})
-predict.SL.hal9002
-predict.SL.hal9001
-SL.hal.9001
-SL.hal9001
-predict.SL.hal9001
-predict.SL.hal9002 <- function(object, newX, ...) {#
-  # generate predictions and return#
-  pred <- stats::predict(object$object$hal_lasso, newx = newX, ...)#
-  return(pred)#
-}
-predict.SL.hal9002 <- function(object, newdata, ...) {#
-  if (!is.matrix(newdata)) {#
-    new_data <- as.matrix(newdata)#
-  }#
+                                col = my_col[sort(rep(1:5,4))])
+make_side_by_side_bar_plots(glm_rslt, randomforest_rslt, #
+                                est = c("mse_donestep1","mse_dcvtmle1",#
+                                        "mse_emp1","mse_bootstrap","mse_lpo"),#
+                                est_label = c("CVOS", "CVTMLE","Empirical","Bootstrap"),#
+                                ylim = c(0.0001,1), yaxis_label = "Mean squared-error",#
+                                col = my_col[sort(rep(1:5,4))])
+make_side_by_side_bar_plots(glm_rslt, randomforest_rslt, #
+                                est = c("mse_donestep1","mse_dcvtmle1",#
+                                        "mse_emp1","mse_bootstrap","mse_lpo"),#
+                                est_label = c("CVOS", "CVTMLE","Empirical","Bootstrap"),#
+                                ylim = c(0.0001,0.1), yaxis_label = "Mean squared-error",#
+                                col = my_col[sort(rep(1:5,4))])
+make_side_by_side_bar_plots(glm_rslt, randomforest_rslt, #
+                                est = c("bias_dcvtmle1","bias_donestep1",#
+                                        "bias_emp1","bias_bootstrap","bias_lpo"),#
+                                est_label = c("CVTMLE", "CVOS","Empirical","Bootstrap","LPO"),#
+                                ylim = c(0.0001,100), yaxis_label = "Absolute Bias",#
+                                col = my_col[sort(rep(1:5,4))])
+make_side_by_side_bar_plots(glm_rslt, randomforest_rslt, #
+                                est = c("bias_dcvtmle1","bias_donestep1",#
+                                        "bias_emp1","bias_bootstrap","bias_lpo"),#
+                                est_label = c("CVTMLE", "CVOS","Empirical","Bootstrap","LPO"),#
+                                ylim = c(0.0001,0.1), yaxis_label = "Absolute Bias",#
+                                col = my_col[sort(rep(1:5,4))])
+# bias#
+    make_side_by_side_bar_plots(glm_rslt, randomforest_rslt, #
+                                est = c("bias_dcvtmle1","bias_donestep1",#
+                                        "bias_emp1","bias_bootstrap","bias_lpo"),#
+                                est_label = c("CVTMLE", "CVOS","Empirical","Bootstrap","LPO"),#
+                                ylim = c(0.0001,0.1), yaxis_label = "Absolute Bias",absolute_val = TRUE,#
+                                col = my_col[sort(rep(1:5,4))])
+# mse by CV Repeats for CVTMLE#
+    make_side_by_side_bar_plots(glm_rslt, randomforest_rslt, #
+                                est = c("mse_dcvtmle1","mse_dcvtmle5",#
+                                        "mse_dcvtmle10","mse_dcvtmle20"),#
+                                est_label = paste0("CVTMLE ", c(1,5,10,20)," repeats"),#
+                                ylim = c(0.0001,0.01), yaxis_label = "Variance")
+# mse by CV Repeats for CVTMLE#
+    make_side_by_side_bar_plots(glm_rslt, randomforest_rslt, #
+                                est = c("mse_dcvtmle1","mse_dcvtmle5",#
+                                        "mse_dcvtmle10","mse_dcvtmle20"),#
+                                est_label = paste0("CVTMLE ", c(1,5,10,20)," repeats"),#
+                                ylim = c(0.0001,0.01), yaxis_label = "MSE",#
+                                col = my_col[sort(rep(1:5,4))])
+library(drtmle)
+install.packages("drtmle")
+y
+library(drtmle)
+# simulate simple data structure#
+set.seed(12345)#
+n <- 200#
+W <- data.frame(W1 = runif(n,-2,2), W2 = rbinom(n,1,0.5))#
+A <- rbinom(n, 1, plogis(-2 + W$W1 - 2*W$W1*W$W2))#
+Y <- rbinom(n, 1, plogis(-2 + W$W1 - 2*W$W1*W$W2 + A))#
 #
-  # generate design matrix#
-  pred_x_basis <- hal9001:::make_design_matrix(new_data, object$basis_list)#
-  group <- object$copy_map[[1]]#
+# estimate the covariate-adjusted marginal mean for A = 1 and A = 0#
+# here, we do not properly estimate the propensity score#
+fit1 <- drtmle(W = W, A = A, Y = Y, # input data#
+               a_0 = c(0, 1), # return estimates for A = 0 and A = 1#
+               SL_Q = "SL.npreg", # use kernel regression for E(Y | A = a, W)#
+               glm_g = "W1 + W2", # use misspecified main terms glm for E(A | W)#
+               SL_Qr = "SL.npreg", # use kernel regression to guard against#
+                                   # misspecification of outcome regression#
+               SL_gr = "SL.npreg" # use kernel regression to guard against#
+                                  # misspecification of propensity score#
+              )
+plot(fit1)
+# simulate simple data structure#
+set.seed(12345)#
+n <- 200#
+W <- data.frame(W1 = runif(n,-2,2), W2 = rbinom(n,1,0.5))#
+A <- rbinom(n, 1, plogis(-2 + W$W1 - 2*W$W1*W$W2))#
+Y <- rbinom(n, 1, plogis(-2 + W$W1 - 2*W$W1*W$W2 + A))#
 #
-  # reduce matrix of basis functions#
-  pred_x_basis <- hal9001:::apply_copy_map(pred_x_basis, object$copy_map)#
+# estimate the covariate-adjusted marginal mean for A = 1 and A = 0#
+# here, we do not properly estimate the propensity score#
+fit1 <- drtmle(W = W, A = A, Y = Y, # input data#
+               a_0 = c(0, 1), # return estimates for A = 0 and A = 1#
+               SL_Q = "SL.npreg", # use kernel regression for E(Y | A = a, W)#
+               glm_g = "W1 + W2", # use misspecified main terms glm for E(A | W)#
+               SL_Qr = "SL.npreg", # use kernel regression to guard against#
+                                   # misspecification of outcome regression#
+               SL_gr = "SL.npreg" # use kernel regression to guard against#
+                                  # misspecification of propensity score#
+              , return_models = TRUE)
+fit1
+plot(fit1)
+# simulate simple data structure#
+set.seed(12345)#
+n <- 200#
+W <- data.frame(W1 = runif(n,-2,2), W2 = rbinom(n,1,0.5))#
+A <- rbinom(n, 1, plogis(-2 + W$W1 - 2*W$W1*W$W2))#
+Y <- rbinom(n, 1, plogis(-2 + W$W1 - 2*W$W1*W$W2 + A))#
 #
-  # generate predictions#
-  preds <- predict(object$object$hal_lasso, newdata = pred_x_basis, #
-                   ...)#
-#
-  return(preds)#
-}
-predict_alllambda_SL.hal9002 <- function(object, newdata, ...) {#
-  if (!is.matrix(newdata)) {#
-    new_data <- as.matrix(newdata)#
-  }#
-#
-  # generate design matrix#
-  pred_x_basis <- hal9001:::make_design_matrix(new_data, object$basis_list)#
-  group <- object$copy_map[[1]]#
-#
-  # reduce matrix of basis functions#
-  pred_x_basis <- hal9001:::apply_copy_map(pred_x_basis, object$copy_map)#
-#
-  # generate predictions#
-  preds <- sapply(object$hal_lasso$lambda, function(l){#
-    predict(object$object$hal_lasso, newdata = pred_x_basis, #
-                   lambda = l)})#
-#
-  return(preds)#
-}
-head(W)
-g_matrix <- predict_alllambda_SL.hal9002(hal_fit, newdata = W)
-predict_alllambda_SL.hal9002 <- function(object, newdata, ...) {#
-  if (!is.matrix(newdata)) {#
-    new_data <- as.matrix(newdata)#
-  }#
-#
-  # generate design matrix#
-  pred_x_basis <- hal9001:::make_design_matrix(new_data, object$basis_list)#
-  group <- object$copy_map[[1]]#
-#
-  # reduce matrix of basis functions#
-  pred_x_basis <- hal9001:::apply_copy_map(pred_x_basis, object$copy_map)#
-#
-  # generate predictions#
-  preds <- sapply(object$hal_lasso$lambda, function(l){#
-    predict(object$hal_lasso, newdata = pred_x_basis, #
-                   lambda = l)})#
-#
-  return(preds)#
-}
-g_matrix <- predict_alllambda_SL.hal9002(hal_fit, newdata = W)
-#' @export #
-predict_alllambda_SL.hal9002 <- function(object, newdata, ...) {#
-  if (!is.matrix(newdata)) {#
-    new_data <- as.matrix(newdata)#
-  }#
-#
-  # generate design matrix#
-  pred_x_basis <- hal9001:::make_design_matrix(new_data, object$basis_list)#
-  group <- object$copy_map[[1]]#
-#
-  # reduce matrix of basis functions#
-  pred_x_basis <- hal9001:::apply_copy_map(pred_x_basis, object$copy_map)#
-#
-  # generate predictions#
-  preds <- sapply(object$hal_lasso$lambda, function(l){#
-    predict(object$hal_lasso, newx = pred_x_basis, #
-                   lambda = l)})#
-#
-  return(preds)#
-}
-g_matrix <- predict_alllambda_SL.hal9002(hal_fit, newdata = W)
-dim(g_matrix)
-head(g_matrix[,1:3])
-head(g_matrix[,1:20])
-head(g_matrix[,1:1000])
-head(g_matrix[,1:2000])
-head(W)
-names(hal_fit)
-hal_fit$coefs
-debug(predict_alllambda_SL.hal9002)
-?predict.glmnet
-predict_alllambda_SL.hal9002 <- function(object, newdata, ...) {#
-  if (!is.matrix(newdata)) {#
-    new_data <- as.matrix(newdata)#
-  }#
-#
-  # generate design matrix#
-  pred_x_basis <- hal9001:::make_design_matrix(new_data, object$basis_list)#
-  group <- object$copy_map[[1]]#
-#
-  # reduce matrix of basis functions#
-  pred_x_basis <- hal9001:::apply_copy_map(pred_x_basis, object$copy_map)#
-#
-  # generate predictions#
-  preds <- sapply(object$hal_lasso$lambda, function(l){#
-    predict(object$hal_lasso, newx = pred_x_basis, #
-                   s = l)})#
-#
-  return(preds)#
-}
-g_matrix <- predict_alllambda_SL.hal9002(hal_fit, newdata = W)
-head(g_matrix[,1:20])
-head(g_matrix[,2000])
-head(g_matrix[,1000])
-head(g_matrix[,500])
-head(g_matrix[,200:250])
-names(hal_fit)
-hal_fit$lambda_star
-hal_fit$lambda
-names(hal_fit)
-grbg <- all_fits[[full_hal_idx]]$fit
-class(Grbg)
-class(grbg)
-names(grbg)
-grbg <- all_fits[[full_hal_idx]]
-names(grbg)
-head(grbg$pred)
-head(grbg$pred_setA)
-n <- length(A)
-train_matrix <- combn(V, V-1)
-tr <- split(train_matrix,col(train_matrix))
-tr <- split(train_matrix,col(train_matrix))[,1]
-tr
-tr <- split(train_matrix,col(train_matrix))[[1]]
-learner_idx <- cvma:::search_fits_for_learner(fits = all_fit_tasks, #
-                                          y = "A", learner = which_ctmle, #
-                                          training_folds = tr)
-learner_idx
-all_fits[[4]]$pred
-folds
-this_g_matrix <- predict_alllambda_SL.hal9002(all_fits[[learner_idx]]$fit$object, #
-                                                  newdata = W[-which(folds %in% tr),,drop=FALSE])
-dim(this_g_matrix)
-all_out <- lapply(split(train_matrix,col(train_matrix)), function(tr){#
-    learner_idx <- cvma:::search_fits_for_learner(fits = all_fit_tasks, #
-                                          y = "A", learner = which_ctmle, #
-                                          training_folds = tr)#
-    this_g_matrix <- predict_alllambda_SL.hal9002(all_fits[[learner_idx]]$fit$object, #
-                                                  newdata = W[-which(folds %in% tr),,drop=FALSE])#
-    return(this_g_matrix)#
-  })
-class(all_out)
-cv_g_matrix <- matrix(NA, nrow = length(W[,1]), ncol = dim(g_matrix)[2])
-cv_g_matrix[idx,] <- Reduce(rbind, lapply(all_out, "[[", 1))
-idx <- unlist(split(1:n, folds)[V:1], use.names = FALSE)
-cv_g_matrix[idx,] <- Reduce(rbind, lapply(all_out, "[[", 1))
-dim(cv_g_matrix)
-Q
+# estimate the covariate-adjusted marginal mean for A = 1 and A = 0#
+# here, we do not properly estimate the propensity score#
+fit1 <- drtmle(W = W, A = A, Y = Y, # input data#
+               a_0 = c(0, 1), # return estimates for A = 0 and A = 1#
+               SL_Q = "SL.npreg", # use kernel regression for E(Y | A = a, W)#
+               glm_g = "W1 + W2", # use misspecified main terms glm for E(A | W)#
+               SL_Qr = "SL.npreg", # use kernel regression to guard against#
+                                   # misspecification of outcome regression#
+               SL_gr = "SL.npreg" # use kernel regression to guard against#
+                                  # misspecification of propensity score#
+              , returnModels = TRUE)
+plot(fit1)
+plot(fit1)
+plot(fit1)
+?plot.drtmle
+install.packages("rmarkdown")
+install.packages("nloptr")
+devtools::install_github("benkeser/drtmle")

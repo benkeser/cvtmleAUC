@@ -443,8 +443,8 @@ if(FALSE){
 
     # bias by CV Repeats for CVTMLE
     make_side_by_side_bar_plots(glm_rslt, randomforest_rslt, 
-                                est = c("bias_emp1","bias_emp5",
-                                        "bias_emp10","bias_emp20"),
+                                est = c("bias_dcvtmle1","bias_dcvtmle5",
+                                        "bias_dcvtmle10","bias_dcvtmle20"),
                                 rm_last = FALSE, transpose = TRUE, 
                                 est_label = paste0("CVTMLE ", c(1,5,10,20)," repeats"),
                                 ylim = c(0.00001,100), yaxis_label = "Absolute bias",,
@@ -452,20 +452,20 @@ if(FALSE){
 
     # variance by CV Repeats for CVTMLE
     make_side_by_side_bar_plots(glm_rslt, randomforest_rslt, 
-                                est = c("var_emp1","var_emp5",
-                                        "var_emp10","var_emp20"),
-                                rm_last = FALSE,
+                                est = c("var_dcvtmle1","var_dcvtmle5",
+                                        "var_dcvtmle10","var_dcvtmle20"),
+                                rm_last = FALSE, transpose = TRUE, 
                                 est_label = paste0("CVTMLE ", c(1,5,10,20)," repeats"),
                                 ylim = c(0.0001,0.01), yaxis_label = "Variance",
                                 col = my_col[sort(rep(1:4,4))])
 
     # mse by CV Repeats for CVTMLE
     make_side_by_side_bar_plots(glm_rslt, randomforest_rslt, 
-                                est = c("mse_emp1","mse_emp5",
-                                        "mse_emp10","mse_emp20"),
-                                rm_last = FALSE,
+                                est = c("mse_dcvtmle1","mse_dcvtmle5",
+                                        "mse_dcvtmle10","mse_dcvtmle20"),
+                                rm_last = FALSE, transpose = TRUE, 
                                 est_label = paste0("CVTMLE ", c(1,5,10,20)," repeats"),
-                                ylim = c(0.0001,0.01), yaxis_label = "Variance",
+                                ylim = c(0.0001,0.1), yaxis_label = "Variance",
                                 col = my_col[sort(rep(1:4,4))])
 
 

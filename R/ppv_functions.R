@@ -86,8 +86,8 @@ cvtn_cvtmle <- function(Y, X, K = 20, sens = 0.95, learner = "glm_wrapper",
   target_data$logit_Fn <- SuperLearner::trimLogit(target_data$Fn, trim = 1e-5)
   pred_data$logit_Fn <- SuperLearner::trimLogit(pred_data$Fn, trim = 1e-5)
   
-  fluc_mod <- glm(ind ~ offset(logit_Fn), data = target_data, family = "binomial",
-                  weights = weight, start = 0)
+  fluc_mod <- glm(ind ~ -1 + offset(logit_Fn) + weight, data = target_data, family = "binomial",
+                  start = 0)
   target_data$Fnstar <- fluc_mod$fitted.values
   pred_data$Fnstar <- predict(fluc_mod, newdata = pred_data, type = "response")
   # compute initial non-targeted estimates

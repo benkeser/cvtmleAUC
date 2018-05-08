@@ -50,7 +50,7 @@ scp allOut*.RData dbenkese@snail.fhcrc.org:~/cvtmleauc
  	# ctrl + shift + t to open up new term
 # scp to snail
 cd ~/Dropbox/R/cvtmleauc/sandbox/simulation
-scp dbenkese@snail.fhcrc.org:~/cvtmleauc/allOut_cvtn.RData . 
+scp dbenkese@snail.fhcrc.org:~/cvtmleauc/allOut*.RData . 
 
 #-----------------------------------------
 # misc commands 

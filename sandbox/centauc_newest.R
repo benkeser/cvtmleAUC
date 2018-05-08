@@ -270,7 +270,7 @@ if (args[1] == 'merge') {
 
 # local editing 
 if(FALSE){
-  setwd("~/Dropbox/R/cvtmleauc/sandbox/")
+  setwd("~/Dropbox/R/cvtmleauc/sandbox/simulation")
   load("allOut_cvauc.RData")
     # load("~/cvtmleauc/out/allOut_new.RData")
 
