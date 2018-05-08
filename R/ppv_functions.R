@@ -267,20 +267,27 @@ cvtn_cvtmle <- function(Y, X, K = 20, sens = 0.95, learner = "glm_wrapper",
 .getDensity <- function(x, c0, bounded_kernel = FALSE,
                         x_name = "psi_nBn_trainx", 
                         nested_cv = FALSE, prediction_list = NULL, 
-                        folds = NULL, ... ){
+                        folds = NULL, maxDens = 1e3, ... ){
   if(!nested_cv){
     if(!bounded_kernel){
-      # density given y = 1
-      fitbw <- np::npudensbw(x[[x_name]][x$train_y == 1])
-      fit <- np::npudens(fitbw)
-      # estimate at c0
-      f_10_c0 <- stats::predict(fit, edat = c0)
-
-      # marginal density
-      fitbw_marg <- np::npudensbw(x[[x_name]])
-      fit_marg <- np::npudens(fitbw_marg)
-      # estimate at c0
-      f_0_c0 <- stats::predict(fit_marg, edat = c0)
+      if(length(unique(x[[x_name]][x$train_y == 1])) > 1){
+        # density given y = 1
+        fitbw <- np::npudensbw(x[[x_name]][x$train_y == 1])
+        fit <- np::npudens(fitbw)
+        # estimate at c0
+        f_10_c0 <- stats::predict(fit, edat = c0)
+      }else{
+        f_10_c0 <- maxDens
+      }
+      if(length(unique(x[[x_name]])) > 1){
+        # marginal density
+        fitbw_marg <- np::npudensbw(x[[x_name]])
+        fit_marg <- np::npudens(fitbw_marg)
+        # estimate at c0
+        f_0_c0 <- stats::predict(fit_marg, edat = c0)
+      }else{
+        f_0_c0 <- maxDens
+      }
     }else{
       # density given Y = 1
       fit_1 <- bde::bde(dataPoints = x[[x_name]][x$train_y == 1],
@@ -328,17 +335,24 @@ cvtn_cvtmle <- function(Y, X, K = 20, sens = 0.95, learner = "glm_wrapper",
                       estimator = "betakernel")
       f_0_c0 <- fit_all@densityCache
     }else{
-      # density given y = 1
-      fitbw <- np::npudensbw(all_pred[all_y == 1])
-      fit <- np::npudens(fitbw)
-      # estimate at c0
-      f_10_c0 <- stats::predict(fit, edat = c0)
-
-      # marginal density
-      fitbw_marg <- np::npudensbw(all_pred)
-      fit_marg <- np::npudens(fitbw_marg)
-      # estimate at c0
-      f_0_c0 <- stats::predict(fit_marg, edat = c0)
+      if(length(unique(all_pred[all_y == 1])) > 1){
+        # density given y = 1
+        fitbw <- np::npudensbw(all_pred[all_y == 1])
+        fit <- np::npudens(fitbw)
+        # estimate at c0
+        f_10_c0 <- stats::predict(fit, edat = c0)
+      }else{
+        f_10_c0 <- maxDens
+      }
+      if(length(unique(all_pred[all_y == 1])) > 1){
+        # marginal density
+        fitbw_marg <- np::npudensbw(all_pred)
+        fit_marg <- np::npudens(fitbw_marg)
+        # estimate at c0
+        f_0_c0 <- stats::predict(fit_marg, edat = c0)
+      }else{
+        f_0_c0 <- maxDens
+      }
     }
   }
   # return both
