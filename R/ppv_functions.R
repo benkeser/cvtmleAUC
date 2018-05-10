@@ -436,7 +436,7 @@ cvtn_cvtmle <- function(Y, X, K = 20, sens = 0.95, learner = "glm_wrapper",
   out <- data.frame(fold = fold_vec, Y = Y_vec, gn = gn_vec, Fn = F_nBn_vec,
                     f_ratio = dens_ratio, ind = ind)
   out_pred <- data.frame(fold = fold_vec_pred, Y = Y_vec_pred, gn = gn_vec, 
-                         Fn = F_nBn_vec_pred, f_ratio = dens_ratio)
+                         Fn = F_nBn_vec_pred, f_ratio = dens_ratio_pred)
   return(list(out = out, out_pred = out_pred))
 }
 
