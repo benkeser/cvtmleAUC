@@ -30,8 +30,8 @@ parm <- expand.grid(seed = 1:bigB,
                     n = ns, K = K, 
                     wrapper = wrappers,
                     stringsAsFactors = FALSE)
-load("~/cvtmleauc/scratch/redo_parm_newest.RData")
-parm <- redo_parm
+# load("~/cvtmleauc/scratch/redo_parm_newest.RData")
+# parm <- redo_parm
 # load('~/cvtmleauc/out/allOut_new.RData')
 # redo_idx <- which(is.na(out$est_dcvtmle))
 # parm <- parm[redo_idx,]

@@ -39,6 +39,7 @@ if [[ -z $RETRYFAILED ]]; then
     echo "  submitting ${SCRIPT} prepare in ${MYSCRATCH}..." 
     sbatch --dependency=singleton --job-name=${ANALYSIS} \
            --partition=${PARTITION} --time=0-3 --requeue \
+           --exclude=gizmoe[1-23] \
            --mail-type=FAIL --mail-user="${username}{MAILDOM}" \
            --output="${MYSCRATCH}/out/${ANALYSIS}.prepare.%J" \
            --wrap="${SCRIPT} prepare 0 $3 $4 $5 $6 $7 $8 $9"

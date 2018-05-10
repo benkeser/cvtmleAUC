@@ -383,8 +383,13 @@ cvtn_cvtmle <- function(Y, X, K = 20, sens = 0.95, learner = "glm_wrapper",
 
     dens_ratio <- Reduce(c, mapply(FUN = function(m, dens){
       if(dens[[1]] == 0){ dens[[1]] <- 1e-3 }
-      if(dens[[2]] > 1e4){ dens[[2]] <- 1e4 }
+      if(dens[[2]] > 1e3){ dens[[2]] <- 1e3 }
       rep(dens[[2]]/dens[[1]], length(m$test_y))
+    }, m = prediction_list, dens = density_list))
+    dens_ratio_pred <- Reduce(c, mapply(FUN = function(m, dens){
+      if(dens[[1]] == 0){ dens[[1]] <- 1e-3 }
+      if(dens[[2]] > 1e3){ dens[[2]] <- 1e3 }
+      rep(dens[[2]]/dens[[1]], 2)
     }, m = prediction_list, dens = density_list))
     ind <- Reduce(c, mapply(m = prediction_list, c0 = quantile_list, function(m, c0){
       as.numeric(m$psi_nBn_testx <= c0)
@@ -422,8 +427,9 @@ cvtn_cvtmle <- function(Y, X, K = 20, sens = 0.95, learner = "glm_wrapper",
     F_nBn_vec <- ifelse(prediction_list[[x]]$test_y == 0, F_nBn_y0_at_c0, F_nBn_y1_at_c0)
     F_nBn_vec_pred <- c(F_nBn_y0_at_c0, F_nBn_y1_at_c0)
     if(density_list[[x]][[1]] == 0){ density_list[[x]][[1]] <- 1e-3 }
-    if(density_list[[x]][[2]] > 1e4){ density_list[[x]][[2]] <- 1e4 }
+    if(density_list[[x]][[2]] > 1e3){ density_list[[x]][[2]] <- 1e3 }
     dens_ratio <- density_list[[x]][[2]]/density_list[[x]][[1]]
+    dens_ratio_pred <- density_list[[x]][[2]]/density_list[[x]][[1]]
     ind <- as.numeric(prediction_list[[x]]$psi_nBn_testx <= quantile_list[[x]])
   }
 
