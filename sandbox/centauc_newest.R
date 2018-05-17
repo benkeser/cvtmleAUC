@@ -24,12 +24,12 @@ K <- c(5, 10, 20, 40)
 wrappers <- c("glm_wrapper", "randomforest_wrapper")
 # wrappers <- c("glmnet_wrapper")
 p <- 10
-parm <- expand.grid(seed = 1:bigB,
+parm <- expand.grid(seed = bigB + 1:bigB,
                     n = ns, K = K, 
                     wrapper = wrappers,
                     stringsAsFactors = FALSE)
-load("~/cvtmleauc/scratch/redo_parm_newest.RData")
-# parm <- redo_parm
+load("~/cvtmleauc/scratch/redo_parm_aucnewest.RData")
+parm <- redo_parm
 # load('~/cvtmleauc/out/allOut_new.RData')
 # redo_idx <- which(is.na(out$est_dcvtmle))
 # parm <- parm[redo_idx,]
@@ -53,14 +53,14 @@ if (args[1] == 'listsize') {
 
 # execute prepare job ##################
 if (args[1] == 'prepare') {
-  # parm_red <- parm[parm$K == parm$K[1] & parm$wrapper == parm$wrapper[1],]
-  # for(i in 1:nrow(parm_red)){
-  #    set.seed(parm_red$seed[i])
-  #    dat <- makeData(n = parm_red$n[i], p = p)
-  #    save(dat, file=paste0("~/cvtmleauc/scratch/dataList",
-  #                          "_n=",parm_red$n[i],
-  #                          "_seed=",parm_red$seed[i],".RData"))
-  #  }
+  parm_red <- parm[parm$K == parm$K[1] & parm$wrapper == parm$wrapper[1],]
+  for(i in 1:nrow(parm_red)){
+     set.seed(parm_red$seed[i])
+     dat <- makeData(n = parm_red$n[i], p = p)
+     save(dat, file=paste0("~/cvtmleauc/scratch/dataList",
+                           "_n=",parm_red$n[i],
+                           "_seed=",parm_red$seed[i],".RData"))
+   }
    print(paste0('initial datasets saved to: ~/cvtmleauc/scratch/dataList ... .RData'))
 }
 
@@ -194,77 +194,77 @@ if (args[1] == 'run') {
 
 # merge job ###########################
 if (args[1] == 'merge') {   
-  ns <- c(50, 100, 250, 500)
-  bigB <- 500
-  K <- c(5,10,20,40)
-  wrappers <- c("glm_wrapper", "randomforest_wrapper")
-  # wrappers <- c("glmnet_wrapper")
-  p <- 10
-  redo_parm <- NULL
-  # TO DO:
-  # Add a replicate argument for repeated cross-validation estimators
-  parm <- expand.grid(seed = 1:bigB,
-                      n = ns, K = K, 
-                      wrapper = wrappers,
-                      stringsAsFactors = FALSE)
-  rslt <- matrix(NA, nrow = nrow(parm), ncol = 67 + 4)
-  for(i in 1:nrow(parm)){
-    if(file.exists(paste0("~/cvtmleauc/out/outauc_",
-                            "n=", parm$n[i],
-                            "_seed=",parm$seed[i],
-                            "_K=",parm$K[i],
-                            "_wrapper=",parm$wrapper[i],
-                            ".RData"))){
-      tmp_1 <- get(load(paste0("~/cvtmleauc/out/outauc_",
-                            "n=", parm$n[i],
-                            "_seed=",parm$seed[i],
-                            "_K=",parm$K[i],
-                            "_wrapper=",parm$wrapper[i],
-                            ".RData")))
-    }else{
-      redo_parm <- rbind(redo_parm, parm[i,])
-      tmp_1 <- rep(NA, 67)
+    ns <- c(50, 100, 250, 500)
+    bigB <- 1000
+    K <- c(5,10,20,40)
+    wrappers <- c("glm_wrapper", "randomforest_wrapper")
+    # wrappers <- c("glmnet_wrapper")
+    p <- 10
+    redo_parm <- NULL
+    # TO DO:
+    # Add a replicate argument for repeated cross-validation estimators
+    parm <- expand.grid(seed = 1:bigB,
+                        n = ns, K = K, 
+                        wrapper = wrappers,
+                        stringsAsFactors = FALSE)
+    rslt <- matrix(NA, nrow = nrow(parm), ncol = 67 + 4)
+    for(i in 1:nrow(parm)){
+      if(file.exists(paste0("~/cvtmleauc/out/outauc_",
+                              "n=", parm$n[i],
+                              "_seed=",parm$seed[i],
+                              "_K=",parm$K[i],
+                              "_wrapper=",parm$wrapper[i],
+                              ".RData"))){
+        tmp_1 <- get(load(paste0("~/cvtmleauc/out/outauc_",
+                              "n=", parm$n[i],
+                              "_seed=",parm$seed[i],
+                              "_K=",parm$K[i],
+                              "_wrapper=",parm$wrapper[i],
+                              ".RData")))
+      }else{
+        redo_parm <- rbind(redo_parm, parm[i,])
+        tmp_1 <- rep(NA, 67)
+      }
+      rslt[i,] <- c(parm$seed[i], parm$n[i], parm$K[i], parm$wrapper[i], tmp_1)
+      # if(parm$K[i] != 5){
+      #   boot_rslt_out <- get(load(paste0("~/cvtmleauc/out/outauc",
+      #                         "n=", parm$n[i],
+      #                         "_seed=",parm$seed[i],
+      #                         "_K=5",
+      #                         "_wrapper=",parm$wrapper[i],
+      #                         ".RData")))
+      #   boot_idx <- length(boot_rslt_out) - 2
+      #   lpo_idx <- length(boot_rslt_out) - 1
+      #   rslt[i,c(boot_idx, lpo_idx)] <- boot_rslt_out[c(boot_idx,lpo_idx)]
+      # }
     }
-    rslt[i,] <- c(parm$seed[i], parm$n[i], parm$K[i], parm$wrapper[i], tmp_1)
-    # if(parm$K[i] != 5){
-    #   boot_rslt_out <- get(load(paste0("~/cvtmleauc/out/outauc",
-    #                         "n=", parm$n[i],
-    #                         "_seed=",parm$seed[i],
-    #                         "_K=5",
-    #                         "_wrapper=",parm$wrapper[i],
-    #                         ".RData")))
-    #   boot_idx <- length(boot_rslt_out) - 2
-    #   lpo_idx <- length(boot_rslt_out) - 1
-    #   rslt[i,c(boot_idx, lpo_idx)] <- boot_rslt_out[c(boot_idx,lpo_idx)]
-    # }
-  }
-  # # format
-  out <- data.frame(rslt, stringsAsFactors = FALSE)
+    # # format
+    out <- data.frame(rslt, stringsAsFactors = FALSE)
 
-  repeat_names <- c("est_dcvtmle", "se_dcvtmle", 
-                 "est_dinit", "est_donestep", "se_donestep",
-                 "est_desteq","se_desteq","est_cvtmle","se_cvtmle",
-                 "est_init", "est_onestep", "se_onestep",
-                 "est_esteq","se_esteq","est_emp","se_emp")
-  repeat_names2 <- c("est_dcvtmle", "se_dcvtmle","est_dinit",
-                  "est_donestep", "se_donestep",
-                 "est_desteq","se_desteq","est_cvtmle","se_cvtmle",
-                 "est_init", "est_onestep", "se_onestep",
-                 "est_esteq","se_esteq","est_emp","se_emp")
+    repeat_names <- c("est_dcvtmle", "se_dcvtmle", 
+                   "est_dinit", "est_donestep", "se_donestep",
+                   "est_desteq","se_desteq","est_cvtmle","se_cvtmle",
+                   "est_init", "est_onestep", "se_onestep",
+                   "est_esteq","se_esteq","est_emp","se_emp")
+    repeat_names2 <- c("est_dcvtmle", "se_dcvtmle","est_dinit",
+                    "est_donestep", "se_donestep",
+                   "est_desteq","se_desteq","est_cvtmle","se_cvtmle",
+                   "est_init", "est_onestep", "se_onestep",
+                   "est_esteq","se_esteq","est_emp","se_emp")
 
-  sim_names <- c("seed","n","K","wrapper",
-                 paste0(repeat_names, 1),
-                 paste0(repeat_names2, 5),
-                 paste0(repeat_names2, 10),
-                 paste0(repeat_names2, 20),
-                 "est_bootstrap","est_lpo",
-                 "truth")  
-  colnames(out) <- sim_names
-  out[,c(1:3,5:ncol(out))] <- apply(out[,c(1:3,5:ncol(out))], 2, function(y){
-    as.numeric(as.character(y))})
+    sim_names <- c("seed","n","K","wrapper",
+                   paste0(repeat_names, 1),
+                   paste0(repeat_names2, 5),
+                   paste0(repeat_names2, 10),
+                   paste0(repeat_names2, 20),
+                   "est_bootstrap","est_lpo",
+                   "truth")  
+    colnames(out) <- sim_names
+    out[,c(1:3,5:ncol(out))] <- apply(out[,c(1:3,5:ncol(out))], 2, function(y){
+      as.numeric(as.character(y))})
 
-  save(out, file=paste0('~/cvtmleauc/out/allOut_cvauc.RData'))
-  save(redo_parm, file = "~/cvtmleauc/scratch/redo_parm_aucnewest.RData")
+    save(out, file=paste0('~/cvtmleauc/out/allOut_cvauc.RData'))
+    save(redo_parm, file = "~/cvtmleauc/scratch/redo_parm_aucnewest.RData")
 }
 
 
@@ -285,12 +285,19 @@ if(FALSE){
                                      "cvtmle20","onestep20","emp20",
                                      "bootstrap", "lpo"
                                      ), ...){
-      b <- v <- m <- co <- NULL
+       b <- bp <- v <- m <- cv <- co <- mad <- NULL
       for(i in seq_len(length(parm[,1]))){
         x <- out[out$n == parm$n[i] & out$K == parm$K[i] & out$wrapper == wrapper,]
         b <- rbind(b, colMeans(x[,paste0("est_",estimators)] - x[,truth], na.rm = TRUE))
+        bp <- rbind(bp, colMeans((x[,paste0("est_",estimators)] - x[,truth])/x[,truth], na.rm = TRUE))
         v <- rbind(v, apply(x[,paste0("est_",estimators)], 2, var, na.rm = TRUE))
+        cv <- rbind(cv, apply(x[,paste0("est_",estimators)], 2, function(y){
+          sd(y, na.rm = TRUE) / mean(y, na.rm = TRUE)
+        }))
         m <- rbind(m, colMeans((x[,paste0("est_",estimators)] - as.numeric(x[,truth]))^2, na.rm = TRUE))
+        mad <- rbind(mad, apply(x[,paste0("est_",estimators)], 2, function(y){ 
+          median(y - as.numeric(x[,truth]), na.rm = TRUE)
+        }))
         # coverage
         # coverage <- rep(NA, length(estimators))
         # ct <- 0
@@ -301,12 +308,15 @@ if(FALSE){
         # }
         # co <- rbind(co, coverage)
       }
-      parm <- cbind(parm, b, v, m) #, 
+      parm <- cbind(parm, b, v, m, mad, cv, bp) #, 
                     # co)
       colnames(parm) <- c("n", "K", paste0("bias_", estimators),
                           paste0("var_", estimators),
-                          paste0("mse_", estimators)) #,
-                          # paste0("cov_", estimators))
+                          paste0("mse_", estimators),
+                          paste0("mad_", estimators),
+                          paste0("cv_", estimators),
+                          paste0("bp_", estimators)
+                          ) #,
       return(parm)
     }
     parm <- expand.grid(n = c(50, 100, 250, 500),
@@ -321,12 +331,14 @@ if(FALSE){
     make_side_by_side_bar_plots <- function(glm_rslt, randomforest_rslt,
                                             est, est_labels, rm_last = TRUE,
                                             yaxis_label, add_ratio = FALSE, 
+                                            relative_est = NULL, relative_K = NULL, 
                                             xaxis_label = "Number CV Folds",
                                             absolute_val = TRUE, col, ...){
       layout(matrix(1:8, nrow = 2, ncol = 4,  byrow = TRUE))
       par(mar = c(1.6, 0.6, 1.6, 0.6), mgp = c(2.1, 0.5, 0),
           oma = c(2.1, 5.1, 2.1, 2.1))
       for(n in c(50, 100, 250, 500)){
+          par(las = 1)
         tmp <- glm_rslt[glm_rslt$n == n, ]
         tmp5 <- tmp[tmp$K == 5,]
         tmp10 <- tmp[tmp$K == 10,]
@@ -341,6 +353,10 @@ if(FALSE){
           grbg[2:4,4] <- NA
         }
         row.names(grbg) <- c(5,10,20,40)
+
+        if(!is.null(relative_est)){
+          grbg <- grbg / grbg[paste(relative_K),relative_est]
+        }
         if(n == 50){
           leg.text <- est_labels
         }else{
@@ -350,20 +366,27 @@ if(FALSE){
           beside=TRUE, log = "y", yaxt = "n", names.arg = rep("",dim(grbg)[2]), col = col, ... )
           mtext(side = 1, outer = FALSE, line = 0.02, text = c(5,10,20,40), cex =0.5, 
         at = c(tmp[,1],tmp[,2],tmp[,3]))
+                  mtext(side = 1, outer = FALSE, line = 0.02, text = "K = ", cex =0.5, 
+              at = par()$usr[1])
         if(n == 50){
           legend(x = "topright", fill = unique(col), legend = leg.text)
         }
         if(n == 50){
+          par(las = 0)
           axis(side = 2)
           mtext(outer = FALSE, side = 2, line = 2, yaxis_label, cex = 0.75)
           mtext(outer = FALSE, side = 2, line = 4, "Logistic Regression", cex = 1)
         }else{
+          par(las = 0)
           axis(side = 2, labels = FALSE)
         }
         mtext(outer = FALSE, side = 3, line = 0.5, paste0("n = ", n))
-
+        if(!is.null(relative_est)){
+          abline(h = 1, lty = 3)
+        }
       }
       for(n in c(50, 100, 250, 500)){
+        par(las = 1)
         tmp <- randomforest_rslt[randomforest_rslt$n == n, ]
         tmp5 <- tmp[tmp$K == 5,]
         tmp10 <- tmp[tmp$K == 10,]
@@ -377,19 +400,28 @@ if(FALSE){
         if(rm_last){
           grbg[2:4,4] <- NA
         }
-        row.names(grbg) <- c(5,10,20,40)
+            row.names(grbg) <- c(5,10,20,40)
+        if(!is.null(relative_est)){
+          grbg <- grbg / grbg[paste(relative_K),relative_est]
+        }
         tmp <- barplot(grbg,  beside=TRUE, log = "y", yaxt = "n", names.arg = rep("",dim(grbg)[2]), 
                        col = col, ...)
         mtext(side = 1, outer = FALSE, line = 0.02, text = c(5,10,20,40), cex =0.5, 
               at = c(tmp[,1],tmp[,2],tmp[,3]))
+        mtext(side = 1, outer = FALSE, line = 0.02, text = "K = ", cex =0.5, 
+              at = par()$usr[1])
         # mtext(side = 1, outer = FALSE, line = 0.02, text = c(5,10,20,40), cex =0.5, 
         #       at = c(mean(tmp[2:3,1]),mean(tmp[2:3,2]),mean(tmp[2:3,3])))
+        par(las = 0)
         if(n == 50){
           axis(side = 2)
           mtext(outer = FALSE, side = 2, line = 2, yaxis_label, cex = 0.75)
           mtext(outer = FALSE, side = 2, line = 4, "Random Forest", cex = 1)
         }else{
           axis(side = 2, labels = FALSE)
+        }
+        if(!is.null(relative_est)){
+          abline(h = 1, lty = 3)
         }
       }
     }
@@ -400,24 +432,41 @@ if(FALSE){
 
     # bias
     make_side_by_side_bar_plots(glm_rslt, randomforest_rslt, 
-                                est = c("bias_dcvtmle1","bias_donestep1",
-                                        "bias_emp1","bias_bootstrap","bias_lpo"),
-                                est_label = c("CVTMLE", "CVOS","Empirical","Bootstrap","LPO"),
-                                ylim = c(0.0001,0.1), yaxis_label = "Absolute Bias",absolute_val = TRUE,
+                                est = c("bias_emp1","bias_dcvtmle1","bias_donestep1",
+                                        "bias_bootstrap","bias_lpo"),
+                                relative_est = "bias_emp1",
+                                relative_K = 5,
+                                est_label = c("CV-EMP", "CVTMLE","CVOS","BOOT","LPO"),
+                                ylim = c(0.01,10), yaxis_label = "Absolute Bias",absolute_val = TRUE,
                                 col = my_col[sort(rep(1:5,4))])
     # variance
     make_side_by_side_bar_plots(glm_rslt, randomforest_rslt, 
-                                est = c("var_dcvtmle1","var_donestep1",
-                                        "var_emp1","var_bootstrap","var_lpo"),
-                                ylim = c(0.0001,50), yaxis_label = "Variance",
+                                est = c("var_emp1","var_dcvtmle1","var_donestep1",
+                                        "var_bootstrap","var_lpo"),
+                                relative_est = "var_emp1",
+                                relative_K = 5,
+                                est_label = c("CV-EMP", "CVTMLE","CVOS","BOOT","LPO"),
+                                ylim = c(0.01,10), yaxis_label = "Variance",
                                 col = my_col[sort(rep(1:5,4))])
     # mse
     # debug(make_side_by_side_bar_plots)
     make_side_by_side_bar_plots(glm_rslt, randomforest_rslt, 
-                                est = c("mse_donestep1","mse_dcvtmle1",
-                                        "mse_emp1","mse_bootstrap","mse_lpo"),
-                                est_label = c("CVOS", "CVTMLE","Empirical","Bootstrap"),
-                                ylim = c(0.0001,0.1), yaxis_label = "Mean squared-error",
+                                est = c("mse_emp1","mse_dcvtmle1","mse_donestep1",
+                                        "mse_bootstrap","mse_lpo"),
+                                relative_K = 5,
+                                relative_est = "mse_emp1",
+                                est_label = c("CV-EMP", "CVTMLE","CVOS","BOOT","LPO"),
+                                ylim = c(0.5,1.5), yaxis_label = "Mean squared-error",
+                                col = my_col[sort(rep(1:5,4))])    
+
+    # mad
+    make_side_by_side_bar_plots(glm_rslt, randomforest_rslt, 
+                                est = c("mad_emp1","mad_dcvtmle1","mad_donestep1",
+                                        "mad_bootstrap","mad_lpo"),
+                                # relative_K = 5,
+                                # relative_est = "mad_emp1",
+                                est_label = c("CV-EMP", "CVTMLE","CVOS","BOOT","LPO"),
+                                ylim = c(0.0001,0.001), yaxis_label = "Mean squared-error",
                                 col = my_col[sort(rep(1:5,4))])
 
     # bias by CV Repeats for CVTMLE
@@ -441,9 +490,6 @@ if(FALSE){
                                 est_label = paste0("CVTMLE ", c(1,5,10,20)," repeats"),
                                 ylim = c(0.0001,0.01), yaxis_label = "MSE",
                                 col = my_col[sort(rep(1:5,4))])
-
-
-
 
 
     # compare mse of cvtmle with 40 folds to mse of empirical with 5 folds

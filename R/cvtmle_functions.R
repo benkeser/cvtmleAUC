@@ -285,6 +285,7 @@ cvauc_cvtmle <- function(Y, X, K = 20, learner = "glm_wrapper",
     out$folds <- folds
     out$ic_cvtmle <- ic
     out$ic_onestep <- ic_os
+    out$ic_esteq <- ic_os
     out$ic_empirical <- ic_emp
 
     out$se_cvtmle_type <- "std"

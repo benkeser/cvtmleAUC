@@ -481,7 +481,7 @@ boot_corrected_cvtn <- function(Y, X, B = 200, learner = "glm_wrapper",
   })))
 
   se <- mapply(which_estimator = estimators, 
-               estimate = estimates[names(estimates) %in% paste0("est_",estimators)], .computeMCSE, 
+               estimate = estimates[paste0("est_",estimators)], .computeMCSE, 
                MoreArgs = list(result_list = result_list, logit = logit))
   out <- list()
   out$est_cvtmle <- estimates["est_cvtmle"]
@@ -503,11 +503,11 @@ boot_corrected_cvtn <- function(Y, X, B = 200, learner = "glm_wrapper",
 }
 
 .computeMCSE <- function(which_estimator = "cvtmle", estimate, result_list, logit = TRUE){
-  icMatrix <- Reduce(cbind, lapply(result_list, "[[", paste0("ic_", which_estimator)))
-  covar <- cov(icMatrix)
-  B <- length(result_list)
-  a <- matrix(1/B, nrow = B, ncol = 1)
   if(!any(is.na(estimate))){
+    icMatrix <- Reduce(cbind, lapply(result_list, "[[", paste0("ic_", which_estimator)))
+    covar <- cov(icMatrix)
+    B <- length(result_list)
+    a <- matrix(1/B, nrow = B, ncol = 1)
     if(estimate <= 0 | estimate >= 1){
       logit <- FALSE
     }
