@@ -145,7 +145,7 @@ stepglm_wrapper <- function(train, test){
 #' @importFrom glmnet cv.glmnet
 #' @examples
 #' # TO DO: Add
-glmnet_wrapper <- function(train, test, lambda.select = "cv", 
+glmnet_wrapper <- function(train, test, lambda.select = "ncoef", 
                            ncoef = trunc(sum(train$Y)/3)){
     x <- model.matrix(~ -1 + ., data = train$X)
     if(lambda.select == "cv"){
