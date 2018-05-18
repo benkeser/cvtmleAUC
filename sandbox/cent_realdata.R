@@ -104,7 +104,7 @@ if (args[1] == 'run') {
 
     # get estimates of dcvauc
     # options(np.messages = FALSE)
-    n_replicates <- 20
+    n_replicates <- 1
     fitauc_dcv <- vector(mode = "list", length = n_replicates)
     fitauc_cv <- vector(mode = "list", length = n_replicates)    
     fittn_dcv <- vector(mode = "list", length = n_replicates)
@@ -190,41 +190,41 @@ if (args[1] == 'run') {
       )))
     }
     
-    # now add in MC averaged results for M = 5, 10, 20
-    for(M in c(5, 10, 20)){
-      for(param in c("auc","tn")){
-        this_dcvfit <- if(param == "auc"){
-          fitauc_dcv
-        }else{
-          fittn_dcv
-        }        
-        this_cvfit <- if(param == "auc"){
-          fittn_dcv
-        }else{
-          fittn_dcv
-        }
-      avg_dcv <- .getMCAveragedResults(this_dcvfit[1:M], logit = FALSE)
-      avg_cv <- .getMCAveragedResults(this_cvfit[1:M], logit = FALSE)
-      eval(parse(text = paste0('out_',param,' <- c(out_',param,',',
-                               'avg_dcv$est_cvtmle, avg_dcv$se_cvtmle,
-               # initial plug-in estimate of dcv
-               avg_dcv$est_init, 
-             # one-step estimate of dcv
-             avg_dcv$est_onestep, avg_dcv$se_onestep,
-             # estimating eqn estimate of dcv
-             avg_dcv$est_esteq, avg_dcv$se_esteq,
-             # cvtmle estimate of cv
-             avg_cv$est_cvtmle, avg_cv$se_cvtmle, 
-             # iterations of cvtmle for cv
-             avg_cv$est_init, 
-             # one-step estimate of cv
-             avg_cv$est_onestep, avg_cv$se_onestep,
-             # estimating eqn estimate of cv
-             avg_cv$est_esteq, avg_cv$se_esteq,
-             # full sample split estimate of cv
-             avg_dcv$est_empirical, avg_dcv$se_empirical)')))
-    }
-  }
+  #   # now add in MC averaged results for M = 5, 10, 20
+  #   for(M in c(5, 10, 20)){
+  #     for(param in c("auc","tn")){
+  #       this_dcvfit <- if(param == "auc"){
+  #         fitauc_dcv
+  #       }else{
+  #         fittn_dcv
+  #       }        
+  #       this_cvfit <- if(param == "auc"){
+  #         fittn_dcv
+  #       }else{
+  #         fittn_dcv
+  #       }
+  #     avg_dcv <- .getMCAveragedResults(this_dcvfit[1:M], logit = FALSE)
+  #     avg_cv <- .getMCAveragedResults(this_cvfit[1:M], logit = FALSE)
+  #     eval(parse(text = paste0('out_',param,' <- c(out_',param,',',
+  #                              'avg_dcv$est_cvtmle, avg_dcv$se_cvtmle,
+  #              # initial plug-in estimate of dcv
+  #              avg_dcv$est_init, 
+  #            # one-step estimate of dcv
+  #            avg_dcv$est_onestep, avg_dcv$se_onestep,
+  #            # estimating eqn estimate of dcv
+  #            avg_dcv$est_esteq, avg_dcv$se_esteq,
+  #            # cvtmle estimate of cv
+  #            avg_cv$est_cvtmle, avg_cv$se_cvtmle, 
+  #            # iterations of cvtmle for cv
+  #            avg_cv$est_init, 
+  #            # one-step estimate of cv
+  #            avg_cv$est_onestep, avg_cv$se_onestep,
+  #            # estimating eqn estimate of cv
+  #            avg_cv$est_esteq, avg_cv$se_esteq,
+  #            # full sample split estimate of cv
+  #            avg_dcv$est_empirical, avg_dcv$se_empirical)')))
+  #   }
+  # }
     out_auc <- c(out_auc, fit_lpo[[1]], true_auc)
     out_tn <- c(out_tn, true_tn)
 

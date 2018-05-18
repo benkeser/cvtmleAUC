@@ -1,0 +1,3891 @@
+?grid
+?grid
+?grid
+make_one_box_plot_row <- function(rslt, metric = "bias", #
+                                      est, add_legend = FALSE, #
+                                      est_labels = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                      rm_last = TRUE,#
+                                      grid = FALSE, #
+                                      nx_grid = NULL, ny_grid = BULL, #
+                                      pred_algo = "Logistic regression",#
+                                            yaxis_label, add_ratio = TRUE, #
+                                            xaxis_label = "Number CV Folds",#
+                                            transpose = FALSE, #
+                                            log = "y", print_n = FALSE,#
+                                            relative_est = NULL,#
+                                            relative_K = NULL, #
+                                            absolute_val = TRUE, col, ...){#
+      for(n in c(50, 100, 250, 500)){#
+        par(las = 1)#
+        tmp <- rslt[rslt$n == n, ]#
+        tmp5 <- tmp[tmp$K == 5,]#
+        tmp10 <- tmp[tmp$K == 10,]#
+        tmp20 <- tmp[tmp$K == 20,]#
+        tmp40 <- tmp[tmp$K == 40,]#
+        # est <- c("mse_dcvtmle1","mse_donestep1","mse_emp1","mse_bootstrap")#
+        grbg <- as.matrix(rbind(tmp5[,est],tmp10[,est],tmp20[,est],tmp40[,est]))#
+        if(absolute_val){#
+          grbg <- abs(grbg)#
+        }#
+        if(rm_last){#
+          grbg[2:4,4] <- NA#
+        }#
+        row.names(grbg) <- c(5,10,20,40)#
+        if(n == 50){#
+          leg.text <- est_labels#
+          sp <- c(0,0,0,0,0,0,0,0,1,0,0,0,1,0)#
+        }else{#
+          leg.text <- FALSE#
+          sp <- c(0,0,0,0,1,0,0,0,1,0,0,0,1,0)#
+        }#
+        if(transpose){#
+          grbg <- t(grbg)#
+        }#
+        if(!is.null(relative_est)){#
+          grbg <- grbg / grbg[paste(relative_K),relative_est]#
+        }#
+        txt <- c(5,10,20,40)#
+        if(n == 50) txt <- c(5,10,20,"",5,10,20,40,5,10,20,40)#
+        tmp <- barplot(grbg, legend.text = FALSE, #
+          beside=TRUE, log = log, yaxt = "n", names.arg = rep("",4), col = col, #
+          space = sp, ... )#
+#
+        if(grid){#
+          grid(nx = nx_grid, ny = ny_grid, lty = 1, col = "gray75")#
+          tmp <- barplot(grbg, legend.text = FALSE, #
+          beside=TRUE, log = log, yaxt = "n", names.arg = rep("",4), col = col, #
+          space = sp, ... )#
+        }#
+        mtext(side = 1, outer = FALSE, line = 0.02, text = txt, cex =0.5, #
+        at = c(tmp[,1],tmp[,2],tmp[,3]))#
+        mtext(side = 1, outer = FALSE, line = 0.02, text = "K = ", cex =0.5, #
+              at = par()$usr[1])#
+        if(n == 50 & add_legend){#
+          legend(x = "topright", fill = unique(col), legend = leg.text, ncol = 2)#
+        }#
+        if(n == 50){#
+          axis(side = 2)#
+          par(las = 0)#
+          mtext(outer = FALSE, side = 2, line = 3, yaxis_label, cex = 0.75)#
+          # mtext(outer = FALSE, side = 2, line = 4.5, pred_algo, cex = 1)#
+        }else{#
+          par(las = 0)#
+          axis(side = 2, labels = FALSE)#
+        }#
+        if(print_n){#
+          mtext(outer = FALSE, side = 3, line = 1.5, paste0("n = ", n))#
+        }#
+        if(add_ratio){#
+        }#
+        if(!is.null(relative_est)){#
+          abline(h = 1, lty = 3)#
+        }#
+      }#
+    }
+layout(matrix(1:12, nrow = 3, ncol = 4,  byrow = TRUE))#
+    par(mar = c(1.6, 0.6, 1.6, 0.6), mgp = c(2.1, 0.5, 0),#
+        oma = c(2.1, 5.1, 2.1, 2.1))#
+    make_one_box_plot_row(rslt = glm_rslt, print_n = TRUE, #
+                          est = c("bias_emp1","bias_dcvtmle1",#
+                                        "bias_donestep1","bias_bootstrap"),#
+                          add_legend = TRUE,#
+                                est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                ylim = c(0.000001,10), yaxis_label = "Absolute Bias",#
+                                col = my_col[sort(rep(1:4,4))])#
+    make_one_box_plot_row(rslt = glm_rslt, #
+                              est = c("var_emp1","var_dcvtmle1",#
+                                            "var_donestep1","var_bootstrap"),#
+                                    est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                    ylim = c(0.000001,10), yaxis_label = "Variance",#
+                                    col = my_col[sort(rep(1:4,4))])#
+    make_one_box_plot_row(rslt = glm_rslt, #
+                              est = c("mse_emp1","mse_dcvtmle1",#
+                                            "mse_donestep1","mse_bootstrap"),#
+                                relative_est = "mse_emp1",#
+                                relative_K = 5,    #
+                                grid = TRUE, nx_grid = 8, ny_grid = 0,                           #
+                                    est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                    ylim = c(0.01,5), yaxis_label = "Relative MSE",#
+                                    col = my_col[sort(rep(1:4,4))])
+warnings()
+make_one_box_plot_row <- function(rslt, metric = "bias", #
+                                      est, add_legend = FALSE, #
+                                      est_labels = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                      rm_last = TRUE,#
+                                      grid = FALSE, #
+                                      nx_grid = NULL, ny_grid = BULL, #
+                                      pred_algo = "Logistic regression",#
+                                            yaxis_label, add_ratio = TRUE, #
+                                            xaxis_label = "Number CV Folds",#
+                                            transpose = FALSE, #
+                                            log = "y", print_n = FALSE,#
+                                            relative_est = NULL,#
+                                            relative_K = NULL, #
+                                            absolute_val = TRUE, col, ...){#
+      for(n in c(50, 100, 250, 500)){#
+        par(las = 1)#
+        tmp <- rslt[rslt$n == n, ]#
+        tmp5 <- tmp[tmp$K == 5,]#
+        tmp10 <- tmp[tmp$K == 10,]#
+        tmp20 <- tmp[tmp$K == 20,]#
+        tmp40 <- tmp[tmp$K == 40,]#
+        # est <- c("mse_dcvtmle1","mse_donestep1","mse_emp1","mse_bootstrap")#
+        grbg <- as.matrix(rbind(tmp5[,est],tmp10[,est],tmp20[,est],tmp40[,est]))#
+        if(absolute_val){#
+          grbg <- abs(grbg)#
+        }#
+        if(rm_last){#
+          grbg[2:4,4] <- NA#
+        }#
+        row.names(grbg) <- c(5,10,20,40)#
+        if(n == 50){#
+          leg.text <- est_labels#
+          sp <- c(0,0,0,0,0,0,0,0,1,0,0,0,1,0)#
+        }else{#
+          leg.text <- FALSE#
+          sp <- c(0,0,0,0,1,0,0,0,1,0,0,0,1,0)#
+        }#
+        if(transpose){#
+          grbg <- t(grbg)#
+        }#
+        if(!is.null(relative_est)){#
+          grbg <- grbg / grbg[paste(relative_K),relative_est]#
+        }#
+        txt <- c(5,10,20,40)#
+        if(n == 50) txt <- c(5,10,20,"",5,10,20,40,5,10,20,40)#
+        tmp <- barplot(grbg, legend.text = FALSE, #
+          beside=TRUE, log = log, yaxt = "n", names.arg = rep("",4), col = col, #
+          space = sp, ... )#
+#
+        if(grid){#
+          grid(nx = nx_grid, ny = ny_grid, lty = 1, col = "gray75")#
+          par(new = TRUE)#
+          tmp <- barplot(grbg, legend.text = FALSE, #
+          beside=TRUE, log = log, yaxt = "n", names.arg = rep("",4), col = col, #
+          space = sp, ... )#
+        }#
+        mtext(side = 1, outer = FALSE, line = 0.02, text = txt, cex =0.5, #
+        at = c(tmp[,1],tmp[,2],tmp[,3]))#
+        mtext(side = 1, outer = FALSE, line = 0.02, text = "K = ", cex =0.5, #
+              at = par()$usr[1])#
+        if(n == 50 & add_legend){#
+          legend(x = "topright", fill = unique(col), legend = leg.text, ncol = 2)#
+        }#
+        if(n == 50){#
+          axis(side = 2)#
+          par(las = 0)#
+          mtext(outer = FALSE, side = 2, line = 3, yaxis_label, cex = 0.75)#
+          # mtext(outer = FALSE, side = 2, line = 4.5, pred_algo, cex = 1)#
+        }else{#
+          par(las = 0)#
+          axis(side = 2, labels = FALSE)#
+        }#
+        if(print_n){#
+          mtext(outer = FALSE, side = 3, line = 1.5, paste0("n = ", n))#
+        }#
+        if(add_ratio){#
+        }#
+        if(!is.null(relative_est)){#
+          abline(h = 1, lty = 3)#
+        }#
+      }#
+    }#
+#
+    layout(matrix(1:12, nrow = 3, ncol = 4,  byrow = TRUE))#
+    par(mar = c(1.6, 0.6, 1.6, 0.6), mgp = c(2.1, 0.5, 0),#
+        oma = c(2.1, 5.1, 2.1, 2.1))#
+    make_one_box_plot_row(rslt = glm_rslt, print_n = TRUE, #
+                          est = c("bias_emp1","bias_dcvtmle1",#
+                                        "bias_donestep1","bias_bootstrap"),#
+                          add_legend = TRUE,#
+                                est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                ylim = c(0.000001,10), yaxis_label = "Absolute Bias",#
+                                col = my_col[sort(rep(1:4,4))])#
+    make_one_box_plot_row(rslt = glm_rslt, #
+                              est = c("var_emp1","var_dcvtmle1",#
+                                            "var_donestep1","var_bootstrap"),#
+                                    est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                    ylim = c(0.000001,10), yaxis_label = "Variance",#
+                                    col = my_col[sort(rep(1:4,4))])#
+    make_one_box_plot_row(rslt = glm_rslt, #
+                              est = c("mse_emp1","mse_dcvtmle1",#
+                                            "mse_donestep1","mse_bootstrap"),#
+                                relative_est = "mse_emp1",#
+                                relative_K = 5,    #
+                                grid = TRUE, ny_grid = 8, nx_grid = 0,                           #
+                                    est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                    ylim = c(0.01,5), yaxis_label = "Relative MSE",#
+                                    col = my_col[sort(rep(1:4,4))])
+?grid
+make_one_box_plot_row <- function(rslt, metric = "bias", #
+                                      est, add_legend = FALSE, #
+                                      est_labels = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                      rm_last = TRUE,#
+                                      grid = FALSE, #
+                                      nx_grid = NULL, ny_grid = BULL, #
+                                      pred_algo = "Logistic regression",#
+                                            yaxis_label, add_ratio = TRUE, #
+                                            xaxis_label = "Number CV Folds",#
+                                            transpose = FALSE, #
+                                            log = "y", print_n = FALSE,#
+                                            relative_est = NULL,#
+                                            relative_K = NULL, #
+                                            absolute_val = TRUE, col, ...){#
+      for(n in c(50, 100, 250, 500)){#
+        par(las = 1)#
+        tmp <- rslt[rslt$n == n, ]#
+        tmp5 <- tmp[tmp$K == 5,]#
+        tmp10 <- tmp[tmp$K == 10,]#
+        tmp20 <- tmp[tmp$K == 20,]#
+        tmp40 <- tmp[tmp$K == 40,]#
+        # est <- c("mse_dcvtmle1","mse_donestep1","mse_emp1","mse_bootstrap")#
+        grbg <- as.matrix(rbind(tmp5[,est],tmp10[,est],tmp20[,est],tmp40[,est]))#
+        if(absolute_val){#
+          grbg <- abs(grbg)#
+        }#
+        if(rm_last){#
+          grbg[2:4,4] <- NA#
+        }#
+        row.names(grbg) <- c(5,10,20,40)#
+        if(n == 50){#
+          leg.text <- est_labels#
+          sp <- c(0,0,0,0,0,0,0,0,1,0,0,0,1,0)#
+        }else{#
+          leg.text <- FALSE#
+          sp <- c(0,0,0,0,1,0,0,0,1,0,0,0,1,0)#
+        }#
+        if(transpose){#
+          grbg <- t(grbg)#
+        }#
+        if(!is.null(relative_est)){#
+          grbg <- grbg / grbg[paste(relative_K),relative_est]#
+        }#
+        txt <- c(5,10,20,40)#
+        if(n == 50) txt <- c(5,10,20,"",5,10,20,40,5,10,20,40)#
+        tmp <- barplot(grbg, legend.text = FALSE, #
+          beside=TRUE, log = log, yaxt = "n", names.arg = rep("",4), col = col, #
+          space = sp, ... )#
+#
+        if(grid){#
+          grid(nx = nx_grid, ny = ny_grid, lty = 1, col = "gray75", equilogs = FALSE)#
+          par(new = TRUE)#
+          tmp <- barplot(grbg, legend.text = FALSE, #
+          beside=TRUE, log = log, yaxt = "n", names.arg = rep("",4), col = col, #
+          space = sp, ... )#
+        }#
+        mtext(side = 1, outer = FALSE, line = 0.02, text = txt, cex =0.5, #
+        at = c(tmp[,1],tmp[,2],tmp[,3]))#
+        mtext(side = 1, outer = FALSE, line = 0.02, text = "K = ", cex =0.5, #
+              at = par()$usr[1])#
+        if(n == 50 & add_legend){#
+          legend(x = "topright", fill = unique(col), legend = leg.text, ncol = 2)#
+        }#
+        if(n == 50){#
+          axis(side = 2)#
+          par(las = 0)#
+          mtext(outer = FALSE, side = 2, line = 3, yaxis_label, cex = 0.75)#
+          # mtext(outer = FALSE, side = 2, line = 4.5, pred_algo, cex = 1)#
+        }else{#
+          par(las = 0)#
+          axis(side = 2, labels = FALSE)#
+        }#
+        if(print_n){#
+          mtext(outer = FALSE, side = 3, line = 1.5, paste0("n = ", n))#
+        }#
+        if(add_ratio){#
+        }#
+        if(!is.null(relative_est)){#
+          abline(h = 1, lty = 3)#
+        }#
+      }#
+    }#
+#
+    layout(matrix(1:12, nrow = 3, ncol = 4,  byrow = TRUE))#
+    par(mar = c(1.6, 0.6, 1.6, 0.6), mgp = c(2.1, 0.5, 0),#
+        oma = c(2.1, 5.1, 2.1, 2.1))#
+    make_one_box_plot_row(rslt = glm_rslt, print_n = TRUE, #
+                          est = c("bias_emp1","bias_dcvtmle1",#
+                                        "bias_donestep1","bias_bootstrap"),#
+                          add_legend = TRUE,#
+                                est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                ylim = c(0.000001,10), yaxis_label = "Absolute Bias",#
+                                col = my_col[sort(rep(1:4,4))])#
+    make_one_box_plot_row(rslt = glm_rslt, #
+                              est = c("var_emp1","var_dcvtmle1",#
+                                            "var_donestep1","var_bootstrap"),#
+                                    est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                    ylim = c(0.000001,10), yaxis_label = "Variance",#
+                                    col = my_col[sort(rep(1:4,4))])#
+    make_one_box_plot_row(rslt = glm_rslt, #
+                              est = c("mse_emp1","mse_dcvtmle1",#
+                                            "mse_donestep1","mse_bootstrap"),#
+                                relative_est = "mse_emp1",#
+                                relative_K = 5,    #
+                                grid = TRUE, ny_grid = 8, nx_grid = 0,                           #
+                                    est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                    ylim = c(0.01,5), yaxis_label = "Relative MSE",#
+                                    col = my_col[sort(rep(1:4,4))])
+?grid
+layout(matrix(1:12, nrow = 3, ncol = 4,  byrow = TRUE))#
+    par(mar = c(1.6, 0.6, 1.6, 0.6), mgp = c(2.1, 0.5, 0),#
+        oma = c(2.1, 5.1, 2.1, 2.1))#
+    make_one_box_plot_row(rslt = glm_rslt, print_n = TRUE, #
+                          est = c("bias_emp1","bias_dcvtmle1",#
+                                        "bias_donestep1","bias_bootstrap"),#
+                          add_legend = TRUE,#
+                                est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                ylim = c(0.000001,10), yaxis_label = "Absolute Bias",#
+                                col = my_col[sort(rep(1:4,4))])#
+    make_one_box_plot_row(rslt = glm_rslt, #
+                              est = c("var_emp1","var_dcvtmle1",#
+                                            "var_donestep1","var_bootstrap"),#
+                                    est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                    ylim = c(0.000001,10), yaxis_label = "Variance",#
+                                    col = my_col[sort(rep(1:4,4))])#
+    make_one_box_plot_row(rslt = glm_rslt, #
+                              est = c("mse_emp1","mse_dcvtmle1",#
+                                            "mse_donestep1","mse_bootstrap"),#
+                                relative_est = "mse_emp1",#
+                                relative_K = 5,    #
+                                grid = TRUE, ny_grid = 8, nx_grid = NULL,                           #
+                                    est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                    ylim = c(0.01,5), yaxis_label = "Relative MSE",#
+                                    col = my_col[sort(rep(1:4,4))])
+layout(matrix(1:12, nrow = 3, ncol = 4,  byrow = TRUE))#
+    par(mar = c(1.6, 0.6, 1.6, 0.6), mgp = c(2.1, 0.5, 0),#
+        oma = c(2.1, 5.1, 2.1, 2.1))#
+    make_one_box_plot_row(rslt = glm_rslt, print_n = TRUE, #
+                          est = c("bias_emp1","bias_dcvtmle1",#
+                                        "bias_donestep1","bias_bootstrap"),#
+                          add_legend = TRUE,#
+                                est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                ylim = c(0.000001,10), yaxis_label = "Absolute Bias",#
+                                col = my_col[sort(rep(1:4,4))])#
+    make_one_box_plot_row(rslt = glm_rslt, #
+                              est = c("var_emp1","var_dcvtmle1",#
+                                            "var_donestep1","var_bootstrap"),#
+                                    est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                    ylim = c(0.000001,10), yaxis_label = "Variance",#
+                                    col = my_col[sort(rep(1:4,4))])#
+    make_one_box_plot_row(rslt = glm_rslt, #
+                              est = c("mse_emp1","mse_dcvtmle1",#
+                                            "mse_donestep1","mse_bootstrap"),#
+                                relative_est = "mse_emp1",#
+                                relative_K = 5,    #
+                                grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                                    est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                    ylim = c(0.01,5), yaxis_label = "Relative MSE",#
+                                    col = my_col[sort(rep(1:4,4))])
+layout(matrix(1:12, nrow = 3, ncol = 4,  byrow = TRUE))#
+    par(mar = c(1.6, 0.6, 1.6, 0.6), mgp = c(2.1, 0.5, 0),#
+        oma = c(2.1, 5.1, 2.1, 2.1))#
+    make_one_box_plot_row(rslt = glm_rslt, print_n = TRUE, #
+                          est = c("bias_emp1","bias_dcvtmle1",#
+                                        "bias_donestep1","bias_bootstrap"),#
+                          grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                          add_legend = TRUE,#
+                                est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                ylim = c(0.000001,10), yaxis_label = "Absolute Bias",#
+                                col = my_col[sort(rep(1:4,4))])#
+    make_one_box_plot_row(rslt = glm_rslt, #
+                                grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                              est = c("var_emp1","var_dcvtmle1",#
+                                            "var_donestep1","var_bootstrap"),#
+                                    est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                    ylim = c(0.000001,10), yaxis_label = "Variance",#
+                                    col = my_col[sort(rep(1:4,4))])#
+    make_one_box_plot_row(rslt = glm_rslt, #
+                              est = c("mse_emp1","mse_dcvtmle1",#
+                                            "mse_donestep1","mse_bootstrap"),#
+                                relative_est = "mse_emp1",#
+                                relative_K = 5,    #
+                                grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                                    est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                    ylim = c(0.01,5), yaxis_label = "Relative MSE",#
+                                    col = my_col[sort(rep(1:4,4))])
+make_one_box_plot_row(rslt = glm_rslt, #
+                              est = c("mse_emp1","mse_dcvtmle1",#
+                                            "mse_donestep1","mse_bootstrap"),#
+                                relative_est = "mse_emp1",#
+                                relative_K = 5,    #
+                                grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                                    est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                    ylim = c(0.01,2), yaxis_label = "Relative MSE",#
+                                    col = my_col[sort(rep(1:4,4))])
+layout(matrix(1:12, nrow = 3, ncol = 4,  byrow = TRUE))#
+    par(mar = c(1.6, 0.6, 1.6, 0.6), mgp = c(2.1, 0.5, 0),#
+        oma = c(2.1, 5.1, 2.1, 2.1))#
+    make_one_box_plot_row(rslt = glm_rslt, print_n = TRUE, #
+                          est = c("bias_emp1","bias_dcvtmle1",#
+                                        "bias_donestep1","bias_bootstrap"),#
+                          grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                          add_legend = TRUE,#
+                                est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                ylim = c(0.000001,10), yaxis_label = "Absolute Bias",#
+                                col = my_col[sort(rep(1:4,4))])#
+    make_one_box_plot_row(rslt = glm_rslt, #
+                                grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                              est = c("var_emp1","var_dcvtmle1",#
+                                            "var_donestep1","var_bootstrap"),#
+                                    est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                    ylim = c(0.000001,10), yaxis_label = "Variance",#
+                                    col = my_col[sort(rep(1:4,4))])#
+    make_one_box_plot_row(rslt = glm_rslt, #
+                              est = c("mse_emp1","mse_dcvtmle1",#
+                                            "mse_donestep1","mse_bootstrap"),#
+                                relative_est = "mse_emp1",#
+                                relative_K = 5,    #
+                                grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                                    est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                    ylim = c(0.01,5), yaxis_label = "Relative MSE",#
+                                    col = my_col[sort(rep(1:4,4))])
+pdf("~/Dropbox/Emory/cross-validated-prediction-metrics/glm_cvtn.pdf",#
+        height = 8, width = 12)#
+    layout(matrix(1:12, nrow = 3, ncol = 4,  byrow = TRUE))#
+    par(mar = c(1.6, 0.6, 1.6, 0.6), mgp = c(2.1, 0.5, 0),#
+        oma = c(2.1, 5.1, 2.1, 2.1))#
+    make_one_box_plot_row(rslt = glm_rslt, print_n = TRUE, #
+                          est = c("bias_emp1","bias_dcvtmle1",#
+                                        "bias_donestep1","bias_bootstrap"),#
+                          grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                          add_legend = TRUE,#
+                                est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                ylim = c(0.000001,10), yaxis_label = "Absolute Bias",#
+                                col = my_col[sort(rep(1:4,4))])#
+    make_one_box_plot_row(rslt = glm_rslt, #
+                                grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                              est = c("var_emp1","var_dcvtmle1",#
+                                            "var_donestep1","var_bootstrap"),#
+                                    est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                    ylim = c(0.000001,10), yaxis_label = "Variance",#
+                                    col = my_col[sort(rep(1:4,4))])#
+    make_one_box_plot_row(rslt = glm_rslt, #
+                              est = c("mse_emp1","mse_dcvtmle1",#
+                                            "mse_donestep1","mse_bootstrap"),#
+                                relative_est = "mse_emp1",#
+                                relative_K = 5,    #
+                                grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                                    est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                    ylim = c(0.01,5), yaxis_label = "Relative MSE",#
+                                    col = my_col[sort(rep(1:4,4))])#
+    dev.off()
+pdf("~/Dropbox/Emory/cross-validated-prediction-metrics/glm_cvtn.pdf",#
+        height = 6, width = 12)#
+    layout(matrix(1:12, nrow = 3, ncol = 4,  byrow = TRUE))#
+    par(mar = c(1.6, 0.6, 1.6, 0.6), mgp = c(2.1, 0.5, 0),#
+        oma = c(2.1, 5.1, 2.1, 2.1))#
+    make_one_box_plot_row(rslt = glm_rslt, print_n = TRUE, #
+                          est = c("bias_emp1","bias_dcvtmle1",#
+                                        "bias_donestep1","bias_bootstrap"),#
+                          grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                          add_legend = TRUE,#
+                                est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                ylim = c(0.000001,10), yaxis_label = "Absolute Bias",#
+                                col = my_col[sort(rep(1:4,4))])#
+    make_one_box_plot_row(rslt = glm_rslt, #
+                                grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                              est = c("var_emp1","var_dcvtmle1",#
+                                            "var_donestep1","var_bootstrap"),#
+                                    est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                    ylim = c(0.000001,10), yaxis_label = "Variance",#
+                                    col = my_col[sort(rep(1:4,4))])#
+    make_one_box_plot_row(rslt = glm_rslt, #
+                              est = c("mse_emp1","mse_dcvtmle1",#
+                                            "mse_donestep1","mse_bootstrap"),#
+                                relative_est = "mse_emp1",#
+                                relative_K = 5,    #
+                                grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                                    est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                    ylim = c(0.01,5), yaxis_label = "Relative MSE",#
+                                    col = my_col[sort(rep(1:4,4))])#
+    dev.off()
+pdf("~/Dropbox/Emory/cross-validated-prediction-metrics/glm_cvtn.pdf",#
+        height = 6, width = 11)#
+    layout(matrix(1:12, nrow = 3, ncol = 4,  byrow = TRUE))#
+    par(mar = c(1.6, 0.6, 1.6, 0.6), mgp = c(2.1, 0.5, 0),#
+        oma = c(2.1, 5.1, 2.1, 2.1))#
+    make_one_box_plot_row(rslt = glm_rslt, print_n = TRUE, #
+                          est = c("bias_emp1","bias_dcvtmle1",#
+                                        "bias_donestep1","bias_bootstrap"),#
+                          grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                          add_legend = TRUE,#
+                                est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                ylim = c(0.000001,10), yaxis_label = "Absolute Bias",#
+                                col = my_col[sort(rep(1:4,4))])#
+    make_one_box_plot_row(rslt = glm_rslt, #
+                                grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                              est = c("var_emp1","var_dcvtmle1",#
+                                            "var_donestep1","var_bootstrap"),#
+                                    est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                    ylim = c(0.000001,10), yaxis_label = "Variance",#
+                                    col = my_col[sort(rep(1:4,4))])#
+    make_one_box_plot_row(rslt = glm_rslt, #
+                              est = c("mse_emp1","mse_dcvtmle1",#
+                                            "mse_donestep1","mse_bootstrap"),#
+                                relative_est = "mse_emp1",#
+                                relative_K = 5,    #
+                                grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                                    est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                    ylim = c(0.01,5), yaxis_label = "Relative MSE",#
+                                    col = my_col[sort(rep(1:4,4))])#
+    dev.off()
+pdf("~/Dropbox/Emory/cross-validated-prediction-metrics/rf_cvtn.pdf",#
+        height = 6, width = 11)
+layout(matrix(1:12, nrow = 3, ncol = 4,  byrow = TRUE))
+par(mar = c(1.6, 0.6, 1.6, 0.6), mgp = c(2.1, 0.5, 0),#
+        oma = c(2.1, 5.1, 2.1, 2.1))
+make_one_box_plot_row(rslt = randomforest_rslt, print_n = TRUE, #
+                          est = c("bias_emp1","bias_dcvtmle1",#
+                                        "bias_donestep1","bias_bootstrap"),#
+                          grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                          add_legend = TRUE,#
+                                est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                ylim = c(0.000001,10), yaxis_label = "Absolute Bias",#
+                                col = my_col[sort(rep(1:4,4))])
+make_one_box_plot_row(rslt = randomforest_rslt, #
+                                grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                              est = c("var_emp1","var_dcvtmle1",#
+                                            "var_donestep1","var_bootstrap"),#
+                                    est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                    ylim = c(0.000001,10), yaxis_label = "Variance",#
+                                    col = my_col[sort(rep(1:4,4))])
+make_one_box_plot_row(rslt = randomforest_rslt, #
+                              est = c("mse_emp1","mse_dcvtmle1",#
+                                            "mse_donestep1","mse_bootstrap"),#
+                                relative_est = "mse_emp1",#
+                                relative_K = 5,    #
+                                grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                                    est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                    ylim = c(0.01,5), yaxis_label = "Relative MSE",#
+                                    col = my_col[sort(rep(1:4,4))])
+dev.off()
+debug(make_one_box_plot_row)
+make_one_box_plot_row(rslt = glm_rslt, print_n = TRUE, #
+                          est = c("bias_emp1","bias_dcvtmle1",#
+                                        "bias_donestep1","bias_bootstrap"),#
+                          grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                          add_legend = TRUE,#
+                                est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                ylim = c(0.000001,10), yaxis_label = "Absolute Bias",#
+                                col = my_col[sort(rep(1:4,4))])
+tmp
+make_one_box_plot_row <- function(rslt, metric = "bias", #
+                                      est, add_legend = FALSE, #
+                                      est_labels = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                      rm_last = TRUE,#
+                                      grid = FALSE, #
+                                      nx_grid = NULL, ny_grid = BULL, #
+                                      pred_algo = "Logistic regression",#
+                                            yaxis_label, add_ratio = TRUE, #
+                                            xaxis_label = "Number CV Folds",#
+                                            transpose = FALSE, #
+                                            log = "y", print_n = FALSE,#
+                                            relative_est = NULL,#
+                                            relative_K = NULL, #
+                                            absolute_val = TRUE, col, ...){#
+      for(n in c(50, 100, 250, 500)){#
+        par(las = 1)#
+        tmp <- rslt[rslt$n == n, ]#
+        tmp5 <- tmp[tmp$K == 5,]#
+        tmp10 <- tmp[tmp$K == 10,]#
+        tmp20 <- tmp[tmp$K == 20,]#
+        tmp40 <- tmp[tmp$K == 40,]#
+        # est <- c("mse_dcvtmle1","mse_donestep1","mse_emp1","mse_bootstrap")#
+        grbg <- as.matrix(rbind(tmp5[,est],tmp10[,est],tmp20[,est],tmp40[,est]))#
+        if(absolute_val){#
+          grbg <- abs(grbg)#
+        }#
+        if(rm_last){#
+          grbg[2:4,4] <- NA#
+        }#
+        row.names(grbg) <- c(5,10,20,40)#
+        if(n == 50){#
+          leg.text <- est_labels#
+          sp <- c(0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0)#
+        }else{#
+          leg.text <- FALSE#
+          sp <- c(0,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0)#
+        }#
+        if(transpose){#
+          grbg <- t(grbg)#
+        }#
+        if(!is.null(relative_est)){#
+          grbg <- grbg / grbg[paste(relative_K),relative_est]#
+        }#
+        txt <- c(5,10,20,40)#
+        if(n == 50) txt <- c(5,10,20,"",5,10,20,40,5,10,20,40)#
+        tmp <- barplot(grbg, legend.text = FALSE, #
+          beside=TRUE, log = log, yaxt = "n", names.arg = rep("",4), col = col, #
+          space = sp, ... )#
+#
+        if(grid){#
+          grid(nx = nx_grid, ny = ny_grid, lty = 1, col = "gray75", equilogs = FALSE)#
+          par(new = TRUE)#
+          tmp <- barplot(grbg, legend.text = FALSE, #
+          beside=TRUE, log = log, yaxt = "n", names.arg = rep("",4), col = col, #
+          space = sp, ... )#
+        }#
+        mtext(side = 1, outer = FALSE, line = 0.02, text = txt, cex =0.5, #
+        at = c(tmp[,1],tmp[,2],tmp[,3]))#
+        mtext(side = 1, outer = FALSE, line = 0.02, text = "K = ", cex =0.5, #
+              at = par()$usr[1])#
+        if(n == 50 & add_legend){#
+          legend(x = "topright", fill = unique(col), legend = leg.text, ncol = 2)#
+        }#
+        if(n == 50){#
+          axis(side = 2)#
+          par(las = 0)#
+          mtext(outer = FALSE, side = 2, line = 3, yaxis_label, cex = 0.75)#
+          # mtext(outer = FALSE, side = 2, line = 4.5, pred_algo, cex = 1)#
+        }else{#
+          par(las = 0)#
+          axis(side = 2, labels = FALSE)#
+        }#
+        if(print_n){#
+          mtext(outer = FALSE, side = 3, line = 1.5, paste0("n = ", n))#
+        }#
+        if(add_ratio){#
+        }#
+        if(!is.null(relative_est)){#
+          abline(h = 1, lty = 3)#
+        }#
+      }#
+    }
+Q
+make_one_box_plot_row <- function(rslt, metric = "bias", #
+                                      est, add_legend = FALSE, #
+                                      est_labels = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                      rm_last = TRUE,#
+                                      grid = FALSE, #
+                                      nx_grid = NULL, ny_grid = BULL, #
+                                      pred_algo = "Logistic regression",#
+                                            yaxis_label, add_ratio = TRUE, #
+                                            xaxis_label = "Number CV Folds",#
+                                            transpose = FALSE, #
+                                            log = "y", print_n = FALSE,#
+                                            relative_est = NULL,#
+                                            relative_K = NULL, #
+                                            absolute_val = TRUE, col, ...){#
+      for(n in c(50, 100, 250, 500)){#
+        par(las = 1)#
+        tmp <- rslt[rslt$n == n, ]#
+        tmp5 <- tmp[tmp$K == 5,]#
+        tmp10 <- tmp[tmp$K == 10,]#
+        tmp20 <- tmp[tmp$K == 20,]#
+        tmp40 <- tmp[tmp$K == 40,]#
+        # est <- c("mse_dcvtmle1","mse_donestep1","mse_emp1","mse_bootstrap")#
+        grbg <- as.matrix(rbind(tmp5[,est],tmp10[,est],tmp20[,est],tmp40[,est]))#
+        if(absolute_val){#
+          grbg <- abs(grbg)#
+        }#
+        if(rm_last){#
+          grbg[2:4,4] <- NA#
+        }#
+        row.names(grbg) <- c(5,10,20,40)#
+        if(n == 50){#
+          leg.text <- est_labels#
+          sp <- c(0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0)#
+        }else{#
+          leg.text <- FALSE#
+          sp <- c(0,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0)#
+        }#
+        if(transpose){#
+          grbg <- t(grbg)#
+        }#
+        if(!is.null(relative_est)){#
+          grbg <- grbg / grbg[paste(relative_K),relative_est]#
+        }#
+        txt <- c(5,10,20,40)#
+        if(n == 50) txt <- c(5,10,20,"",5,10,20,40,5,10,20,40)#
+        tmp <- barplot(grbg, legend.text = FALSE, #
+          beside=TRUE, log = log, yaxt = "n", names.arg = rep("",4), col = col, #
+          space = sp, ... )#
+#
+        if(grid){#
+          grid(nx = nx_grid, ny = ny_grid, lty = 1, col = "gray75", equilogs = FALSE)#
+          par(new = TRUE)#
+          tmp <- barplot(grbg, legend.text = FALSE, #
+          beside=TRUE, log = log, yaxt = "n", names.arg = rep("",4), col = col, #
+          space = sp, ... )#
+        }#
+        mtext(side = 1, outer = FALSE, line = 0.02, text = txt, cex =0.5, #
+        at = c(tmp[,1],tmp[,2],tmp[,3]))#
+        mtext(side = 1, outer = FALSE, line = 0.02, text = "K = ", cex =0.5, #
+              at = par()$usr[1])#
+        if(n == 50 & add_legend){#
+          legend(x = "topright", fill = unique(col), legend = leg.text, ncol = 2)#
+        }#
+        if(n == 50){#
+          axis(side = 2)#
+          par(las = 0)#
+          mtext(outer = FALSE, side = 2, line = 3, yaxis_label, cex = 0.75)#
+          # mtext(outer = FALSE, side = 2, line = 4.5, pred_algo, cex = 1)#
+        }else{#
+          par(las = 0)#
+          axis(side = 2, labels = FALSE)#
+        }#
+        if(print_n){#
+          mtext(outer = FALSE, side = 3, line = 1.5, paste0("n = ", n))#
+        }#
+        if(add_ratio){#
+        }#
+        if(!is.null(relative_est)){#
+          abline(h = 1, lty = 3)#
+        }#
+      }#
+    }
+debug(make_one_box_plot_row)
+make_one_box_plot_row(rslt = glm_rslt, print_n = TRUE, #
+                          est = c("bias_emp1","bias_dcvtmle1",#
+                                        "bias_donestep1","bias_bootstrap"),#
+                          grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                          add_legend = TRUE,#
+                                est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                ylim = c(0.000001,10), yaxis_label = "Absolute Bias",#
+                                col = my_col[sort(rep(1:4,4))])
+tmp
+?barplot
+Q
+make_one_box_plot_row <- function(rslt, metric = "bias", #
+                                      est, add_legend = FALSE, #
+                                      est_labels = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                      rm_last = TRUE,#
+                                      grid = FALSE, #
+                                      nx_grid = NULL, ny_grid = BULL, #
+                                      pred_algo = "Logistic regression",#
+                                            yaxis_label, add_ratio = TRUE, #
+                                            xaxis_label = "Number CV Folds",#
+                                            transpose = FALSE, #
+                                            log = "y", print_n = FALSE,#
+                                            relative_est = NULL,#
+                                            relative_K = NULL, #
+                                            absolute_val = TRUE, col, ...){#
+      for(n in c(50, 100, 250, 500)){#
+        par(las = 1)#
+        tmp <- rslt[rslt$n == n, ]#
+        tmp5 <- tmp[tmp$K == 5,]#
+        tmp10 <- tmp[tmp$K == 10,]#
+        tmp20 <- tmp[tmp$K == 20,]#
+        tmp40 <- tmp[tmp$K == 40,]#
+        # est <- c("mse_dcvtmle1","mse_donestep1","mse_emp1","mse_bootstrap")#
+        grbg <- as.matrix(rbind(tmp5[,est],tmp10[,est],tmp20[,est],tmp40[,est]))#
+        if(absolute_val){#
+          grbg <- abs(grbg)#
+        }#
+        if(rm_last){#
+          grbg[2:4,4] <- NA#
+        }#
+        row.names(grbg) <- c(5,10,20,40)#
+        if(n == 50){#
+          leg.text <- est_labels#
+          sp <- c(0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0)#
+        }else{#
+          leg.text <- FALSE#
+          sp <- c(0,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0)#
+        }#
+        xl <- c(0, 14 + sum(sp))#
+        if(transpose){#
+          grbg <- t(grbg)#
+        }#
+        if(!is.null(relative_est)){#
+          grbg <- grbg / grbg[paste(relative_K),relative_est]#
+        }#
+        txt <- c(5,10,20,40)#
+        if(n == 50) txt <- c(5,10,20,"",5,10,20,40,5,10,20,40)#
+        tmp <- barplot(grbg, legend.text = FALSE, #
+          beside=TRUE, log = log, yaxt = "n", names.arg = rep("",4), col = col, #
+          space = sp, xlim = xl, ... )#
+#
+        if(grid){#
+          grid(nx = nx_grid, ny = ny_grid, lty = 1, col = "gray75", equilogs = FALSE)#
+          par(new = TRUE)#
+          tmp <- barplot(grbg, legend.text = FALSE, #
+          beside=TRUE, log = log, yaxt = "n", names.arg = rep("",4), col = col, #
+          space = sp, xlim = xl, ... )#
+        }#
+        mtext(side = 1, outer = FALSE, line = 0.02, text = txt, cex =0.5, #
+        at = c(tmp[,1],tmp[,2],tmp[,3]))#
+        mtext(side = 1, outer = FALSE, line = 0.02, text = "K = ", cex =0.5, #
+              at = par()$usr[1])#
+        if(n == 50 & add_legend){#
+          legend(x = "topright", fill = unique(col), legend = leg.text, ncol = 2)#
+        }#
+        if(n == 50){#
+          axis(side = 2)#
+          par(las = 0)#
+          mtext(outer = FALSE, side = 2, line = 3, yaxis_label, cex = 0.75)#
+          # mtext(outer = FALSE, side = 2, line = 4.5, pred_algo, cex = 1)#
+        }else{#
+          par(las = 0)#
+          axis(side = 2, labels = FALSE)#
+        }#
+        if(print_n){#
+          mtext(outer = FALSE, side = 3, line = 1.5, paste0("n = ", n))#
+        }#
+        if(add_ratio){#
+        }#
+        if(!is.null(relative_est)){#
+          abline(h = 1, lty = 3)#
+        }#
+      }#
+    }
+debug(make_one_box_plot_row)
+make_one_box_plot_row(rslt = glm_rslt, print_n = TRUE, #
+                          est = c("bias_emp1","bias_dcvtmle1",#
+                                        "bias_donestep1","bias_bootstrap"),#
+                          grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                          add_legend = TRUE,#
+                                est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                ylim = c(0.000001,10), yaxis_label = "Absolute Bias",#
+                                col = my_col[sort(rep(1:4,4))])
+tmp
+text(x = tmp, srt = 90, "a")
+text(x = tmp, y = par()$usr[3], srt = 90, "a")
+text(x = tmp, y = par()$usr[1], srt = 90, "a")
+text(x = tmp, y = par()$usr[2], srt = 90, "a")
+text(x = tmp, y = par()$usr[2], srt = 90, "a", pos = 4)
+par()$usr
+text(x = tmp, y = exp(par()$usr[2]), srt = 90, "a", pos = 4)
+text(x = tmp, y = exp(par()$usr[3]), srt = 90, "a", pos = 4)
+text(x = tmp, y = exp(par()$usr[3]), srt = 90, "a", pos = 2)
+text(x = tmp, y = exp(par()$usr[3]), srt = 90, "a", pos = 1)
+text(x = tmp, y = exp(par()$usr[3]), srt = 90, "a", pos = 3)
+text(x = tmp, y = exp(par()$usr[3]), srt = 90, "a")
+text(x = tmp, y = 0, srt = 90, "a")
+text(x = tmp, y = -6, srt = 90, "a")
+text(x = tmp, y = 1e-4, srt = 90, "a")
+text(x = tmp, y = 1e-3, srt = 90, "a")
+text(x = tmp, y = 1e-5, srt = 90, "a")
+text(x = tmp, y = ylim[1], srt = 90, "a")
+exp(-6)
+log(0.000001)
+?par
+10^-6
+text(x = tmp, y = 10^par()$usr[3], srt = 90, "a")
+text(x = tmp, y = 10^par()$usr[3], srt = 90, "a", pos = 1)
+text(x = tmp, y = 10^par()$usr[3], srt = 90, "a", pos = 4)
+text(x = tmp, y = 10^par()$usr[3], srt = 90, "a", pos = 3)
+text(x = tmp, y = 10^par()$usr[3] + 0.01, srt = 90, "a")
+text(x = tmp, y = 1.001*10^par()$usr[3], srt = 90, "a")
+text(x = tmp, y = 1.1*10^par()$usr[3], srt = 90, "a")
+text(x = tmp, y = 1.5*10^par()$usr[3], srt = 90, "a")
+text(x = tmp, y = 1.5*10^par()$usr[3], srt = 90, grbg)
+text(x = tmp, y = 1.5*10^par()$usr[3], srt = 90, round(grbg,3))
+text(x = tmp, y = 1.5*10^par()$usr[3], srt = 90, round(grbg,2))
+text(x = tmp, y = 1.5*10^par()$usr[3], srt = 90, round(grbg,2), pos = 3)
+Q
+make_one_box_plot_row <- function(rslt, metric = "bias", #
+                                      est, add_legend = FALSE, #
+                                      est_labels = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                      rm_last = TRUE,#
+                                      grid = FALSE, #
+                                      add_text = FALSE, #
+                                      nx_grid = NULL, ny_grid = BULL, #
+                                      pred_algo = "Logistic regression",#
+                                            yaxis_label, add_ratio = TRUE, #
+                                            xaxis_label = "Number CV Folds",#
+                                            transpose = FALSE, #
+                                            log = "y", print_n = FALSE,#
+                                            relative_est = NULL,#
+                                            relative_K = NULL, #
+                                            absolute_val = TRUE, col, ...){#
+      for(n in c(50, 100, 250, 500)){#
+        par(las = 1)#
+        tmp <- rslt[rslt$n == n, ]#
+        tmp5 <- tmp[tmp$K == 5,]#
+        tmp10 <- tmp[tmp$K == 10,]#
+        tmp20 <- tmp[tmp$K == 20,]#
+        tmp40 <- tmp[tmp$K == 40,]#
+        # est <- c("mse_dcvtmle1","mse_donestep1","mse_emp1","mse_bootstrap")#
+        grbg <- as.matrix(rbind(tmp5[,est],tmp10[,est],tmp20[,est],tmp40[,est]))#
+        if(absolute_val){#
+          grbg <- abs(grbg)#
+        }#
+        if(rm_last){#
+          grbg[2:4,4] <- NA#
+        }#
+        row.names(grbg) <- c(5,10,20,40)#
+        if(n == 50){#
+          leg.text <- est_labels#
+          sp <- c(0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0)#
+        }else{#
+          leg.text <- FALSE#
+          sp <- c(0,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0)#
+        }#
+        xl <- c(0, 14 + sum(sp))#
+        if(transpose){#
+          grbg <- t(grbg)#
+        }#
+        if(!is.null(relative_est)){#
+          grbg <- grbg / grbg[paste(relative_K),relative_est]#
+        }#
+        txt <- c(5,10,20,40)#
+        if(n == 50) txt <- c(5,10,20,"",5,10,20,40,5,10,20,40)#
+        tmp <- barplot(grbg, legend.text = FALSE, #
+          beside=TRUE, log = log, yaxt = "n", names.arg = rep("",4), col = col, #
+          space = sp, xlim = xl, ... )#
+#
+        if(grid){#
+          grid(nx = nx_grid, ny = ny_grid, lty = 1, col = "gray75", equilogs = FALSE)#
+          par(new = TRUE)#
+          tmp <- barplot(grbg, legend.text = FALSE, #
+          beside=TRUE, log = log, yaxt = "n", names.arg = rep("",4), col = col, #
+          space = sp, xlim = xl, ... )#
+        }#
+        mtext(side = 1, outer = FALSE, line = 0.02, text = txt, cex =0.5, #
+        at = c(tmp[,1],tmp[,2],tmp[,3]))#
+        mtext(side = 1, outer = FALSE, line = 0.02, text = "K = ", cex =0.5, #
+              at = par()$usr[1])#
+        if(add_text){#
+          text(x = tmp, y = 1.5*10^par()$usr[3], srt = 90, round(grbg, 2), pos = 3)#
+        }#
+        if(n == 50 & add_legend){#
+          legend(x = "topright", fill = unique(col), legend = leg.text, ncol = 2)#
+        }#
+        if(n == 50){#
+          axis(side = 2)#
+          par(las = 0)#
+          mtext(outer = FALSE, side = 2, line = 3, yaxis_label, cex = 0.75)#
+          # mtext(outer = FALSE, side = 2, line = 4.5, pred_algo, cex = 1)#
+        }else{#
+          par(las = 0)#
+          axis(side = 2, labels = FALSE)#
+        }#
+        if(print_n){#
+          mtext(outer = FALSE, side = 3, line = 1.5, paste0("n = ", n))#
+        }#
+        if(add_ratio){#
+        }#
+        if(!is.null(relative_est)){#
+          abline(h = 1, lty = 3)#
+        }#
+      }#
+    }
+layout(matrix(1:12, nrow = 3, ncol = 4,  byrow = TRUE))#
+    par(mar = c(1.6, 0.6, 1.6, 0.6), mgp = c(2.1, 0.5, 0),#
+        oma = c(2.1, 5.1, 2.1, 2.1))#
+    make_one_box_plot_row(rslt = glm_rslt, print_n = TRUE, #
+                          est = c("bias_emp1","bias_dcvtmle1",#
+                                        "bias_donestep1","bias_bootstrap"),#
+                          grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                          add_legend = TRUE,#
+                                est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                ylim = c(0.000001,10), yaxis_label = "Absolute Bias",#
+                                col = my_col[sort(rep(1:4,4))])#
+    make_one_box_plot_row(rslt = glm_rslt, #
+                                grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                              est = c("var_emp1","var_dcvtmle1",#
+                                            "var_donestep1","var_bootstrap"),#
+                                    est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                    ylim = c(0.000001,10), yaxis_label = "Variance",#
+                                    col = my_col[sort(rep(1:4,4))])#
+    make_one_box_plot_row(rslt = glm_rslt, #
+                              est = c("mse_emp1","mse_dcvtmle1",#
+                                            "mse_donestep1","mse_bootstrap"),#
+                                relative_est = "mse_emp1",#
+                                relative_K = 5,    add_text = TRUE#
+                                grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                                    est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                    ylim = c(0.01,5), yaxis_label = "Relative MSE",#
+                                    col = my_col[sort(rep(1:4,4))])
+make_one_box_plot_row(rslt = glm_rslt, #
+                              est = c("mse_emp1","mse_dcvtmle1",#
+                                            "mse_donestep1","mse_bootstrap"),#
+                                relative_est = "mse_emp1",#
+                                relative_K = 5,    add_text = TRUE,#
+                                grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                                    est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                    ylim = c(0.01,5), yaxis_label = "Relative MSE",#
+                                    col = my_col[sort(rep(1:4,4))])
+layout(matrix(1:12, nrow = 3, ncol = 4,  byrow = TRUE))#
+    par(mar = c(1.6, 0.6, 1.6, 0.6), mgp = c(2.1, 0.5, 0),#
+        oma = c(2.1, 5.1, 2.1, 2.1))#
+    make_one_box_plot_row(rslt = glm_rslt, print_n = TRUE, #
+                          est = c("bias_emp1","bias_dcvtmle1",#
+                                        "bias_donestep1","bias_bootstrap"),#
+                          grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                          add_legend = TRUE,#
+                                est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                ylim = c(0.000001,10), yaxis_label = "Absolute Bias",#
+                                col = my_col[sort(rep(1:4,4))])#
+    make_one_box_plot_row(rslt = glm_rslt, #
+                                grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                              est = c("var_emp1","var_dcvtmle1",#
+                                            "var_donestep1","var_bootstrap"),#
+                                    est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                    ylim = c(0.000001,10), yaxis_label = "Variance",#
+                                    col = my_col[sort(rep(1:4,4))])#
+    make_one_box_plot_row(rslt = glm_rslt, #
+                              est = c("mse_emp1","mse_dcvtmle1",#
+                                            "mse_donestep1","mse_bootstrap"),#
+                                relative_est = "mse_emp1",#
+                                relative_K = 5,    add_text = TRUE,#
+                                grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                                    est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                    ylim = c(0.01,5), yaxis_label = "Relative MSE",#
+                                    col = my_col[sort(rep(1:4,4))])
+?text
+pdf("~/Dropbox/Emory/cross-validated-prediction-metrics/glm_cvtn.pdf",#
+        height = 6, width = 11)#
+    layout(matrix(1:12, nrow = 3, ncol = 4,  byrow = TRUE))#
+    par(mar = c(1.6, 0.6, 1.6, 0.6), mgp = c(2.1, 0.5, 0),#
+        oma = c(2.1, 5.1, 2.1, 2.1))#
+    make_one_box_plot_row(rslt = glm_rslt, print_n = TRUE, #
+                          est = c("bias_emp1","bias_dcvtmle1",#
+                                        "bias_donestep1","bias_bootstrap"),#
+                          grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                          add_legend = TRUE,#
+                                est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                ylim = c(0.000001,10), yaxis_label = "Absolute Bias",#
+                                col = my_col[sort(rep(1:4,4))])#
+    make_one_box_plot_row(rslt = glm_rslt, #
+                                grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                              est = c("var_emp1","var_dcvtmle1",#
+                                            "var_donestep1","var_bootstrap"),#
+                                    est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                    ylim = c(0.000001,10), yaxis_label = "Variance",#
+                                    col = my_col[sort(rep(1:4,4))])#
+    make_one_box_plot_row(rslt = glm_rslt, #
+                              est = c("mse_emp1","mse_dcvtmle1",#
+                                            "mse_donestep1","mse_bootstrap"),#
+                                relative_est = "mse_emp1",#
+                                relative_K = 5,    add_text = TRUE,#
+                                grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                                    est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                    ylim = c(0.01,5), yaxis_label = "Relative MSE",#
+                                    col = my_col[sort(rep(1:4,4))])#
+    dev.off()
+make_one_box_plot_row <- function(rslt, metric = "bias", #
+                                      est, add_legend = FALSE, #
+                                      est_labels = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                      rm_last = TRUE,#
+                                      grid = FALSE, #
+                                      add_text = FALSE, #
+                                      nx_grid = NULL, ny_grid = BULL, #
+                                      pred_algo = "Logistic regression",#
+                                            yaxis_label, add_ratio = TRUE, #
+                                            xaxis_label = "Number CV Folds",#
+                                            transpose = FALSE, #
+                                            log = "y", print_n = FALSE,#
+                                            relative_est = NULL,#
+                                            relative_K = NULL, #
+                                            absolute_val = TRUE, col, ...){#
+      for(n in c(50, 100, 250, 500)){#
+        par(las = 1)#
+        tmp <- rslt[rslt$n == n, ]#
+        tmp5 <- tmp[tmp$K == 5,]#
+        tmp10 <- tmp[tmp$K == 10,]#
+        tmp20 <- tmp[tmp$K == 20,]#
+        tmp40 <- tmp[tmp$K == 40,]#
+        # est <- c("mse_dcvtmle1","mse_donestep1","mse_emp1","mse_bootstrap")#
+        grbg <- as.matrix(rbind(tmp5[,est],tmp10[,est],tmp20[,est],tmp40[,est]))#
+        if(absolute_val){#
+          grbg <- abs(grbg)#
+        }#
+        if(rm_last){#
+          grbg[2:4,4] <- NA#
+        }#
+        row.names(grbg) <- c(5,10,20,40)#
+        if(n == 50){#
+          leg.text <- est_labels#
+          sp <- c(0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0)#
+        }else{#
+          leg.text <- FALSE#
+          sp <- c(0,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0)#
+        }#
+        xl <- c(0, 14 + sum(sp))#
+        if(transpose){#
+          grbg <- t(grbg)#
+        }#
+        if(!is.null(relative_est)){#
+          grbg <- grbg / grbg[paste(relative_K),relative_est]#
+        }#
+        txt <- c(5,10,20,40)#
+        if(n == 50) txt <- c(5,10,20,"",5,10,20,40,5,10,20,40)#
+        tmp <- barplot(grbg, legend.text = FALSE, #
+          beside=TRUE, log = log, yaxt = "n", names.arg = rep("",4), col = col, #
+          space = sp, xlim = xl, ... )#
+#
+        if(grid){#
+          grid(nx = nx_grid, ny = ny_grid, lty = 1, col = "gray75", equilogs = FALSE)#
+          par(new = TRUE)#
+          tmp <- barplot(grbg, legend.text = FALSE, #
+          beside=TRUE, log = log, yaxt = "n", names.arg = rep("",4), col = col, #
+          space = sp, xlim = xl, ... )#
+        }#
+        mtext(side = 1, outer = FALSE, line = 0.02, text = txt, cex =0.5, #
+        at = c(tmp[,1],tmp[,2],tmp[,3]))#
+        mtext(side = 1, outer = FALSE, line = 0.02, text = "K = ", cex =0.5, #
+              at = par()$usr[1])#
+        if(add_text){#
+          tmp[is.na(tmp)] <- ""#
+          text(x = tmp, y = 1.5*10^par()$usr[3], srt = 90, round(grbg, 2), pos = 3)#
+        }#
+        if(n == 50 & add_legend){#
+          legend(x = "topright", fill = unique(col), legend = leg.text, ncol = 2)#
+        }#
+        if(n == 50){#
+          axis(side = 2)#
+          par(las = 0)#
+          mtext(outer = FALSE, side = 2, line = 3, yaxis_label, cex = 0.75)#
+          # mtext(outer = FALSE, side = 2, line = 4.5, pred_algo, cex = 1)#
+        }else{#
+          par(las = 0)#
+          axis(side = 2, labels = FALSE)#
+        }#
+        if(print_n){#
+          mtext(outer = FALSE, side = 3, line = 1.5, paste0("n = ", n))#
+        }#
+        if(add_ratio){#
+        }#
+        if(!is.null(relative_est)){#
+          abline(h = 1, lty = 3)#
+        }#
+      }#
+    }#
+    pdf("~/Dropbox/Emory/cross-validated-prediction-metrics/glm_cvtn.pdf",#
+        height = 6, width = 11)#
+    layout(matrix(1:12, nrow = 3, ncol = 4,  byrow = TRUE))#
+    par(mar = c(1.6, 0.6, 1.6, 0.6), mgp = c(2.1, 0.5, 0),#
+        oma = c(2.1, 5.1, 2.1, 2.1))#
+    make_one_box_plot_row(rslt = glm_rslt, print_n = TRUE, #
+                          est = c("bias_emp1","bias_dcvtmle1",#
+                                        "bias_donestep1","bias_bootstrap"),#
+                          grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                          add_legend = TRUE,#
+                                est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                ylim = c(0.000001,10), yaxis_label = "Absolute Bias",#
+                                col = my_col[sort(rep(1:4,4))])#
+    make_one_box_plot_row(rslt = glm_rslt, #
+                                grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                              est = c("var_emp1","var_dcvtmle1",#
+                                            "var_donestep1","var_bootstrap"),#
+                                    est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                    ylim = c(0.000001,10), yaxis_label = "Variance",#
+                                    col = my_col[sort(rep(1:4,4))])#
+    make_one_box_plot_row(rslt = glm_rslt, #
+                              est = c("mse_emp1","mse_dcvtmle1",#
+                                            "mse_donestep1","mse_bootstrap"),#
+                                relative_est = "mse_emp1",#
+                                relative_K = 5,    add_text = TRUE,#
+                                grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                                    est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                    ylim = c(0.01,5), yaxis_label = "Relative MSE",#
+                                    col = my_col[sort(rep(1:4,4))])#
+    dev.off()
+debug(make_one_box_plot_row)
+make_one_box_plot_row(rslt = glm_rslt, #
+                              est = c("mse_emp1","mse_dcvtmle1",#
+                                            "mse_donestep1","mse_bootstrap"),#
+                                relative_est = "mse_emp1",#
+                                relative_K = 5,    add_text = TRUE,#
+                                grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                                    est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                    ylim = c(0.01,5), yaxis_label = "Relative MSE",#
+                                    col = my_col[sort(rep(1:4,4))])
+tmp
+Q
+make_one_box_plot_row <- function(rslt, metric = "bias", #
+                                      est, add_legend = FALSE, #
+                                      est_labels = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                      rm_last = TRUE,#
+                                      grid = FALSE, #
+                                      add_text = FALSE, #
+                                      nx_grid = NULL, ny_grid = BULL, #
+                                      pred_algo = "Logistic regression",#
+                                            yaxis_label, add_ratio = TRUE, #
+                                            xaxis_label = "Number CV Folds",#
+                                            transpose = FALSE, #
+                                            log = "y", print_n = FALSE,#
+                                            relative_est = NULL,#
+                                            relative_K = NULL, #
+                                            absolute_val = TRUE, col, ...){#
+      for(n in c(50, 100, 250, 500)){#
+        par(las = 1)#
+        tmp <- rslt[rslt$n == n, ]#
+        tmp5 <- tmp[tmp$K == 5,]#
+        tmp10 <- tmp[tmp$K == 10,]#
+        tmp20 <- tmp[tmp$K == 20,]#
+        tmp40 <- tmp[tmp$K == 40,]#
+        # est <- c("mse_dcvtmle1","mse_donestep1","mse_emp1","mse_bootstrap")#
+        grbg <- as.matrix(rbind(tmp5[,est],tmp10[,est],tmp20[,est],tmp40[,est]))#
+        if(absolute_val){#
+          grbg <- abs(grbg)#
+        }#
+        if(rm_last){#
+          grbg[2:4,4] <- NA#
+        }#
+        row.names(grbg) <- c(5,10,20,40)#
+        if(n == 50){#
+          leg.text <- est_labels#
+          sp <- c(0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0)#
+        }else{#
+          leg.text <- FALSE#
+          sp <- c(0,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0)#
+        }#
+        xl <- c(0, 14 + sum(sp))#
+        if(transpose){#
+          grbg <- t(grbg)#
+        }#
+        if(!is.null(relative_est)){#
+          grbg <- grbg / grbg[paste(relative_K),relative_est]#
+        }#
+        txt <- c(5,10,20,40)#
+        if(n == 50) txt <- c(5,10,20,"",5,10,20,40,5,10,20,40)#
+        tmp <- barplot(grbg, legend.text = FALSE, #
+          beside=TRUE, log = log, yaxt = "n", names.arg = rep("",4), col = col, #
+          space = sp, xlim = xl, ... )#
+#
+        if(grid){#
+          grid(nx = nx_grid, ny = ny_grid, lty = 1, col = "gray75", equilogs = FALSE)#
+          par(new = TRUE)#
+          tmp <- barplot(grbg, legend.text = FALSE, #
+          beside=TRUE, log = log, yaxt = "n", names.arg = rep("",4), col = col, #
+          space = sp, xlim = xl, ... )#
+        }#
+        mtext(side = 1, outer = FALSE, line = 0.02, text = txt, cex =0.5, #
+        at = c(tmp[,1],tmp[,2],tmp[,3]))#
+        mtext(side = 1, outer = FALSE, line = 0.02, text = "K = ", cex =0.5, #
+              at = par()$usr[1])#
+        if(add_text){#
+          grbg[is.na(grbg)] <- ""#
+          text(x = tmp, y = 1.5*10^par()$usr[3], srt = 90, round(grbg, 2), pos = 3)#
+        }#
+        if(n == 50 & add_legend){#
+          legend(x = "topright", fill = unique(col), legend = leg.text, ncol = 2)#
+        }#
+        if(n == 50){#
+          axis(side = 2)#
+          par(las = 0)#
+          mtext(outer = FALSE, side = 2, line = 3, yaxis_label, cex = 0.75)#
+          # mtext(outer = FALSE, side = 2, line = 4.5, pred_algo, cex = 1)#
+        }else{#
+          par(las = 0)#
+          axis(side = 2, labels = FALSE)#
+        }#
+        if(print_n){#
+          mtext(outer = FALSE, side = 3, line = 1.5, paste0("n = ", n))#
+        }#
+        if(add_ratio){#
+        }#
+        if(!is.null(relative_est)){#
+          abline(h = 1, lty = 3)#
+        }#
+      }#
+    }#
+    pdf("~/Dropbox/Emory/cross-validated-prediction-metrics/glm_cvtn.pdf",#
+        height = 6, width = 11)#
+    layout(matrix(1:12, nrow = 3, ncol = 4,  byrow = TRUE))#
+    par(mar = c(1.6, 0.6, 1.6, 0.6), mgp = c(2.1, 0.5, 0),#
+        oma = c(2.1, 5.1, 2.1, 2.1))#
+    make_one_box_plot_row(rslt = glm_rslt, print_n = TRUE, #
+                          est = c("bias_emp1","bias_dcvtmle1",#
+                                        "bias_donestep1","bias_bootstrap"),#
+                          grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                          add_legend = TRUE,#
+                                est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                ylim = c(0.000001,10), yaxis_label = "Absolute Bias",#
+                                col = my_col[sort(rep(1:4,4))])#
+    make_one_box_plot_row(rslt = glm_rslt, #
+                                grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                              est = c("var_emp1","var_dcvtmle1",#
+                                            "var_donestep1","var_bootstrap"),#
+                                    est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                    ylim = c(0.000001,10), yaxis_label = "Variance",#
+                                    col = my_col[sort(rep(1:4,4))])#
+    make_one_box_plot_row(rslt = glm_rslt, #
+                              est = c("mse_emp1","mse_dcvtmle1",#
+                                            "mse_donestep1","mse_bootstrap"),#
+                                relative_est = "mse_emp1",#
+                                relative_K = 5,    add_text = TRUE,#
+                                grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                                    est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                    ylim = c(0.01,5), yaxis_label = "Relative MSE",#
+                                    col = my_col[sort(rep(1:4,4))])#
+    dev.off()
+make_one_box_plot_row <- function(rslt, metric = "bias", #
+                                      est, add_legend = FALSE, #
+                                      est_labels = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                      rm_last = TRUE,#
+                                      grid = FALSE, #
+                                      add_text = FALSE, #
+                                      nx_grid = NULL, ny_grid = BULL, #
+                                      pred_algo = "Logistic regression",#
+                                            yaxis_label, add_ratio = TRUE, #
+                                            xaxis_label = "Number CV Folds",#
+                                            transpose = FALSE, #
+                                            log = "y", print_n = FALSE,#
+                                            relative_est = NULL,#
+                                            relative_K = NULL, #
+                                            absolute_val = TRUE, col, ...){#
+      for(n in c(50, 100, 250, 500)){#
+        par(las = 1)#
+        tmp <- rslt[rslt$n == n, ]#
+        tmp5 <- tmp[tmp$K == 5,]#
+        tmp10 <- tmp[tmp$K == 10,]#
+        tmp20 <- tmp[tmp$K == 20,]#
+        tmp40 <- tmp[tmp$K == 40,]#
+        # est <- c("mse_dcvtmle1","mse_donestep1","mse_emp1","mse_bootstrap")#
+        grbg <- as.matrix(rbind(tmp5[,est],tmp10[,est],tmp20[,est],tmp40[,est]))#
+        if(absolute_val){#
+          grbg <- abs(grbg)#
+        }#
+        if(rm_last){#
+          grbg[2:4,4] <- NA#
+        }#
+        row.names(grbg) <- c(5,10,20,40)#
+        if(n == 50){#
+          leg.text <- est_labels#
+          sp <- c(0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0)#
+        }else{#
+          leg.text <- FALSE#
+          sp <- c(0,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0)#
+        }#
+        xl <- c(0, 14 + sum(sp))#
+        if(transpose){#
+          grbg <- t(grbg)#
+        }#
+        if(!is.null(relative_est)){#
+          grbg <- grbg / grbg[paste(relative_K),relative_est]#
+        }#
+        txt <- c(5,10,20,40)#
+        if(n == 50) txt <- c(5,10,20,"",5,10,20,40,5,10,20,40)#
+        tmp <- barplot(grbg, legend.text = FALSE, #
+          beside=TRUE, log = log, yaxt = "n", names.arg = rep("",4), col = col, #
+          space = sp, xlim = xl, ... )#
+#
+        if(grid){#
+          grid(nx = nx_grid, ny = ny_grid, lty = 1, col = "gray75", equilogs = FALSE)#
+          par(new = TRUE)#
+          tmp <- barplot(grbg, legend.text = FALSE, #
+          beside=TRUE, log = log, yaxt = "n", names.arg = rep("",4), col = col, #
+          space = sp, xlim = xl, ... )#
+        }#
+        mtext(side = 1, outer = FALSE, line = 0.02, text = txt, cex =0.5, #
+        at = c(tmp[,1],tmp[,2],tmp[,3]))#
+        mtext(side = 1, outer = FALSE, line = 0.02, text = "K = ", cex =0.5, #
+              at = par()$usr[1])#
+        if(add_text){#
+          grbg2 <- round(grbg, 2)#
+          grbg2[is.na(grbg2)] <- ""#
+          text(x = tmp, y = 1.5*10^par()$usr[3], srt = 90, grbg2, pos = 3)#
+        }#
+        if(n == 50 & add_legend){#
+          legend(x = "topright", fill = unique(col), legend = leg.text, ncol = 2)#
+        }#
+        if(n == 50){#
+          axis(side = 2)#
+          par(las = 0)#
+          mtext(outer = FALSE, side = 2, line = 3, yaxis_label, cex = 0.75)#
+          # mtext(outer = FALSE, side = 2, line = 4.5, pred_algo, cex = 1)#
+        }else{#
+          par(las = 0)#
+          axis(side = 2, labels = FALSE)#
+        }#
+        if(print_n){#
+          mtext(outer = FALSE, side = 3, line = 1.5, paste0("n = ", n))#
+        }#
+        if(add_ratio){#
+        }#
+        if(!is.null(relative_est)){#
+          abline(h = 1, lty = 3)#
+        }#
+      }#
+    }#
+    pdf("~/Dropbox/Emory/cross-validated-prediction-metrics/glm_cvtn.pdf",#
+        height = 6, width = 11)#
+    layout(matrix(1:12, nrow = 3, ncol = 4,  byrow = TRUE))#
+    par(mar = c(1.6, 0.6, 1.6, 0.6), mgp = c(2.1, 0.5, 0),#
+        oma = c(2.1, 5.1, 2.1, 2.1))#
+    make_one_box_plot_row(rslt = glm_rslt, print_n = TRUE, #
+                          est = c("bias_emp1","bias_dcvtmle1",#
+                                        "bias_donestep1","bias_bootstrap"),#
+                          grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                          add_legend = TRUE,#
+                                est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                ylim = c(0.000001,10), yaxis_label = "Absolute Bias",#
+                                col = my_col[sort(rep(1:4,4))])#
+    make_one_box_plot_row(rslt = glm_rslt, #
+                                grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                              est = c("var_emp1","var_dcvtmle1",#
+                                            "var_donestep1","var_bootstrap"),#
+                                    est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                    ylim = c(0.000001,10), yaxis_label = "Variance",#
+                                    col = my_col[sort(rep(1:4,4))])#
+    make_one_box_plot_row(rslt = glm_rslt, #
+                              est = c("mse_emp1","mse_dcvtmle1",#
+                                            "mse_donestep1","mse_bootstrap"),#
+                                relative_est = "mse_emp1",#
+                                relative_K = 5,    add_text = TRUE,#
+                                grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                                    est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                    ylim = c(0.01,5), yaxis_label = "Relative MSE",#
+                                    col = my_col[sort(rep(1:4,4))])#
+    dev.off()
+?text
+?prettyNum
+make_one_box_plot_row <- function(rslt, metric = "bias", #
+                                      est, add_legend = FALSE, #
+                                      est_labels = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                      rm_last = TRUE,#
+                                      grid = FALSE, #
+                                      add_text = FALSE, #
+                                      nx_grid = NULL, ny_grid = BULL, #
+                                      pred_algo = "Logistic regression",#
+                                            yaxis_label, add_ratio = TRUE, #
+                                            xaxis_label = "Number CV Folds",#
+                                            transpose = FALSE, #
+                                            log = "y", print_n = FALSE,#
+                                            relative_est = NULL,#
+                                            relative_K = NULL, #
+                                            absolute_val = TRUE, col, ...){#
+      for(n in c(50, 100, 250, 500)){#
+        par(las = 1)#
+        tmp <- rslt[rslt$n == n, ]#
+        tmp5 <- tmp[tmp$K == 5,]#
+        tmp10 <- tmp[tmp$K == 10,]#
+        tmp20 <- tmp[tmp$K == 20,]#
+        tmp40 <- tmp[tmp$K == 40,]#
+        # est <- c("mse_dcvtmle1","mse_donestep1","mse_emp1","mse_bootstrap")#
+        grbg <- as.matrix(rbind(tmp5[,est],tmp10[,est],tmp20[,est],tmp40[,est]))#
+        if(absolute_val){#
+          grbg <- abs(grbg)#
+        }#
+        if(rm_last){#
+          grbg[2:4,4] <- NA#
+        }#
+        row.names(grbg) <- c(5,10,20,40)#
+        if(n == 50){#
+          leg.text <- est_labels#
+          sp <- c(0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0)#
+        }else{#
+          leg.text <- FALSE#
+          sp <- c(0,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0)#
+        }#
+        xl <- c(0, 14 + sum(sp))#
+        if(transpose){#
+          grbg <- t(grbg)#
+        }#
+        if(!is.null(relative_est)){#
+          grbg <- grbg / grbg[paste(relative_K),relative_est]#
+        }#
+        txt <- c(5,10,20,40)#
+        if(n == 50) txt <- c(5,10,20,"",5,10,20,40,5,10,20,40)#
+        tmp <- barplot(grbg, legend.text = FALSE, #
+          beside=TRUE, log = log, yaxt = "n", names.arg = rep("",4), col = col, #
+          space = sp, xlim = xl, ... )#
+#
+        if(grid){#
+          grid(nx = nx_grid, ny = ny_grid, lty = 1, col = "gray75", equilogs = FALSE)#
+          par(new = TRUE)#
+          tmp <- barplot(grbg, legend.text = FALSE, #
+          beside=TRUE, log = log, yaxt = "n", names.arg = rep("",4), col = col, #
+          space = sp, xlim = xl, ... )#
+        }#
+        mtext(side = 1, outer = FALSE, line = 0.02, text = txt, cex =0.5, #
+        at = c(tmp[,1],tmp[,2],tmp[,3]))#
+        mtext(side = 1, outer = FALSE, line = 0.02, text = "K = ", cex =0.5, #
+              at = par()$usr[1])#
+        if(add_text){#
+          grbg2 <- round(grbg, 2)#
+          grbg2[is.na(grbg2)] <- ""#
+          text(x = tmp, y = 1.5*10^par()$usr[3], srt = 90, prettyNum(grbg2), adj = c(0,0.001))#
+        }#
+        if(n == 50 & add_legend){#
+          legend(x = "topright", fill = unique(col), legend = leg.text, ncol = 2)#
+        }#
+        if(n == 50){#
+          axis(side = 2)#
+          par(las = 0)#
+          mtext(outer = FALSE, side = 2, line = 3, yaxis_label, cex = 0.75)#
+          # mtext(outer = FALSE, side = 2, line = 4.5, pred_algo, cex = 1)#
+        }else{#
+          par(las = 0)#
+          axis(side = 2, labels = FALSE)#
+        }#
+        if(print_n){#
+          mtext(outer = FALSE, side = 3, line = 1.5, paste0("n = ", n))#
+        }#
+        if(add_ratio){#
+        }#
+        if(!is.null(relative_est)){#
+          abline(h = 1, lty = 3)#
+        }#
+      }#
+    }#
+    pdf("~/Dropbox/Emory/cross-validated-prediction-metrics/glm_cvtn.pdf",#
+        height = 6, width = 11)#
+    layout(matrix(1:12, nrow = 3, ncol = 4,  byrow = TRUE))#
+    par(mar = c(1.6, 0.6, 1.6, 0.6), mgp = c(2.1, 0.5, 0),#
+        oma = c(2.1, 5.1, 2.1, 2.1))#
+    make_one_box_plot_row(rslt = glm_rslt, print_n = TRUE, #
+                          est = c("bias_emp1","bias_dcvtmle1",#
+                                        "bias_donestep1","bias_bootstrap"),#
+                          grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                          add_legend = TRUE,#
+                                est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                ylim = c(0.000001,10), yaxis_label = "Absolute Bias",#
+                                col = my_col[sort(rep(1:4,4))])#
+    make_one_box_plot_row(rslt = glm_rslt, #
+                                grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                              est = c("var_emp1","var_dcvtmle1",#
+                                            "var_donestep1","var_bootstrap"),#
+                                    est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                    ylim = c(0.000001,10), yaxis_label = "Variance",#
+                                    col = my_col[sort(rep(1:4,4))])#
+    make_one_box_plot_row(rslt = glm_rslt, #
+                              est = c("mse_emp1","mse_dcvtmle1",#
+                                            "mse_donestep1","mse_bootstrap"),#
+                                relative_est = "mse_emp1",#
+                                relative_K = 5,    add_text = TRUE,#
+                                grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                                    est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                    ylim = c(0.01,5), yaxis_label = "Relative MSE",#
+                                    col = my_col[sort(rep(1:4,4))])#
+    dev.off()
+make_one_box_plot_row <- function(rslt, metric = "bias", #
+                                      est, add_legend = FALSE, #
+                                      est_labels = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                      rm_last = TRUE,#
+                                      grid = FALSE, #
+                                      add_text = FALSE, #
+                                      nx_grid = NULL, ny_grid = BULL, #
+                                      pred_algo = "Logistic regression",#
+                                            yaxis_label, add_ratio = TRUE, #
+                                            xaxis_label = "Number CV Folds",#
+                                            transpose = FALSE, #
+                                            log = "y", print_n = FALSE,#
+                                            relative_est = NULL,#
+                                            relative_K = NULL, #
+                                            absolute_val = TRUE, col, ...){#
+      for(n in c(50, 100, 250, 500)){#
+        par(las = 1)#
+        tmp <- rslt[rslt$n == n, ]#
+        tmp5 <- tmp[tmp$K == 5,]#
+        tmp10 <- tmp[tmp$K == 10,]#
+        tmp20 <- tmp[tmp$K == 20,]#
+        tmp40 <- tmp[tmp$K == 40,]#
+        # est <- c("mse_dcvtmle1","mse_donestep1","mse_emp1","mse_bootstrap")#
+        grbg <- as.matrix(rbind(tmp5[,est],tmp10[,est],tmp20[,est],tmp40[,est]))#
+        if(absolute_val){#
+          grbg <- abs(grbg)#
+        }#
+        if(rm_last){#
+          grbg[2:4,4] <- NA#
+        }#
+        row.names(grbg) <- c(5,10,20,40)#
+        if(n == 50){#
+          leg.text <- est_labels#
+          sp <- c(0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0)#
+        }else{#
+          leg.text <- FALSE#
+          sp <- c(0,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0)#
+        }#
+        xl <- c(0, 14 + sum(sp))#
+        if(transpose){#
+          grbg <- t(grbg)#
+        }#
+        if(!is.null(relative_est)){#
+          grbg <- grbg / grbg[paste(relative_K),relative_est]#
+        }#
+        txt <- c(5,10,20,40)#
+        if(n == 50) txt <- c(5,10,20,"",5,10,20,40,5,10,20,40)#
+        tmp <- barplot(grbg, legend.text = FALSE, #
+          beside=TRUE, log = log, yaxt = "n", names.arg = rep("",4), col = col, #
+          space = sp, xlim = xl, ... )#
+#
+        if(grid){#
+          grid(nx = nx_grid, ny = ny_grid, lty = 1, col = "gray75", equilogs = FALSE)#
+          par(new = TRUE)#
+          tmp <- barplot(grbg, legend.text = FALSE, #
+          beside=TRUE, log = log, yaxt = "n", names.arg = rep("",4), col = col, #
+          space = sp, xlim = xl, ... )#
+        }#
+        mtext(side = 1, outer = FALSE, line = 0.02, text = txt, cex =0.5, #
+        at = c(tmp[,1],tmp[,2],tmp[,3]))#
+        mtext(side = 1, outer = FALSE, line = 0.02, text = "K = ", cex =0.5, #
+              at = par()$usr[1])#
+        if(add_text){#
+          grbg2 <- round(grbg, 2)#
+          grbg2[is.na(grbg2)] <- ""#
+          text(x = tmp, y = 1.5*10^par()$usr[3], srt = 90, prettyNum(grbg2), adj = c(0,0.001),#
+               pos = 3)#
+        }#
+        if(n == 50 & add_legend){#
+          legend(x = "topright", fill = unique(col), legend = leg.text, ncol = 2)#
+        }#
+        if(n == 50){#
+          axis(side = 2)#
+          par(las = 0)#
+          mtext(outer = FALSE, side = 2, line = 3, yaxis_label, cex = 0.75)#
+          # mtext(outer = FALSE, side = 2, line = 4.5, pred_algo, cex = 1)#
+        }else{#
+          par(las = 0)#
+          axis(side = 2, labels = FALSE)#
+        }#
+        if(print_n){#
+          mtext(outer = FALSE, side = 3, line = 1.5, paste0("n = ", n))#
+        }#
+        if(add_ratio){#
+        }#
+        if(!is.null(relative_est)){#
+          abline(h = 1, lty = 3)#
+        }#
+      }#
+    }#
+    pdf("~/Dropbox/Emory/cross-validated-prediction-metrics/glm_cvtn.pdf",#
+        height = 6, width = 11)#
+    layout(matrix(1:12, nrow = 3, ncol = 4,  byrow = TRUE))#
+    par(mar = c(1.6, 0.6, 1.6, 0.6), mgp = c(2.1, 0.5, 0),#
+        oma = c(2.1, 5.1, 2.1, 2.1))#
+    make_one_box_plot_row(rslt = glm_rslt, print_n = TRUE, #
+                          est = c("bias_emp1","bias_dcvtmle1",#
+                                        "bias_donestep1","bias_bootstrap"),#
+                          grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                          add_legend = TRUE,#
+                                est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                ylim = c(0.000001,10), yaxis_label = "Absolute Bias",#
+                                col = my_col[sort(rep(1:4,4))])#
+    make_one_box_plot_row(rslt = glm_rslt, #
+                                grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                              est = c("var_emp1","var_dcvtmle1",#
+                                            "var_donestep1","var_bootstrap"),#
+                                    est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                    ylim = c(0.000001,10), yaxis_label = "Variance",#
+                                    col = my_col[sort(rep(1:4,4))])#
+    make_one_box_plot_row(rslt = glm_rslt, #
+                              est = c("mse_emp1","mse_dcvtmle1",#
+                                            "mse_donestep1","mse_bootstrap"),#
+                                relative_est = "mse_emp1",#
+                                relative_K = 5,    add_text = TRUE,#
+                                grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                                    est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                    ylim = c(0.01,5), yaxis_label = "Relative MSE",#
+                                    col = my_col[sort(rep(1:4,4))])#
+    dev.off()
+?prettyNum
+make_one_box_plot_row <- function(rslt, metric = "bias", #
+                                      est, add_legend = FALSE, #
+                                      est_labels = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                      rm_last = TRUE,#
+                                      grid = FALSE, #
+                                      add_text = FALSE, #
+                                      nx_grid = NULL, ny_grid = BULL, #
+                                      pred_algo = "Logistic regression",#
+                                            yaxis_label, add_ratio = TRUE, #
+                                            xaxis_label = "Number CV Folds",#
+                                            transpose = FALSE, #
+                                            log = "y", print_n = FALSE,#
+                                            relative_est = NULL,#
+                                            relative_K = NULL, #
+                                            absolute_val = TRUE, col, ...){#
+      for(n in c(50, 100, 250, 500)){#
+        par(las = 1)#
+        tmp <- rslt[rslt$n == n, ]#
+        tmp5 <- tmp[tmp$K == 5,]#
+        tmp10 <- tmp[tmp$K == 10,]#
+        tmp20 <- tmp[tmp$K == 20,]#
+        tmp40 <- tmp[tmp$K == 40,]#
+        # est <- c("mse_dcvtmle1","mse_donestep1","mse_emp1","mse_bootstrap")#
+        grbg <- as.matrix(rbind(tmp5[,est],tmp10[,est],tmp20[,est],tmp40[,est]))#
+        if(absolute_val){#
+          grbg <- abs(grbg)#
+        }#
+        if(rm_last){#
+          grbg[2:4,4] <- NA#
+        }#
+        row.names(grbg) <- c(5,10,20,40)#
+        if(n == 50){#
+          leg.text <- est_labels#
+          sp <- c(0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0)#
+        }else{#
+          leg.text <- FALSE#
+          sp <- c(0,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0)#
+        }#
+        xl <- c(0, 14 + sum(sp))#
+        if(transpose){#
+          grbg <- t(grbg)#
+        }#
+        if(!is.null(relative_est)){#
+          grbg <- grbg / grbg[paste(relative_K),relative_est]#
+        }#
+        txt <- c(5,10,20,40)#
+        if(n == 50) txt <- c(5,10,20,"",5,10,20,40,5,10,20,40)#
+        tmp <- barplot(grbg, legend.text = FALSE, #
+          beside=TRUE, log = log, yaxt = "n", names.arg = rep("",4), col = col, #
+          space = sp, xlim = xl, ... )#
+#
+        if(grid){#
+          grid(nx = nx_grid, ny = ny_grid, lty = 1, col = "gray75", equilogs = FALSE)#
+          par(new = TRUE)#
+          tmp <- barplot(grbg, legend.text = FALSE, #
+          beside=TRUE, log = log, yaxt = "n", names.arg = rep("",4), col = col, #
+          space = sp, xlim = xl, ... )#
+        }#
+        mtext(side = 1, outer = FALSE, line = 0.02, text = txt, cex =0.5, #
+        at = c(tmp[,1],tmp[,2],tmp[,3]))#
+        mtext(side = 1, outer = FALSE, line = 0.02, text = "K = ", cex =0.5, #
+              at = par()$usr[1])#
+        if(add_text){#
+          grbg2 <- round(grbg, 2)#
+          grbg2[is.na(grbg2)] <- ""#
+          text(x = tmp, y = 1.5*10^par()$usr[3], srt = 90, prettyNum(grbg2, digits = 2))#
+               # adj = c(0,0.001),#
+        }#
+        if(n == 50 & add_legend){#
+          legend(x = "topright", fill = unique(col), legend = leg.text, ncol = 2)#
+        }#
+        if(n == 50){#
+          axis(side = 2)#
+          par(las = 0)#
+          mtext(outer = FALSE, side = 2, line = 3, yaxis_label, cex = 0.75)#
+          # mtext(outer = FALSE, side = 2, line = 4.5, pred_algo, cex = 1)#
+        }else{#
+          par(las = 0)#
+          axis(side = 2, labels = FALSE)#
+        }#
+        if(print_n){#
+          mtext(outer = FALSE, side = 3, line = 1.5, paste0("n = ", n))#
+        }#
+        if(add_ratio){#
+        }#
+        if(!is.null(relative_est)){#
+          abline(h = 1, lty = 3)#
+        }#
+      }#
+    }#
+    pdf("~/Dropbox/Emory/cross-validated-prediction-metrics/glm_cvtn.pdf",#
+        height = 6, width = 11)#
+    layout(matrix(1:12, nrow = 3, ncol = 4,  byrow = TRUE))#
+    par(mar = c(1.6, 0.6, 1.6, 0.6), mgp = c(2.1, 0.5, 0),#
+        oma = c(2.1, 5.1, 2.1, 2.1))#
+    make_one_box_plot_row(rslt = glm_rslt, print_n = TRUE, #
+                          est = c("bias_emp1","bias_dcvtmle1",#
+                                        "bias_donestep1","bias_bootstrap"),#
+                          grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                          add_legend = TRUE,#
+                                est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                ylim = c(0.000001,10), yaxis_label = "Absolute Bias",#
+                                col = my_col[sort(rep(1:4,4))])#
+    make_one_box_plot_row(rslt = glm_rslt, #
+                                grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                              est = c("var_emp1","var_dcvtmle1",#
+                                            "var_donestep1","var_bootstrap"),#
+                                    est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                    ylim = c(0.000001,10), yaxis_label = "Variance",#
+                                    col = my_col[sort(rep(1:4,4))])#
+    make_one_box_plot_row(rslt = glm_rslt, #
+                              est = c("mse_emp1","mse_dcvtmle1",#
+                                            "mse_donestep1","mse_bootstrap"),#
+                                relative_est = "mse_emp1",#
+                                relative_K = 5,    add_text = TRUE,#
+                                grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                                    est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                    ylim = c(0.01,5), yaxis_label = "Relative MSE",#
+                                    col = my_col[sort(rep(1:4,4))])#
+    dev.off()
+make_one_box_plot_row <- function(rslt, metric = "bias", #
+                                      est, add_legend = FALSE, #
+                                      est_labels = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                      rm_last = TRUE,#
+                                      grid = FALSE, #
+                                      add_text = FALSE, #
+                                      nx_grid = NULL, ny_grid = BULL, #
+                                      pred_algo = "Logistic regression",#
+                                            yaxis_label, add_ratio = TRUE, #
+                                            xaxis_label = "Number CV Folds",#
+                                            transpose = FALSE, #
+                                            log = "y", print_n = FALSE,#
+                                            relative_est = NULL,#
+                                            relative_K = NULL, #
+                                            absolute_val = TRUE, col, ...){#
+      for(n in c(50, 100, 250, 500)){#
+        par(las = 1)#
+        tmp <- rslt[rslt$n == n, ]#
+        tmp5 <- tmp[tmp$K == 5,]#
+        tmp10 <- tmp[tmp$K == 10,]#
+        tmp20 <- tmp[tmp$K == 20,]#
+        tmp40 <- tmp[tmp$K == 40,]#
+        # est <- c("mse_dcvtmle1","mse_donestep1","mse_emp1","mse_bootstrap")#
+        grbg <- as.matrix(rbind(tmp5[,est],tmp10[,est],tmp20[,est],tmp40[,est]))#
+        if(absolute_val){#
+          grbg <- abs(grbg)#
+        }#
+        if(rm_last){#
+          grbg[2:4,4] <- NA#
+        }#
+        row.names(grbg) <- c(5,10,20,40)#
+        if(n == 50){#
+          leg.text <- est_labels#
+          sp <- c(0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0)#
+        }else{#
+          leg.text <- FALSE#
+          sp <- c(0,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0)#
+        }#
+        xl <- c(0, 14 + sum(sp))#
+        if(transpose){#
+          grbg <- t(grbg)#
+        }#
+        if(!is.null(relative_est)){#
+          grbg <- grbg / grbg[paste(relative_K),relative_est]#
+        }#
+        txt <- c(5,10,20,40)#
+        if(n == 50) txt <- c(5,10,20,"",5,10,20,40,5,10,20,40)#
+        tmp <- barplot(grbg, legend.text = FALSE, #
+          beside=TRUE, log = log, yaxt = "n", names.arg = rep("",4), col = col, #
+          space = sp, xlim = xl, ... )#
+#
+        if(grid){#
+          grid(nx = nx_grid, ny = ny_grid, lty = 1, col = "gray75", equilogs = FALSE)#
+          par(new = TRUE)#
+          tmp <- barplot(grbg, legend.text = FALSE, #
+          beside=TRUE, log = log, yaxt = "n", names.arg = rep("",4), col = col, #
+          space = sp, xlim = xl, ... )#
+        }#
+        mtext(side = 1, outer = FALSE, line = 0.02, text = txt, cex =0.5, #
+        at = c(tmp[,1],tmp[,2],tmp[,3]))#
+        mtext(side = 1, outer = FALSE, line = 0.02, text = "K = ", cex =0.5, #
+              at = par()$usr[1])#
+        if(add_text){#
+          grbg2 <- prettyNum(grbg2, digits = 2)#
+          grbg2[is.na(grbg2)] <- ""#
+          text(x = tmp, y = 1.5*10^par()$usr[3], srt = 90, grbg2)#
+               # adj = c(0,0.001),#
+        }#
+        if(n == 50 & add_legend){#
+          legend(x = "topright", fill = unique(col), legend = leg.text, ncol = 2)#
+        }#
+        if(n == 50){#
+          axis(side = 2)#
+          par(las = 0)#
+          mtext(outer = FALSE, side = 2, line = 3, yaxis_label, cex = 0.75)#
+          # mtext(outer = FALSE, side = 2, line = 4.5, pred_algo, cex = 1)#
+        }else{#
+          par(las = 0)#
+          axis(side = 2, labels = FALSE)#
+        }#
+        if(print_n){#
+          mtext(outer = FALSE, side = 3, line = 1.5, paste0("n = ", n))#
+        }#
+        if(add_ratio){#
+        }#
+        if(!is.null(relative_est)){#
+          abline(h = 1, lty = 3)#
+        }#
+      }#
+    }#
+    pdf("~/Dropbox/Emory/cross-validated-prediction-metrics/glm_cvtn.pdf",#
+        height = 6, width = 11)#
+    layout(matrix(1:12, nrow = 3, ncol = 4,  byrow = TRUE))#
+    par(mar = c(1.6, 0.6, 1.6, 0.6), mgp = c(2.1, 0.5, 0),#
+        oma = c(2.1, 5.1, 2.1, 2.1))#
+    make_one_box_plot_row(rslt = glm_rslt, print_n = TRUE, #
+                          est = c("bias_emp1","bias_dcvtmle1",#
+                                        "bias_donestep1","bias_bootstrap"),#
+                          grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                          add_legend = TRUE,#
+                                est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                ylim = c(0.000001,10), yaxis_label = "Absolute Bias",#
+                                col = my_col[sort(rep(1:4,4))])#
+    make_one_box_plot_row(rslt = glm_rslt, #
+                                grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                              est = c("var_emp1","var_dcvtmle1",#
+                                            "var_donestep1","var_bootstrap"),#
+                                    est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                    ylim = c(0.000001,10), yaxis_label = "Variance",#
+                                    col = my_col[sort(rep(1:4,4))])#
+    make_one_box_plot_row(rslt = glm_rslt, #
+                              est = c("mse_emp1","mse_dcvtmle1",#
+                                            "mse_donestep1","mse_bootstrap"),#
+                                relative_est = "mse_emp1",#
+                                relative_K = 5,    add_text = TRUE,#
+                                grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                                    est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                    ylim = c(0.01,5), yaxis_label = "Relative MSE",#
+                                    col = my_col[sort(rep(1:4,4))])#
+    dev.off()
+make_one_box_plot_row <- function(rslt, metric = "bias", #
+                                      est, add_legend = FALSE, #
+                                      est_labels = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                      rm_last = TRUE,#
+                                      grid = FALSE, #
+                                      add_text = FALSE, #
+                                      nx_grid = NULL, ny_grid = BULL, #
+                                      pred_algo = "Logistic regression",#
+                                            yaxis_label, add_ratio = TRUE, #
+                                            xaxis_label = "Number CV Folds",#
+                                            transpose = FALSE, #
+                                            log = "y", print_n = FALSE,#
+                                            relative_est = NULL,#
+                                            relative_K = NULL, #
+                                            absolute_val = TRUE, col, ...){#
+      for(n in c(50, 100, 250, 500)){#
+        par(las = 1)#
+        tmp <- rslt[rslt$n == n, ]#
+        tmp5 <- tmp[tmp$K == 5,]#
+        tmp10 <- tmp[tmp$K == 10,]#
+        tmp20 <- tmp[tmp$K == 20,]#
+        tmp40 <- tmp[tmp$K == 40,]#
+        # est <- c("mse_dcvtmle1","mse_donestep1","mse_emp1","mse_bootstrap")#
+        grbg <- as.matrix(rbind(tmp5[,est],tmp10[,est],tmp20[,est],tmp40[,est]))#
+        if(absolute_val){#
+          grbg <- abs(grbg)#
+        }#
+        if(rm_last){#
+          grbg[2:4,4] <- NA#
+        }#
+        row.names(grbg) <- c(5,10,20,40)#
+        if(n == 50){#
+          leg.text <- est_labels#
+          sp <- c(0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0)#
+        }else{#
+          leg.text <- FALSE#
+          sp <- c(0,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0)#
+        }#
+        xl <- c(0, 14 + sum(sp))#
+        if(transpose){#
+          grbg <- t(grbg)#
+        }#
+        if(!is.null(relative_est)){#
+          grbg <- grbg / grbg[paste(relative_K),relative_est]#
+        }#
+        txt <- c(5,10,20,40)#
+        if(n == 50) txt <- c(5,10,20,"",5,10,20,40,5,10,20,40)#
+        tmp <- barplot(grbg, legend.text = FALSE, #
+          beside=TRUE, log = log, yaxt = "n", names.arg = rep("",4), col = col, #
+          space = sp, xlim = xl, ... )#
+#
+        if(grid){#
+          grid(nx = nx_grid, ny = ny_grid, lty = 1, col = "gray75", equilogs = FALSE)#
+          par(new = TRUE)#
+          tmp <- barplot(grbg, legend.text = FALSE, #
+          beside=TRUE, log = log, yaxt = "n", names.arg = rep("",4), col = col, #
+          space = sp, xlim = xl, ... )#
+        }#
+        mtext(side = 1, outer = FALSE, line = 0.02, text = txt, cex =0.5, #
+        at = c(tmp[,1],tmp[,2],tmp[,3]))#
+        mtext(side = 1, outer = FALSE, line = 0.02, text = "K = ", cex =0.5, #
+              at = par()$usr[1])#
+        if(add_text){#
+          grbg2 <- prettyNum(grbg, digits = 2)#
+          grbg2[is.na(grbg2)] <- ""#
+          text(x = tmp, y = 1.5*10^par()$usr[3], srt = 90, grbg2)#
+               # adj = c(0,0.001),#
+        }#
+        if(n == 50 & add_legend){#
+          legend(x = "topright", fill = unique(col), legend = leg.text, ncol = 2)#
+        }#
+        if(n == 50){#
+          axis(side = 2)#
+          par(las = 0)#
+          mtext(outer = FALSE, side = 2, line = 3, yaxis_label, cex = 0.75)#
+          # mtext(outer = FALSE, side = 2, line = 4.5, pred_algo, cex = 1)#
+        }else{#
+          par(las = 0)#
+          axis(side = 2, labels = FALSE)#
+        }#
+        if(print_n){#
+          mtext(outer = FALSE, side = 3, line = 1.5, paste0("n = ", n))#
+        }#
+        if(add_ratio){#
+        }#
+        if(!is.null(relative_est)){#
+          abline(h = 1, lty = 3)#
+        }#
+      }#
+    }#
+    pdf("~/Dropbox/Emory/cross-validated-prediction-metrics/glm_cvtn.pdf",#
+        height = 6, width = 11)#
+    layout(matrix(1:12, nrow = 3, ncol = 4,  byrow = TRUE))#
+    par(mar = c(1.6, 0.6, 1.6, 0.6), mgp = c(2.1, 0.5, 0),#
+        oma = c(2.1, 5.1, 2.1, 2.1))#
+    make_one_box_plot_row(rslt = glm_rslt, print_n = TRUE, #
+                          est = c("bias_emp1","bias_dcvtmle1",#
+                                        "bias_donestep1","bias_bootstrap"),#
+                          grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                          add_legend = TRUE,#
+                                est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                ylim = c(0.000001,10), yaxis_label = "Absolute Bias",#
+                                col = my_col[sort(rep(1:4,4))])#
+    make_one_box_plot_row(rslt = glm_rslt, #
+                                grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                              est = c("var_emp1","var_dcvtmle1",#
+                                            "var_donestep1","var_bootstrap"),#
+                                    est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                    ylim = c(0.000001,10), yaxis_label = "Variance",#
+                                    col = my_col[sort(rep(1:4,4))])#
+    make_one_box_plot_row(rslt = glm_rslt, #
+                              est = c("mse_emp1","mse_dcvtmle1",#
+                                            "mse_donestep1","mse_bootstrap"),#
+                                relative_est = "mse_emp1",#
+                                relative_K = 5,    add_text = TRUE,#
+                                grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                                    est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                    ylim = c(0.01,5), yaxis_label = "Relative MSE",#
+                                    col = my_col[sort(rep(1:4,4))])#
+    dev.off()
+?prettyNum
+make_one_box_plot_row <- function(rslt, metric = "bias", #
+                                      est, add_legend = FALSE, #
+                                      est_labels = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                      rm_last = TRUE,#
+                                      grid = FALSE, #
+                                      add_text = FALSE, #
+                                      nx_grid = NULL, ny_grid = BULL, #
+                                      pred_algo = "Logistic regression",#
+                                            yaxis_label, add_ratio = TRUE, #
+                                            xaxis_label = "Number CV Folds",#
+                                            transpose = FALSE, #
+                                            log = "y", print_n = FALSE,#
+                                            relative_est = NULL,#
+                                            relative_K = NULL, #
+                                            absolute_val = TRUE, col, ...){#
+      for(n in c(50, 100, 250, 500)){#
+        par(las = 1)#
+        tmp <- rslt[rslt$n == n, ]#
+        tmp5 <- tmp[tmp$K == 5,]#
+        tmp10 <- tmp[tmp$K == 10,]#
+        tmp20 <- tmp[tmp$K == 20,]#
+        tmp40 <- tmp[tmp$K == 40,]#
+        # est <- c("mse_dcvtmle1","mse_donestep1","mse_emp1","mse_bootstrap")#
+        grbg <- as.matrix(rbind(tmp5[,est],tmp10[,est],tmp20[,est],tmp40[,est]))#
+        if(absolute_val){#
+          grbg <- abs(grbg)#
+        }#
+        if(rm_last){#
+          grbg[2:4,4] <- NA#
+        }#
+        row.names(grbg) <- c(5,10,20,40)#
+        if(n == 50){#
+          leg.text <- est_labels#
+          sp <- c(0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0)#
+        }else{#
+          leg.text <- FALSE#
+          sp <- c(0,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0)#
+        }#
+        xl <- c(0, 14 + sum(sp))#
+        if(transpose){#
+          grbg <- t(grbg)#
+        }#
+        if(!is.null(relative_est)){#
+          grbg <- grbg / grbg[paste(relative_K),relative_est]#
+        }#
+        txt <- c(5,10,20,40)#
+        if(n == 50) txt <- c(5,10,20,"",5,10,20,40,5,10,20,40)#
+        tmp <- barplot(grbg, legend.text = FALSE, #
+          beside=TRUE, log = log, yaxt = "n", names.arg = rep("",4), col = col, #
+          space = sp, xlim = xl, ... )#
+#
+        if(grid){#
+          grid(nx = nx_grid, ny = ny_grid, lty = 1, col = "gray75", equilogs = FALSE)#
+          par(new = TRUE)#
+          tmp <- barplot(grbg, legend.text = FALSE, #
+          beside=TRUE, log = log, yaxt = "n", names.arg = rep("",4), col = col, #
+          space = sp, xlim = xl, ... )#
+        }#
+        mtext(side = 1, outer = FALSE, line = 0.02, text = txt, cex =0.5, #
+        at = c(tmp[,1],tmp[,2],tmp[,3]))#
+        mtext(side = 1, outer = FALSE, line = 0.02, text = "K = ", cex =0.5, #
+              at = par()$usr[1])#
+        if(add_text){#
+          grbg2 <- format(grbg, digits = 2)#
+          grbg2[is.na(grbg2)] <- ""#
+          text(x = tmp, y = 1.5*10^par()$usr[3], srt = 90, grbg2)#
+               # adj = c(0,0.001),#
+        }#
+        if(n == 50 & add_legend){#
+          legend(x = "topright", fill = unique(col), legend = leg.text, ncol = 2)#
+        }#
+        if(n == 50){#
+          axis(side = 2)#
+          par(las = 0)#
+          mtext(outer = FALSE, side = 2, line = 3, yaxis_label, cex = 0.75)#
+          # mtext(outer = FALSE, side = 2, line = 4.5, pred_algo, cex = 1)#
+        }else{#
+          par(las = 0)#
+          axis(side = 2, labels = FALSE)#
+        }#
+        if(print_n){#
+          mtext(outer = FALSE, side = 3, line = 1.5, paste0("n = ", n))#
+        }#
+        if(add_ratio){#
+        }#
+        if(!is.null(relative_est)){#
+          abline(h = 1, lty = 3)#
+        }#
+      }#
+    }#
+    pdf("~/Dropbox/Emory/cross-validated-prediction-metrics/glm_cvtn.pdf",#
+        height = 6, width = 11)#
+    layout(matrix(1:12, nrow = 3, ncol = 4,  byrow = TRUE))#
+    par(mar = c(1.6, 0.6, 1.6, 0.6), mgp = c(2.1, 0.5, 0),#
+        oma = c(2.1, 5.1, 2.1, 2.1))#
+    make_one_box_plot_row(rslt = glm_rslt, print_n = TRUE, #
+                          est = c("bias_emp1","bias_dcvtmle1",#
+                                        "bias_donestep1","bias_bootstrap"),#
+                          grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                          add_legend = TRUE,#
+                                est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                ylim = c(0.000001,10), yaxis_label = "Absolute Bias",#
+                                col = my_col[sort(rep(1:4,4))])#
+    make_one_box_plot_row(rslt = glm_rslt, #
+                                grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                              est = c("var_emp1","var_dcvtmle1",#
+                                            "var_donestep1","var_bootstrap"),#
+                                    est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                    ylim = c(0.000001,10), yaxis_label = "Variance",#
+                                    col = my_col[sort(rep(1:4,4))])#
+    make_one_box_plot_row(rslt = glm_rslt, #
+                              est = c("mse_emp1","mse_dcvtmle1",#
+                                            "mse_donestep1","mse_bootstrap"),#
+                                relative_est = "mse_emp1",#
+                                relative_K = 5,    add_text = TRUE,#
+                                grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                                    est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                    ylim = c(0.01,5), yaxis_label = "Relative MSE",#
+                                    col = my_col[sort(rep(1:4,4))])#
+    dev.off()
+?format
+make_one_box_plot_row <- function(rslt, metric = "bias", #
+                                      est, add_legend = FALSE, #
+                                      est_labels = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                      rm_last = TRUE,#
+                                      grid = FALSE, #
+                                      add_text = FALSE, #
+                                      nx_grid = NULL, ny_grid = BULL, #
+                                      pred_algo = "Logistic regression",#
+                                            yaxis_label, add_ratio = TRUE, #
+                                            xaxis_label = "Number CV Folds",#
+                                            transpose = FALSE, #
+                                            log = "y", print_n = FALSE,#
+                                            relative_est = NULL,#
+                                            relative_K = NULL, #
+                                            absolute_val = TRUE, col, ...){#
+      for(n in c(50, 100, 250, 500)){#
+        par(las = 1)#
+        tmp <- rslt[rslt$n == n, ]#
+        tmp5 <- tmp[tmp$K == 5,]#
+        tmp10 <- tmp[tmp$K == 10,]#
+        tmp20 <- tmp[tmp$K == 20,]#
+        tmp40 <- tmp[tmp$K == 40,]#
+        # est <- c("mse_dcvtmle1","mse_donestep1","mse_emp1","mse_bootstrap")#
+        grbg <- as.matrix(rbind(tmp5[,est],tmp10[,est],tmp20[,est],tmp40[,est]))#
+        if(absolute_val){#
+          grbg <- abs(grbg)#
+        }#
+        if(rm_last){#
+          grbg[2:4,4] <- NA#
+        }#
+        row.names(grbg) <- c(5,10,20,40)#
+        if(n == 50){#
+          leg.text <- est_labels#
+          sp <- c(0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0)#
+        }else{#
+          leg.text <- FALSE#
+          sp <- c(0,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0)#
+        }#
+        xl <- c(0, 14 + sum(sp))#
+        if(transpose){#
+          grbg <- t(grbg)#
+        }#
+        if(!is.null(relative_est)){#
+          grbg <- grbg / grbg[paste(relative_K),relative_est]#
+        }#
+        txt <- c(5,10,20,40)#
+        if(n == 50) txt <- c(5,10,20,"",5,10,20,40,5,10,20,40)#
+        tmp <- barplot(grbg, legend.text = FALSE, #
+          beside=TRUE, log = log, yaxt = "n", names.arg = rep("",4), col = col, #
+          space = sp, xlim = xl, ... )#
+#
+        if(grid){#
+          grid(nx = nx_grid, ny = ny_grid, lty = 1, col = "gray75", equilogs = FALSE)#
+          par(new = TRUE)#
+          tmp <- barplot(grbg, legend.text = FALSE, #
+          beside=TRUE, log = log, yaxt = "n", names.arg = rep("",4), col = col, #
+          space = sp, xlim = xl, ... )#
+        }#
+        mtext(side = 1, outer = FALSE, line = 0.02, text = txt, cex =0.5, #
+        at = c(tmp[,1],tmp[,2],tmp[,3]))#
+        mtext(side = 1, outer = FALSE, line = 0.02, text = "K = ", cex =0.5, #
+              at = par()$usr[1])#
+        if(add_text){#
+          grbg2 <- format(grbg, digits = 2, zero.print = TRUE)#
+          grbg2[is.na(grbg2)] <- ""#
+          text(x = tmp, y = 1.5*10^par()$usr[3], srt = 90, grbg2)#
+               # adj = c(0,0.001),#
+        }#
+        if(n == 50 & add_legend){#
+          legend(x = "topright", fill = unique(col), legend = leg.text, ncol = 2)#
+        }#
+        if(n == 50){#
+          axis(side = 2)#
+          par(las = 0)#
+          mtext(outer = FALSE, side = 2, line = 3, yaxis_label, cex = 0.75)#
+          # mtext(outer = FALSE, side = 2, line = 4.5, pred_algo, cex = 1)#
+        }else{#
+          par(las = 0)#
+          axis(side = 2, labels = FALSE)#
+        }#
+        if(print_n){#
+          mtext(outer = FALSE, side = 3, line = 1.5, paste0("n = ", n))#
+        }#
+        if(add_ratio){#
+        }#
+        if(!is.null(relative_est)){#
+          abline(h = 1, lty = 3)#
+        }#
+      }#
+    }#
+    pdf("~/Dropbox/Emory/cross-validated-prediction-metrics/glm_cvtn.pdf",#
+        height = 6, width = 11)#
+    layout(matrix(1:12, nrow = 3, ncol = 4,  byrow = TRUE))#
+    par(mar = c(1.6, 0.6, 1.6, 0.6), mgp = c(2.1, 0.5, 0),#
+        oma = c(2.1, 5.1, 2.1, 2.1))#
+    make_one_box_plot_row(rslt = glm_rslt, print_n = TRUE, #
+                          est = c("bias_emp1","bias_dcvtmle1",#
+                                        "bias_donestep1","bias_bootstrap"),#
+                          grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                          add_legend = TRUE,#
+                                est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                ylim = c(0.000001,10), yaxis_label = "Absolute Bias",#
+                                col = my_col[sort(rep(1:4,4))])#
+    make_one_box_plot_row(rslt = glm_rslt, #
+                                grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                              est = c("var_emp1","var_dcvtmle1",#
+                                            "var_donestep1","var_bootstrap"),#
+                                    est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                    ylim = c(0.000001,10), yaxis_label = "Variance",#
+                                    col = my_col[sort(rep(1:4,4))])#
+    make_one_box_plot_row(rslt = glm_rslt, #
+                              est = c("mse_emp1","mse_dcvtmle1",#
+                                            "mse_donestep1","mse_bootstrap"),#
+                                relative_est = "mse_emp1",#
+                                relative_K = 5,    add_text = TRUE,#
+                                grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                                    est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                    ylim = c(0.01,5), yaxis_label = "Relative MSE",#
+                                    col = my_col[sort(rep(1:4,4))])#
+    dev.off()
+debug(make_one_box_plot_row)
+make_one_box_plot_row(rslt = glm_rslt, #
+                              est = c("mse_emp1","mse_dcvtmle1",#
+                                            "mse_donestep1","mse_bootstrap"),#
+                                relative_est = "mse_emp1",#
+                                relative_K = 5,    add_text = TRUE,#
+                                grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                                    est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                    ylim = c(0.01,5), yaxis_label = "Relative MSE",#
+                                    col = my_col[sort(rep(1:4,4))])
+grbg
+grbg2
+grbg2
+grepl("N", grbg2)
+grbg2[grepl["N",grbg2]] <- ""
+grbg2[grepl("N",grbg2)] <- ""
+grbg2
+make_one_box_plot_row <- function(rslt, metric = "bias", #
+                                      est, add_legend = FALSE, #
+                                      est_labels = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                      rm_last = TRUE,#
+                                      grid = FALSE, #
+                                      add_text = FALSE, #
+                                      nx_grid = NULL, ny_grid = BULL, #
+                                      pred_algo = "Logistic regression",#
+                                            yaxis_label, add_ratio = TRUE, #
+                                            xaxis_label = "Number CV Folds",#
+                                            transpose = FALSE, #
+                                            log = "y", print_n = FALSE,#
+                                            relative_est = NULL,#
+                                            relative_K = NULL, #
+                                            absolute_val = TRUE, col, ...){#
+      for(n in c(50, 100, 250, 500)){#
+        par(las = 1)#
+        tmp <- rslt[rslt$n == n, ]#
+        tmp5 <- tmp[tmp$K == 5,]#
+        tmp10 <- tmp[tmp$K == 10,]#
+        tmp20 <- tmp[tmp$K == 20,]#
+        tmp40 <- tmp[tmp$K == 40,]#
+        # est <- c("mse_dcvtmle1","mse_donestep1","mse_emp1","mse_bootstrap")#
+        grbg <- as.matrix(rbind(tmp5[,est],tmp10[,est],tmp20[,est],tmp40[,est]))#
+        if(absolute_val){#
+          grbg <- abs(grbg)#
+        }#
+        if(rm_last){#
+          grbg[2:4,4] <- NA#
+        }#
+        row.names(grbg) <- c(5,10,20,40)#
+        if(n == 50){#
+          leg.text <- est_labels#
+          sp <- c(0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0)#
+        }else{#
+          leg.text <- FALSE#
+          sp <- c(0,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0)#
+        }#
+        xl <- c(0, 14 + sum(sp))#
+        if(transpose){#
+          grbg <- t(grbg)#
+        }#
+        if(!is.null(relative_est)){#
+          grbg <- grbg / grbg[paste(relative_K),relative_est]#
+        }#
+        txt <- c(5,10,20,40)#
+        if(n == 50) txt <- c(5,10,20,"",5,10,20,40,5,10,20,40)#
+        tmp <- barplot(grbg, legend.text = FALSE, #
+          beside=TRUE, log = log, yaxt = "n", names.arg = rep("",4), col = col, #
+          space = sp, xlim = xl, ... )#
+#
+        if(grid){#
+          grid(nx = nx_grid, ny = ny_grid, lty = 1, col = "gray75", equilogs = FALSE)#
+          par(new = TRUE)#
+          tmp <- barplot(grbg, legend.text = FALSE, #
+          beside=TRUE, log = log, yaxt = "n", names.arg = rep("",4), col = col, #
+          space = sp, xlim = xl, ... )#
+        }#
+        mtext(side = 1, outer = FALSE, line = 0.02, text = txt, cex =0.5, #
+        at = c(tmp[,1],tmp[,2],tmp[,3]))#
+        mtext(side = 1, outer = FALSE, line = 0.02, text = "K = ", cex =0.5, #
+              at = par()$usr[1])#
+        if(add_text){#
+          grbg2 <- format(grbg, digits = 2, zero.print = TRUE)#
+          grbg2[grepl("N",grbg2)] <- ""          #
+          text(x = tmp, y = 1.5*10^par()$usr[3], srt = 90, grbg2)#
+               # adj = c(0,0.001),#
+        }#
+        if(n == 50 & add_legend){#
+          legend(x = "topright", fill = unique(col), legend = leg.text, ncol = 2)#
+        }#
+        if(n == 50){#
+          axis(side = 2)#
+          par(las = 0)#
+          mtext(outer = FALSE, side = 2, line = 3, yaxis_label, cex = 0.75)#
+          # mtext(outer = FALSE, side = 2, line = 4.5, pred_algo, cex = 1)#
+        }else{#
+          par(las = 0)#
+          axis(side = 2, labels = FALSE)#
+        }#
+        if(print_n){#
+          mtext(outer = FALSE, side = 3, line = 1.5, paste0("n = ", n))#
+        }#
+        if(add_ratio){#
+        }#
+        if(!is.null(relative_est)){#
+          abline(h = 1, lty = 3)#
+        }#
+      }#
+    }#
+    pdf("~/Dropbox/Emory/cross-validated-prediction-metrics/glm_cvtn.pdf",#
+        height = 6, width = 11)#
+    layout(matrix(1:12, nrow = 3, ncol = 4,  byrow = TRUE))#
+    par(mar = c(1.6, 0.6, 1.6, 0.6), mgp = c(2.1, 0.5, 0),#
+        oma = c(2.1, 5.1, 2.1, 2.1))#
+    make_one_box_plot_row(rslt = glm_rslt, print_n = TRUE, #
+                          est = c("bias_emp1","bias_dcvtmle1",#
+                                        "bias_donestep1","bias_bootstrap"),#
+                          grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                          add_legend = TRUE,#
+                                est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                ylim = c(0.000001,10), yaxis_label = "Absolute Bias",#
+                                col = my_col[sort(rep(1:4,4))])#
+    make_one_box_plot_row(rslt = glm_rslt, #
+                                grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                              est = c("var_emp1","var_dcvtmle1",#
+                                            "var_donestep1","var_bootstrap"),#
+                                    est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                    ylim = c(0.000001,10), yaxis_label = "Variance",#
+                                    col = my_col[sort(rep(1:4,4))])#
+    make_one_box_plot_row(rslt = glm_rslt, #
+                              est = c("mse_emp1","mse_dcvtmle1",#
+                                            "mse_donestep1","mse_bootstrap"),#
+                                relative_est = "mse_emp1",#
+                                relative_K = 5,    add_text = TRUE,#
+                                grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                                    est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                    ylim = c(0.01,5), yaxis_label = "Relative MSE",#
+                                    col = my_col[sort(rep(1:4,4))])#
+    dev.off()
+Q
+make_one_box_plot_row <- function(rslt, metric = "bias", #
+                                      est, add_legend = FALSE, #
+                                      est_labels = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                      rm_last = TRUE,#
+                                      grid = FALSE, #
+                                      add_text = FALSE, #
+                                      nx_grid = NULL, ny_grid = BULL, #
+                                      pred_algo = "Logistic regression",#
+                                            yaxis_label, add_ratio = TRUE, #
+                                            xaxis_label = "Number CV Folds",#
+                                            transpose = FALSE, #
+                                            log = "y", print_n = FALSE,#
+                                            relative_est = NULL,#
+                                            relative_K = NULL, #
+                                            absolute_val = TRUE, col, ...){#
+      for(n in c(50, 100, 250, 500)){#
+        par(las = 1)#
+        tmp <- rslt[rslt$n == n, ]#
+        tmp5 <- tmp[tmp$K == 5,]#
+        tmp10 <- tmp[tmp$K == 10,]#
+        tmp20 <- tmp[tmp$K == 20,]#
+        tmp40 <- tmp[tmp$K == 40,]#
+        # est <- c("mse_dcvtmle1","mse_donestep1","mse_emp1","mse_bootstrap")#
+        grbg <- as.matrix(rbind(tmp5[,est],tmp10[,est],tmp20[,est],tmp40[,est]))#
+        if(absolute_val){#
+          grbg <- abs(grbg)#
+        }#
+        if(rm_last){#
+          grbg[2:4,4] <- NA#
+        }#
+        row.names(grbg) <- c(5,10,20,40)#
+        if(n == 50){#
+          leg.text <- est_labels#
+          sp <- c(0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0)#
+        }else{#
+          leg.text <- FALSE#
+          sp <- c(0,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0)#
+        }#
+        xl <- c(0, 14 + sum(sp))#
+        if(transpose){#
+          grbg <- t(grbg)#
+        }#
+        if(!is.null(relative_est)){#
+          grbg <- grbg / grbg[paste(relative_K),relative_est]#
+        }#
+        txt <- c(5,10,20,40)#
+        if(n == 50) txt <- c(5,10,20,"",5,10,20,40,5,10,20,40)#
+        tmp <- barplot(grbg, legend.text = FALSE, #
+          beside=TRUE, log = log, yaxt = "n", names.arg = rep("",4), col = col, #
+          space = sp, xlim = xl, ... )#
+#
+        if(grid){#
+          grid(nx = nx_grid, ny = ny_grid, lty = 1, col = "gray75", equilogs = FALSE)#
+          par(new = TRUE)#
+          tmp <- barplot(grbg, legend.text = FALSE, #
+          beside=TRUE, log = log, yaxt = "n", names.arg = rep("",4), col = col, #
+          space = sp, xlim = xl, ... )#
+        }#
+        mtext(side = 1, outer = FALSE, line = 0.02, text = txt, cex =0.5, #
+        at = c(tmp[,1],tmp[,2],tmp[,3]))#
+        mtext(side = 1, outer = FALSE, line = 0.02, text = "K = ", cex =0.5, #
+              at = par()$usr[1])#
+        if(add_text){#
+          grbg2 <- format(grbg, digits = 2, zero.print = TRUE)#
+          grbg2[grepl("N",grbg2)] <- ""          #
+          text(x = tmp, y = 1.5*10^par()$usr[3], srt = 90, grbg2)#
+               # adj = c(0,0.001),#
+        }#
+        if(n == 50 & add_legend){#
+          legend(x = "topright", fill = unique(col), legend = leg.text, ncol = 2)#
+        }#
+        if(n == 50){#
+          axis(side = 2)#
+          par(las = 0)#
+          mtext(outer = FALSE, side = 2, line = 3, yaxis_label, cex = 0.75)#
+          # mtext(outer = FALSE, side = 2, line = 4.5, pred_algo, cex = 1)#
+        }else{#
+          par(las = 0)#
+          axis(side = 2, labels = FALSE)#
+        }#
+        if(print_n){#
+          mtext(outer = FALSE, side = 3, line = 1.5, paste0("n = ", n))#
+        }#
+        if(add_ratio){#
+        }#
+        if(!is.null(relative_est)){#
+          abline(h = 1, lty = 3)#
+        }#
+      }#
+    }#
+    pdf("~/Dropbox/Emory/cross-validated-prediction-metrics/glm_cvtn.pdf",#
+        height = 6, width = 11)#
+    layout(matrix(1:12, nrow = 3, ncol = 4,  byrow = TRUE))#
+    par(mar = c(1.6, 0.6, 1.6, 0.6), mgp = c(2.1, 0.5, 0),#
+        oma = c(2.1, 5.1, 2.1, 2.1))#
+    make_one_box_plot_row(rslt = glm_rslt, print_n = TRUE, #
+                          est = c("bias_emp1","bias_dcvtmle1",#
+                                        "bias_donestep1","bias_bootstrap"),#
+                          grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                          add_legend = TRUE,#
+                                est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                ylim = c(0.000001,10), yaxis_label = "Absolute Bias",#
+                                col = my_col[sort(rep(1:4,4))])#
+    make_one_box_plot_row(rslt = glm_rslt, #
+                                grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                              est = c("var_emp1","var_dcvtmle1",#
+                                            "var_donestep1","var_bootstrap"),#
+                                    est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                    ylim = c(0.000001,10), yaxis_label = "Variance",#
+                                    col = my_col[sort(rep(1:4,4))])#
+    make_one_box_plot_row(rslt = glm_rslt, #
+                              est = c("mse_emp1","mse_dcvtmle1",#
+                                            "mse_donestep1","mse_bootstrap"),#
+                                relative_est = "mse_emp1",#
+                                relative_K = 5,    add_text = TRUE,#
+                                grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                                    est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                    ylim = c(0.01,5), yaxis_label = "Relative MSE",#
+                                    col = my_col[sort(rep(1:4,4))])#
+    dev.off()
+make_one_box_plot_row <- function(rslt, metric = "bias", #
+                                      est, add_legend = FALSE, #
+                                      est_labels = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                      rm_last = TRUE,#
+                                      grid = FALSE, #
+                                      add_text = FALSE, #
+                                      nx_grid = NULL, ny_grid = BULL, #
+                                      pred_algo = "Logistic regression",#
+                                            yaxis_label, add_ratio = TRUE, #
+                                            xaxis_label = "Number CV Folds",#
+                                            transpose = FALSE, #
+                                            log = "y", print_n = FALSE,#
+                                            relative_est = NULL,#
+                                            relative_K = NULL, #
+                                            absolute_val = TRUE, col, ...){#
+      for(n in c(50, 100, 250, 500)){#
+        par(las = 1)#
+        tmp <- rslt[rslt$n == n, ]#
+        tmp5 <- tmp[tmp$K == 5,]#
+        tmp10 <- tmp[tmp$K == 10,]#
+        tmp20 <- tmp[tmp$K == 20,]#
+        tmp40 <- tmp[tmp$K == 40,]#
+        # est <- c("mse_dcvtmle1","mse_donestep1","mse_emp1","mse_bootstrap")#
+        grbg <- as.matrix(rbind(tmp5[,est],tmp10[,est],tmp20[,est],tmp40[,est]))#
+        if(absolute_val){#
+          grbg <- abs(grbg)#
+        }#
+        if(rm_last){#
+          grbg[2:4,4] <- NA#
+        }#
+        row.names(grbg) <- c(5,10,20,40)#
+        if(n == 50){#
+          leg.text <- est_labels#
+          sp <- c(0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0)#
+        }else{#
+          leg.text <- FALSE#
+          sp <- c(0,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0)#
+        }#
+        xl <- c(0, 14 + sum(sp))#
+        if(transpose){#
+          grbg <- t(grbg)#
+        }#
+        if(!is.null(relative_est)){#
+          grbg <- grbg / grbg[paste(relative_K),relative_est]#
+        }#
+        txt <- c(5,10,20,40)#
+        if(n == 50) txt <- c(5,10,20,"",5,10,20,40,5,10,20,40)#
+        tmp <- barplot(grbg, legend.text = FALSE, #
+          beside=TRUE, log = log, yaxt = "n", names.arg = rep("",4), col = col, #
+          space = sp, xlim = xl, ... )#
+#
+        if(grid){#
+          grid(nx = nx_grid, ny = ny_grid, lty = 1, col = "gray75", equilogs = FALSE)#
+          par(new = TRUE)#
+          tmp <- barplot(grbg, legend.text = FALSE, #
+          beside=TRUE, log = log, yaxt = "n", names.arg = rep("",4), col = col, #
+          space = sp, xlim = xl, ... )#
+        }#
+        mtext(side = 1, outer = FALSE, line = 0.02, text = txt, cex =0.5, #
+        at = c(tmp[,1],tmp[,2],tmp[,3]))#
+        mtext(side = 1, outer = FALSE, line = 0.02, text = "K = ", cex =0.5, #
+              at = par()$usr[1])#
+        if(add_text){#
+          grbg2 <- format(grbg, digits = 2, zero.print = TRUE, scientific = FALSE)#
+          grbg2[grepl("N",grbg2)] <- ""          #
+          text(x = tmp, y = 1.5*10^par()$usr[3], srt = 90, grbg2)#
+               # adj = c(0,0.001),#
+        }#
+        if(n == 50 & add_legend){#
+          legend(x = "topright", fill = unique(col), legend = leg.text, ncol = 2)#
+        }#
+        if(n == 50){#
+          axis(side = 2)#
+          par(las = 0)#
+          mtext(outer = FALSE, side = 2, line = 3, yaxis_label, cex = 0.75)#
+          # mtext(outer = FALSE, side = 2, line = 4.5, pred_algo, cex = 1)#
+        }else{#
+          par(las = 0)#
+          axis(side = 2, labels = FALSE)#
+        }#
+        if(print_n){#
+          mtext(outer = FALSE, side = 3, line = 1.5, paste0("n = ", n))#
+        }#
+        if(add_ratio){#
+        }#
+        if(!is.null(relative_est)){#
+          abline(h = 1, lty = 3)#
+        }#
+      }#
+    }#
+    pdf("~/Dropbox/Emory/cross-validated-prediction-metrics/glm_cvtn.pdf",#
+        height = 6, width = 11)#
+    layout(matrix(1:12, nrow = 3, ncol = 4,  byrow = TRUE))#
+    par(mar = c(1.6, 0.6, 1.6, 0.6), mgp = c(2.1, 0.5, 0),#
+        oma = c(2.1, 5.1, 2.1, 2.1))#
+    make_one_box_plot_row(rslt = glm_rslt, print_n = TRUE, #
+                          est = c("bias_emp1","bias_dcvtmle1",#
+                                        "bias_donestep1","bias_bootstrap"),#
+                          grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                          add_legend = TRUE,#
+                                est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                ylim = c(0.000001,10), yaxis_label = "Absolute Bias",#
+                                col = my_col[sort(rep(1:4,4))])#
+    make_one_box_plot_row(rslt = glm_rslt, #
+                                grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                              est = c("var_emp1","var_dcvtmle1",#
+                                            "var_donestep1","var_bootstrap"),#
+                                    est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                    ylim = c(0.000001,10), yaxis_label = "Variance",#
+                                    col = my_col[sort(rep(1:4,4))])#
+    make_one_box_plot_row(rslt = glm_rslt, #
+                              est = c("mse_emp1","mse_dcvtmle1",#
+                                            "mse_donestep1","mse_bootstrap"),#
+                                relative_est = "mse_emp1",#
+                                relative_K = 5,    add_text = TRUE,#
+                                grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                                    est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                    ylim = c(0.01,5), yaxis_label = "Relative MSE",#
+                                    col = my_col[sort(rep(1:4,4))])#
+    dev.off()
+?format
+make_one_box_plot_row <- function(rslt, metric = "bias", #
+                                      est, add_legend = FALSE, #
+                                      est_labels = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                      rm_last = TRUE,#
+                                      grid = FALSE, #
+                                      add_text = FALSE, #
+                                      nx_grid = NULL, ny_grid = BULL, #
+                                      pred_algo = "Logistic regression",#
+                                            yaxis_label, add_ratio = TRUE, #
+                                            xaxis_label = "Number CV Folds",#
+                                            transpose = FALSE, #
+                                            log = "y", print_n = FALSE,#
+                                            relative_est = NULL,#
+                                            relative_K = NULL, #
+                                            absolute_val = TRUE, col, ...){#
+      for(n in c(50, 100, 250, 500)){#
+        par(las = 1)#
+        tmp <- rslt[rslt$n == n, ]#
+        tmp5 <- tmp[tmp$K == 5,]#
+        tmp10 <- tmp[tmp$K == 10,]#
+        tmp20 <- tmp[tmp$K == 20,]#
+        tmp40 <- tmp[tmp$K == 40,]#
+        # est <- c("mse_dcvtmle1","mse_donestep1","mse_emp1","mse_bootstrap")#
+        grbg <- as.matrix(rbind(tmp5[,est],tmp10[,est],tmp20[,est],tmp40[,est]))#
+        if(absolute_val){#
+          grbg <- abs(grbg)#
+        }#
+        if(rm_last){#
+          grbg[2:4,4] <- NA#
+        }#
+        row.names(grbg) <- c(5,10,20,40)#
+        if(n == 50){#
+          leg.text <- est_labels#
+          sp <- c(0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0)#
+        }else{#
+          leg.text <- FALSE#
+          sp <- c(0,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0)#
+        }#
+        xl <- c(0, 14 + sum(sp))#
+        if(transpose){#
+          grbg <- t(grbg)#
+        }#
+        if(!is.null(relative_est)){#
+          grbg <- grbg / grbg[paste(relative_K),relative_est]#
+        }#
+        txt <- c(5,10,20,40)#
+        if(n == 50) txt <- c(5,10,20,"",5,10,20,40,5,10,20,40)#
+        tmp <- barplot(grbg, legend.text = FALSE, #
+          beside=TRUE, log = log, yaxt = "n", names.arg = rep("",4), col = col, #
+          space = sp, xlim = xl, ... )#
+#
+        if(grid){#
+          grid(nx = nx_grid, ny = ny_grid, lty = 1, col = "gray75", equilogs = FALSE)#
+          par(new = TRUE)#
+          tmp <- barplot(grbg, legend.text = FALSE, #
+          beside=TRUE, log = log, yaxt = "n", names.arg = rep("",4), col = col, #
+          space = sp, xlim = xl, ... )#
+        }#
+        mtext(side = 1, outer = FALSE, line = 0.02, text = txt, cex =0.5, #
+        at = c(tmp[,1],tmp[,2],tmp[,3]))#
+        mtext(side = 1, outer = FALSE, line = 0.02, text = "K = ", cex =0.5, #
+              at = par()$usr[1])#
+        if(add_text){#
+          grbg2 <- format(grbg, digits = 2, zero.print = TRUE, scientific = FALSE,#
+                          justify = "right")#
+          grbg2[grepl("N",grbg2)] <- ""          #
+          text(x = tmp, y = 1.5*10^par()$usr[3], srt = 90, grbg2)#
+               # adj = c(0,0.001),#
+        }#
+        if(n == 50 & add_legend){#
+          legend(x = "topright", fill = unique(col), legend = leg.text, ncol = 2)#
+        }#
+        if(n == 50){#
+          axis(side = 2)#
+          par(las = 0)#
+          mtext(outer = FALSE, side = 2, line = 3, yaxis_label, cex = 0.75)#
+          # mtext(outer = FALSE, side = 2, line = 4.5, pred_algo, cex = 1)#
+        }else{#
+          par(las = 0)#
+          axis(side = 2, labels = FALSE)#
+        }#
+        if(print_n){#
+          mtext(outer = FALSE, side = 3, line = 1.5, paste0("n = ", n))#
+        }#
+        if(add_ratio){#
+        }#
+        if(!is.null(relative_est)){#
+          abline(h = 1, lty = 3)#
+        }#
+      }#
+    }#
+    pdf("~/Dropbox/Emory/cross-validated-prediction-metrics/glm_cvtn.pdf",#
+        height = 6, width = 11)#
+    layout(matrix(1:12, nrow = 3, ncol = 4,  byrow = TRUE))#
+    par(mar = c(1.6, 0.6, 1.6, 0.6), mgp = c(2.1, 0.5, 0),#
+        oma = c(2.1, 5.1, 2.1, 2.1))#
+    make_one_box_plot_row(rslt = glm_rslt, print_n = TRUE, #
+                          est = c("bias_emp1","bias_dcvtmle1",#
+                                        "bias_donestep1","bias_bootstrap"),#
+                          grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                          add_legend = TRUE,#
+                                est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                ylim = c(0.000001,10), yaxis_label = "Absolute Bias",#
+                                col = my_col[sort(rep(1:4,4))])#
+    make_one_box_plot_row(rslt = glm_rslt, #
+                                grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                              est = c("var_emp1","var_dcvtmle1",#
+                                            "var_donestep1","var_bootstrap"),#
+                                    est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                    ylim = c(0.000001,10), yaxis_label = "Variance",#
+                                    col = my_col[sort(rep(1:4,4))])#
+    make_one_box_plot_row(rslt = glm_rslt, #
+                              est = c("mse_emp1","mse_dcvtmle1",#
+                                            "mse_donestep1","mse_bootstrap"),#
+                                relative_est = "mse_emp1",#
+                                relative_K = 5,    add_text = TRUE,#
+                                grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                                    est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                    ylim = c(0.01,5), yaxis_label = "Relative MSE",#
+                                    col = my_col[sort(rep(1:4,4))])#
+    dev.off()
+make_one_box_plot_row <- function(rslt, metric = "bias", #
+                                      est, add_legend = FALSE, #
+                                      est_labels = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                      rm_last = TRUE,#
+                                      grid = FALSE, #
+                                      add_text = FALSE, #
+                                      nx_grid = NULL, ny_grid = BULL, #
+                                      pred_algo = "Logistic regression",#
+                                            yaxis_label, add_ratio = TRUE, #
+                                            xaxis_label = "Number CV Folds",#
+                                            transpose = FALSE, #
+                                            log = "y", print_n = FALSE,#
+                                            relative_est = NULL,#
+                                            relative_K = NULL, #
+                                            absolute_val = TRUE, col, ...){#
+      for(n in c(50, 100, 250, 500)){#
+        par(las = 1)#
+        tmp <- rslt[rslt$n == n, ]#
+        tmp5 <- tmp[tmp$K == 5,]#
+        tmp10 <- tmp[tmp$K == 10,]#
+        tmp20 <- tmp[tmp$K == 20,]#
+        tmp40 <- tmp[tmp$K == 40,]#
+        # est <- c("mse_dcvtmle1","mse_donestep1","mse_emp1","mse_bootstrap")#
+        grbg <- as.matrix(rbind(tmp5[,est],tmp10[,est],tmp20[,est],tmp40[,est]))#
+        if(absolute_val){#
+          grbg <- abs(grbg)#
+        }#
+        if(rm_last){#
+          grbg[2:4,4] <- NA#
+        }#
+        row.names(grbg) <- c(5,10,20,40)#
+        if(n == 50){#
+          leg.text <- est_labels#
+          sp <- c(0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0)#
+        }else{#
+          leg.text <- FALSE#
+          sp <- c(0,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0)#
+        }#
+        xl <- c(0, 14 + sum(sp))#
+        if(transpose){#
+          grbg <- t(grbg)#
+        }#
+        if(!is.null(relative_est)){#
+          grbg <- grbg / grbg[paste(relative_K),relative_est]#
+        }#
+        txt <- c(5,10,20,40)#
+        if(n == 50) txt <- c(5,10,20,"",5,10,20,40,5,10,20,40)#
+        tmp <- barplot(grbg, legend.text = FALSE, #
+          beside=TRUE, log = log, yaxt = "n", names.arg = rep("",4), col = col, #
+          space = sp, xlim = xl, ... )#
+#
+        if(grid){#
+          grid(nx = nx_grid, ny = ny_grid, lty = 1, col = "gray75", equilogs = FALSE)#
+          par(new = TRUE)#
+          tmp <- barplot(grbg, legend.text = FALSE, #
+          beside=TRUE, log = log, yaxt = "n", names.arg = rep("",4), col = col, #
+          space = sp, xlim = xl, ... )#
+        }#
+        mtext(side = 1, outer = FALSE, line = 0.02, text = txt, cex =0.5, #
+        at = c(tmp[,1],tmp[,2],tmp[,3]))#
+        mtext(side = 1, outer = FALSE, line = 0.02, text = "K = ", cex =0.5, #
+              at = par()$usr[1])#
+        if(add_text){#
+          grbg2 <- format(grbg, digits = 2, zero.print = TRUE, scientific = FALSE)#
+          grbg2[grepl("N",grbg2)] <- ""          #
+          text(x = tmp, y = 1.75*10^par()$usr[3], srt = 90, grbg2)#
+               # adj = c(0,0.001),#
+        }#
+        if(n == 50 & add_legend){#
+          legend(x = "topright", fill = unique(col), legend = leg.text, ncol = 2)#
+        }#
+        if(n == 50){#
+          axis(side = 2)#
+          par(las = 0)#
+          mtext(outer = FALSE, side = 2, line = 3, yaxis_label, cex = 0.75)#
+          # mtext(outer = FALSE, side = 2, line = 4.5, pred_algo, cex = 1)#
+        }else{#
+          par(las = 0)#
+          axis(side = 2, labels = FALSE)#
+        }#
+        if(print_n){#
+          mtext(outer = FALSE, side = 3, line = 1.5, paste0("n = ", n))#
+        }#
+        if(add_ratio){#
+        }#
+        if(!is.null(relative_est)){#
+          abline(h = 1, lty = 3)#
+        }#
+      }#
+    }#
+    pdf("~/Dropbox/Emory/cross-validated-prediction-metrics/glm_cvtn.pdf",#
+        height = 6, width = 11)#
+    layout(matrix(1:12, nrow = 3, ncol = 4,  byrow = TRUE))#
+    par(mar = c(1.6, 0.6, 1.6, 0.6), mgp = c(2.1, 0.5, 0),#
+        oma = c(2.1, 5.1, 2.1, 2.1))#
+    make_one_box_plot_row(rslt = glm_rslt, print_n = TRUE, #
+                          est = c("bias_emp1","bias_dcvtmle1",#
+                                        "bias_donestep1","bias_bootstrap"),#
+                          grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                          add_legend = TRUE,#
+                                est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                ylim = c(0.000001,10), yaxis_label = "Absolute Bias",#
+                                col = my_col[sort(rep(1:4,4))])#
+    make_one_box_plot_row(rslt = glm_rslt, #
+                                grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                              est = c("var_emp1","var_dcvtmle1",#
+                                            "var_donestep1","var_bootstrap"),#
+                                    est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                    ylim = c(0.000001,10), yaxis_label = "Variance",#
+                                    col = my_col[sort(rep(1:4,4))])#
+    make_one_box_plot_row(rslt = glm_rslt, #
+                              est = c("mse_emp1","mse_dcvtmle1",#
+                                            "mse_donestep1","mse_bootstrap"),#
+                                relative_est = "mse_emp1",#
+                                relative_K = 5,    add_text = TRUE,#
+                                grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                                    est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                    ylim = c(0.01,5), yaxis_label = "Relative MSE",#
+                                    col = my_col[sort(rep(1:4,4))])#
+    dev.off()
+make_one_box_plot_row <- function(rslt, metric = "bias", #
+                                      est, add_legend = FALSE, #
+                                      est_labels = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                      rm_last = TRUE,#
+                                      grid = FALSE, #
+                                      add_text = FALSE, #
+                                      nx_grid = NULL, ny_grid = BULL, #
+                                      pred_algo = "Logistic regression",#
+                                            yaxis_label, add_ratio = TRUE, #
+                                            xaxis_label = "Number CV Folds",#
+                                            transpose = FALSE, #
+                                            log = "y", print_n = FALSE,#
+                                            relative_est = NULL,#
+                                            relative_K = NULL, #
+                                            absolute_val = TRUE, col, ...){#
+      for(n in c(50, 100, 250, 500)){#
+        par(las = 1)#
+        tmp <- rslt[rslt$n == n, ]#
+        tmp5 <- tmp[tmp$K == 5,]#
+        tmp10 <- tmp[tmp$K == 10,]#
+        tmp20 <- tmp[tmp$K == 20,]#
+        tmp40 <- tmp[tmp$K == 40,]#
+        # est <- c("mse_dcvtmle1","mse_donestep1","mse_emp1","mse_bootstrap")#
+        grbg <- as.matrix(rbind(tmp5[,est],tmp10[,est],tmp20[,est],tmp40[,est]))#
+        if(absolute_val){#
+          grbg <- abs(grbg)#
+        }#
+        if(rm_last){#
+          grbg[2:4,4] <- NA#
+        }#
+        row.names(grbg) <- c(5,10,20,40)#
+        if(n == 50){#
+          leg.text <- est_labels#
+          sp <- c(0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0)#
+        }else{#
+          leg.text <- FALSE#
+          sp <- c(0,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0)#
+        }#
+        xl <- c(0, 14 + sum(sp))#
+        if(transpose){#
+          grbg <- t(grbg)#
+        }#
+        if(!is.null(relative_est)){#
+          grbg <- grbg / grbg[paste(relative_K),relative_est]#
+        }#
+        txt <- c(5,10,20,40)#
+        if(n == 50) txt <- c(5,10,20,"",5,10,20,40,5,10,20,40)#
+        tmp <- barplot(grbg, legend.text = FALSE, #
+          beside=TRUE, log = log, yaxt = "n", names.arg = rep("",4), col = col, #
+          space = sp, xlim = xl, ... )#
+#
+        if(grid){#
+          grid(nx = nx_grid, ny = ny_grid, lty = 1, col = "gray75", equilogs = FALSE)#
+          par(new = TRUE)#
+          tmp <- barplot(grbg, legend.text = FALSE, #
+          beside=TRUE, log = log, yaxt = "n", names.arg = rep("",4), col = col, #
+          space = sp, xlim = xl, ... )#
+        }#
+        mtext(side = 1, outer = FALSE, line = 0.02, text = txt, cex =0.5, #
+        at = c(tmp[,1],tmp[,2],tmp[,3]))#
+        mtext(side = 1, outer = FALSE, line = 0.02, text = "K = ", cex =0.5, #
+              at = par()$usr[1])#
+        if(add_text){#
+          # grbg2 <- format(grbg, digits = 2, zero.print = TRUE, scientific = FALSE)#
+          grbg2 <- format(grbg, digits = 2, format = "f"))#
+          grbg2[grepl("N",grbg2)] <- ""          #
+          text(x = tmp, y = 1.75*10^par()$usr[3], srt = 90, grbg2)#
+               # adj = c(0,0.001),#
+        }#
+        if(n == 50 & add_legend){#
+          legend(x = "topright", fill = unique(col), legend = leg.text, ncol = 2)#
+        }#
+        if(n == 50){#
+          axis(side = 2)#
+          par(las = 0)#
+          mtext(outer = FALSE, side = 2, line = 3, yaxis_label, cex = 0.75)#
+          # mtext(outer = FALSE, side = 2, line = 4.5, pred_algo, cex = 1)#
+        }else{#
+          par(las = 0)#
+          axis(side = 2, labels = FALSE)#
+        }#
+        if(print_n){#
+          mtext(outer = FALSE, side = 3, line = 1.5, paste0("n = ", n))#
+        }#
+        if(add_ratio){#
+        }#
+        if(!is.null(relative_est)){#
+          abline(h = 1, lty = 3)#
+        }#
+      }#
+    }#
+    pdf("~/Dropbox/Emory/cross-validated-prediction-metrics/glm_cvtn.pdf",#
+        height = 6, width = 11)#
+    layout(matrix(1:12, nrow = 3, ncol = 4,  byrow = TRUE))#
+    par(mar = c(1.6, 0.6, 1.6, 0.6), mgp = c(2.1, 0.5, 0),#
+        oma = c(2.1, 5.1, 2.1, 2.1))#
+    make_one_box_plot_row(rslt = glm_rslt, print_n = TRUE, #
+                          est = c("bias_emp1","bias_dcvtmle1",#
+                                        "bias_donestep1","bias_bootstrap"),#
+                          grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                          add_legend = TRUE,#
+                                est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                ylim = c(0.000001,10), yaxis_label = "Absolute Bias",#
+                                col = my_col[sort(rep(1:4,4))])#
+    make_one_box_plot_row(rslt = glm_rslt, #
+                                grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                              est = c("var_emp1","var_dcvtmle1",#
+                                            "var_donestep1","var_bootstrap"),#
+                                    est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                    ylim = c(0.000001,10), yaxis_label = "Variance",#
+                                    col = my_col[sort(rep(1:4,4))])#
+    make_one_box_plot_row(rslt = glm_rslt, #
+                              est = c("mse_emp1","mse_dcvtmle1",#
+                                            "mse_donestep1","mse_bootstrap"),#
+                                relative_est = "mse_emp1",#
+                                relative_K = 5,    add_text = TRUE,#
+                                grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                                    est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                    ylim = c(0.01,5), yaxis_label = "Relative MSE",#
+                                    col = my_col[sort(rep(1:4,4))])#
+    dev.off()
+debug(make_one_box_plot_row)
+make_one_box_plot_row(rslt = glm_rslt, #
+                              est = c("mse_emp1","mse_dcvtmle1",#
+                                            "mse_donestep1","mse_bootstrap"),#
+                                relative_est = "mse_emp1",#
+                                relative_K = 5,    add_text = TRUE,#
+                                grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                                    est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                    ylim = c(0.01,5), yaxis_label = "Relative MSE",#
+                                    col = my_col[sort(rep(1:4,4))])
+grbg2
+Q
+make_one_box_plot_row <- function(rslt, metric = "bias", #
+                                      est, add_legend = FALSE, #
+                                      est_labels = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                      rm_last = TRUE,#
+                                      grid = FALSE, #
+                                      add_text = FALSE, #
+                                      nx_grid = NULL, ny_grid = BULL, #
+                                      pred_algo = "Logistic regression",#
+                                            yaxis_label, add_ratio = TRUE, #
+                                            xaxis_label = "Number CV Folds",#
+                                            transpose = FALSE, #
+                                            log = "y", print_n = FALSE,#
+                                            relative_est = NULL,#
+                                            relative_K = NULL, #
+                                            absolute_val = TRUE, col, ...){#
+      for(n in c(50, 100, 250, 500)){#
+        par(las = 1)#
+        tmp <- rslt[rslt$n == n, ]#
+        tmp5 <- tmp[tmp$K == 5,]#
+        tmp10 <- tmp[tmp$K == 10,]#
+        tmp20 <- tmp[tmp$K == 20,]#
+        tmp40 <- tmp[tmp$K == 40,]#
+        # est <- c("mse_dcvtmle1","mse_donestep1","mse_emp1","mse_bootstrap")#
+        grbg <- as.matrix(rbind(tmp5[,est],tmp10[,est],tmp20[,est],tmp40[,est]))#
+        if(absolute_val){#
+          grbg <- abs(grbg)#
+        }#
+        if(rm_last){#
+          grbg[2:4,4] <- NA#
+        }#
+        row.names(grbg) <- c(5,10,20,40)#
+        if(n == 50){#
+          leg.text <- est_labels#
+          sp <- c(0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0)#
+        }else{#
+          leg.text <- FALSE#
+          sp <- c(0,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0)#
+        }#
+        xl <- c(0, 14 + sum(sp))#
+        if(transpose){#
+          grbg <- t(grbg)#
+        }#
+        if(!is.null(relative_est)){#
+          grbg <- grbg / grbg[paste(relative_K),relative_est]#
+        }#
+        txt <- c(5,10,20,40)#
+        if(n == 50) txt <- c(5,10,20,"",5,10,20,40,5,10,20,40)#
+        tmp <- barplot(grbg, legend.text = FALSE, #
+          beside=TRUE, log = log, yaxt = "n", names.arg = rep("",4), col = col, #
+          space = sp, xlim = xl, ... )#
+#
+        if(grid){#
+          grid(nx = nx_grid, ny = ny_grid, lty = 1, col = "gray75", equilogs = FALSE)#
+          par(new = TRUE)#
+          tmp <- barplot(grbg, legend.text = FALSE, #
+          beside=TRUE, log = log, yaxt = "n", names.arg = rep("",4), col = col, #
+          space = sp, xlim = xl, ... )#
+        }#
+        mtext(side = 1, outer = FALSE, line = 0.02, text = txt, cex =0.5, #
+        at = c(tmp[,1],tmp[,2],tmp[,3]))#
+        mtext(side = 1, outer = FALSE, line = 0.02, text = "K = ", cex =0.5, #
+              at = par()$usr[1])#
+        if(add_text){#
+          # grbg2 <- format(grbg, digits = 2, zero.print = TRUE, scientific = FALSE)#
+          grbg2 <- format(grbg, digits = 2, format = "f"))#
+          grbg2[grepl("N",grbg2)] <- ""          #
+          text(x = tmp, y = 1.75*10^par()$usr[3], srt = 90, grbg2)#
+               # adj = c(0,0.001),#
+        }#
+        if(n == 50 & add_legend){#
+          legend(x = "topright", fill = unique(col), legend = leg.text, ncol = 2)#
+        }#
+        if(n == 50){#
+          axis(side = 2)#
+          par(las = 0)#
+          mtext(outer = FALSE, side = 2, line = 3, yaxis_label, cex = 0.75)#
+          # mtext(outer = FALSE, side = 2, line = 4.5, pred_algo, cex = 1)#
+        }else{#
+          par(las = 0)#
+          axis(side = 2, labels = FALSE)#
+        }#
+        if(print_n){#
+          mtext(outer = FALSE, side = 3, line = 1.5, paste0("n = ", n))#
+        }#
+        if(add_ratio){#
+        }#
+        if(!is.null(relative_est)){#
+          abline(h = 1, lty = 3)#
+        }#
+      }#
+    }
+make_one_box_plot_row <- function(rslt, metric = "bias", #
+                                      est, add_legend = FALSE, #
+                                      est_labels = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                      rm_last = TRUE,#
+                                      grid = FALSE, #
+                                      add_text = FALSE, #
+                                      nx_grid = NULL, ny_grid = BULL, #
+                                      pred_algo = "Logistic regression",#
+                                            yaxis_label, add_ratio = TRUE, #
+                                            xaxis_label = "Number CV Folds",#
+                                            transpose = FALSE, #
+                                            log = "y", print_n = FALSE,#
+                                            relative_est = NULL,#
+                                            relative_K = NULL, #
+                                            absolute_val = TRUE, col, ...){#
+      for(n in c(50, 100, 250, 500)){#
+        par(las = 1)#
+        tmp <- rslt[rslt$n == n, ]#
+        tmp5 <- tmp[tmp$K == 5,]#
+        tmp10 <- tmp[tmp$K == 10,]#
+        tmp20 <- tmp[tmp$K == 20,]#
+        tmp40 <- tmp[tmp$K == 40,]#
+        # est <- c("mse_dcvtmle1","mse_donestep1","mse_emp1","mse_bootstrap")#
+        grbg <- as.matrix(rbind(tmp5[,est],tmp10[,est],tmp20[,est],tmp40[,est]))#
+        if(absolute_val){#
+          grbg <- abs(grbg)#
+        }#
+        if(rm_last){#
+          grbg[2:4,4] <- NA#
+        }#
+        row.names(grbg) <- c(5,10,20,40)#
+        if(n == 50){#
+          leg.text <- est_labels#
+          sp <- c(0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0)#
+        }else{#
+          leg.text <- FALSE#
+          sp <- c(0,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0)#
+        }#
+        xl <- c(0, 14 + sum(sp))#
+        if(transpose){#
+          grbg <- t(grbg)#
+        }#
+        if(!is.null(relative_est)){#
+          grbg <- grbg / grbg[paste(relative_K),relative_est]#
+        }#
+        txt <- c(5,10,20,40)#
+        if(n == 50) txt <- c(5,10,20,"",5,10,20,40,5,10,20,40)#
+        tmp <- barplot(grbg, legend.text = FALSE, #
+          beside=TRUE, log = log, yaxt = "n", names.arg = rep("",4), col = col, #
+          space = sp, xlim = xl, ... )#
+#
+        if(grid){#
+          grid(nx = nx_grid, ny = ny_grid, lty = 1, col = "gray75", equilogs = FALSE)#
+          par(new = TRUE)#
+          tmp <- barplot(grbg, legend.text = FALSE, #
+          beside=TRUE, log = log, yaxt = "n", names.arg = rep("",4), col = col, #
+          space = sp, xlim = xl, ... )#
+        }#
+        mtext(side = 1, outer = FALSE, line = 0.02, text = txt, cex =0.5, #
+        at = c(tmp[,1],tmp[,2],tmp[,3]))#
+        mtext(side = 1, outer = FALSE, line = 0.02, text = "K = ", cex =0.5, #
+              at = par()$usr[1])#
+        if(add_text){#
+          # grbg2 <- format(grbg, digits = 2, zero.print = TRUE, scientific = FALSE)#
+          grbg2 <- formatC(grbg, digits = 2, format = "f")#
+          grbg2[grepl("N",grbg2)] <- ""          #
+          text(x = tmp, y = 1.75*10^par()$usr[3], srt = 90, grbg2)#
+               # adj = c(0,0.001),#
+        }#
+        if(n == 50 & add_legend){#
+          legend(x = "topright", fill = unique(col), legend = leg.text, ncol = 2)#
+        }#
+        if(n == 50){#
+          axis(side = 2)#
+          par(las = 0)#
+          mtext(outer = FALSE, side = 2, line = 3, yaxis_label, cex = 0.75)#
+          # mtext(outer = FALSE, side = 2, line = 4.5, pred_algo, cex = 1)#
+        }else{#
+          par(las = 0)#
+          axis(side = 2, labels = FALSE)#
+        }#
+        if(print_n){#
+          mtext(outer = FALSE, side = 3, line = 1.5, paste0("n = ", n))#
+        }#
+        if(add_ratio){#
+        }#
+        if(!is.null(relative_est)){#
+          abline(h = 1, lty = 3)#
+        }#
+      }#
+    }#
+    pdf("~/Dropbox/Emory/cross-validated-prediction-metrics/glm_cvtn.pdf",#
+        height = 6, width = 11)#
+    layout(matrix(1:12, nrow = 3, ncol = 4,  byrow = TRUE))#
+    par(mar = c(1.6, 0.6, 1.6, 0.6), mgp = c(2.1, 0.5, 0),#
+        oma = c(2.1, 5.1, 2.1, 2.1))#
+    make_one_box_plot_row(rslt = glm_rslt, print_n = TRUE, #
+                          est = c("bias_emp1","bias_dcvtmle1",#
+                                        "bias_donestep1","bias_bootstrap"),#
+                          grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                          add_legend = TRUE,#
+                                est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                ylim = c(0.000001,10), yaxis_label = "Absolute Bias",#
+                                col = my_col[sort(rep(1:4,4))])#
+    make_one_box_plot_row(rslt = glm_rslt, #
+                                grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                              est = c("var_emp1","var_dcvtmle1",#
+                                            "var_donestep1","var_bootstrap"),#
+                                    est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                    ylim = c(0.000001,10), yaxis_label = "Variance",#
+                                    col = my_col[sort(rep(1:4,4))])#
+    make_one_box_plot_row(rslt = glm_rslt, #
+                              est = c("mse_emp1","mse_dcvtmle1",#
+                                            "mse_donestep1","mse_bootstrap"),#
+                                relative_est = "mse_emp1",#
+                                relative_K = 5,    add_text = TRUE,#
+                                grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                                    est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                    ylim = c(0.01,5), yaxis_label = "Relative MSE",#
+                                    col = my_col[sort(rep(1:4,4))])#
+    dev.off()
+pdf("~/Dropbox/Emory/cross-validated-prediction-metrics/glm_cvtn.pdf",#
+        height = 6, width = 11)#
+    layout(matrix(1:12, nrow = 3, ncol = 4,  byrow = TRUE))#
+    par(mar = c(1.6, 0.6, 1.6, 0.6), mgp = c(2.1, 0.5, 0),#
+        oma = c(2.1, 5.1, 2.1, 2.1))#
+    make_one_box_plot_row(rslt = glm_rslt, print_n = TRUE, #
+                          est = c("bias_emp1","bias_dcvtmle1",#
+                                        "bias_donestep1","bias_bootstrap"),#
+                          grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                          add_legend = TRUE,#
+                                est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                ylim = c(0.000001,10), yaxis_label = "Absolute Bias",#
+                                col = my_col[sort(rep(1:4,4))])#
+    make_one_box_plot_row(rslt = glm_rslt, #
+                                grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                              est = c("var_emp1","var_dcvtmle1",#
+                                            "var_donestep1","var_bootstrap"),#
+                                    est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                    ylim = c(0.000001,10), yaxis_label = "Variance",#
+                                    col = my_col[sort(rep(1:4,4))])#
+    make_one_box_plot_row(rslt = glm_rslt, #
+                              est = c("mse_emp1","mse_dcvtmle1",#
+                                            "mse_donestep1","mse_bootstrap"),#
+                                relative_est = "mse_emp1",#
+                                relative_K = 5,    add_text = TRUE,#
+                                grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                                    est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                    ylim = c(0.01,5), yaxis_label = "Relative MSE",#
+                                    col = my_col[sort(rep(1:4,4))])#
+    dev.off()
+make_one_box_plot_row <- function(rslt, metric = "bias", #
+                                      est, add_legend = FALSE, #
+                                      est_labels = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                      rm_last = TRUE,#
+                                      grid = FALSE, #
+                                      add_text = FALSE, #
+                                      nx_grid = NULL, ny_grid = BULL, #
+                                      pred_algo = "Logistic regression",#
+                                            yaxis_label, add_ratio = TRUE, #
+                                            xaxis_label = "Number CV Folds",#
+                                            transpose = FALSE, #
+                                            log = "y", print_n = FALSE,#
+                                            relative_est = NULL,#
+                                            relative_K = NULL, #
+                                            absolute_val = TRUE, col, ...){#
+      for(n in c(50, 100, 250, 500)){#
+        par(las = 1)#
+        tmp <- rslt[rslt$n == n, ]#
+        tmp5 <- tmp[tmp$K == 5,]#
+        tmp10 <- tmp[tmp$K == 10,]#
+        tmp20 <- tmp[tmp$K == 20,]#
+        tmp40 <- tmp[tmp$K == 40,]#
+        # est <- c("mse_dcvtmle1","mse_donestep1","mse_emp1","mse_bootstrap")#
+        grbg <- as.matrix(rbind(tmp5[,est],tmp10[,est],tmp20[,est],tmp40[,est]))#
+        if(absolute_val){#
+          grbg <- abs(grbg)#
+        }#
+        if(rm_last){#
+          grbg[2:4,4] <- NA#
+        }#
+        row.names(grbg) <- c(5,10,20,40)#
+        if(n == 50){#
+          leg.text <- est_labels#
+          sp <- c(0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0)#
+        }else{#
+          leg.text <- FALSE#
+          sp <- c(0,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0)#
+        }#
+        xl <- c(0, 14 + sum(sp))#
+        if(transpose){#
+          grbg <- t(grbg)#
+        }#
+        if(!is.null(relative_est)){#
+          grbg <- grbg / grbg[paste(relative_K),relative_est]#
+        }#
+        txt <- c(5,10,20,40)#
+        if(n == 50) txt <- c(5,10,20,"",5,10,20,40,5,10,20,40)#
+        tmp <- barplot(grbg, legend.text = FALSE, #
+          beside=TRUE, log = log, yaxt = "n", names.arg = rep("",4), col = col, #
+          space = sp, xlim = xl, ... )#
+#
+        if(grid){#
+          grid(nx = nx_grid, ny = ny_grid, lty = 1, col = "gray75", equilogs = FALSE)#
+          par(new = TRUE)#
+          tmp <- barplot(grbg, legend.text = FALSE, #
+          beside=TRUE, log = log, yaxt = "n", names.arg = rep("",4), col = col, #
+          space = sp, xlim = xl, ... )#
+        }#
+        mtext(side = 1, outer = FALSE, line = 0.02, text = txt, cex =0.5, #
+        at = c(tmp[,1],tmp[,2],tmp[,3]))#
+        mtext(side = 1, outer = FALSE, line = 0.02, text = "K = ", cex =0.5, #
+              at = par()$usr[1])#
+        if(add_text){#
+          # grbg2 <- format(grbg, digits = 2, zero.print = TRUE, scientific = FALSE)#
+          grbg2 <- formatC(grbg, digits = 2, format = "f")#
+          grbg2[grepl("N",grbg2)] <- ""          #
+          text(x = tmp, y = 2.2*10^par()$usr[3], srt = 90, grbg2)#
+               # adj = c(0,0.001),#
+        }#
+        if(n == 50 & add_legend){#
+          legend(x = "topright", fill = unique(col), legend = leg.text, ncol = 2)#
+        }#
+        if(n == 50){#
+          axis(side = 2)#
+          par(las = 0)#
+          mtext(outer = FALSE, side = 2, line = 3, yaxis_label, cex = 0.75)#
+          # mtext(outer = FALSE, side = 2, line = 4.5, pred_algo, cex = 1)#
+        }else{#
+          par(las = 0)#
+          axis(side = 2, labels = FALSE)#
+        }#
+        if(print_n){#
+          mtext(outer = FALSE, side = 3, line = 1.5, paste0("n = ", n))#
+        }#
+        if(add_ratio){#
+        }#
+        if(!is.null(relative_est)){#
+          abline(h = 1, lty = 3)#
+        }#
+      }#
+    }#
+    pdf("~/Dropbox/Emory/cross-validated-prediction-metrics/glm_cvtn.pdf",#
+        height = 6, width = 11)#
+    layout(matrix(1:12, nrow = 3, ncol = 4,  byrow = TRUE))#
+    par(mar = c(1.6, 0.6, 1.6, 0.6), mgp = c(2.1, 0.5, 0),#
+        oma = c(2.1, 5.1, 2.1, 2.1))#
+    make_one_box_plot_row(rslt = glm_rslt, print_n = TRUE, #
+                          est = c("bias_emp1","bias_dcvtmle1",#
+                                        "bias_donestep1","bias_bootstrap"),#
+                          grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                          add_legend = TRUE,#
+                                est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                ylim = c(0.000001,10), yaxis_label = "Absolute Bias",#
+                                col = my_col[sort(rep(1:4,4))])#
+    make_one_box_plot_row(rslt = glm_rslt, #
+                                grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                              est = c("var_emp1","var_dcvtmle1",#
+                                            "var_donestep1","var_bootstrap"),#
+                                    est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                    ylim = c(0.000001,10), yaxis_label = "Variance",#
+                                    col = my_col[sort(rep(1:4,4))])#
+    make_one_box_plot_row(rslt = glm_rslt, #
+                              est = c("mse_emp1","mse_dcvtmle1",#
+                                            "mse_donestep1","mse_bootstrap"),#
+                                relative_est = "mse_emp1",#
+                                relative_K = 5,    add_text = TRUE,#
+                                grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                                    est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                    ylim = c(0.01,5), yaxis_label = "Relative MSE",#
+                                    col = my_col[sort(rep(1:4,4))])#
+    dev.off()
+make_one_box_plot_row <- function(rslt, metric = "bias", #
+                                      est, add_legend = FALSE, #
+                                      est_labels = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                      rm_last = TRUE,#
+                                      grid = FALSE, #
+                                      add_text = FALSE, #
+                                      nx_grid = NULL, ny_grid = BULL, #
+                                      pred_algo = "Logistic regression",#
+                                            yaxis_label, add_ratio = TRUE, #
+                                            xaxis_label = "Number CV Folds",#
+                                            transpose = FALSE, #
+                                            log = "y", print_n = FALSE,#
+                                            relative_est = NULL,#
+                                            relative_K = NULL, #
+                                            absolute_val = TRUE, col, ...){#
+      for(n in c(50, 100, 250, 500)){#
+        par(las = 1)#
+        tmp <- rslt[rslt$n == n, ]#
+        tmp5 <- tmp[tmp$K == 5,]#
+        tmp10 <- tmp[tmp$K == 10,]#
+        tmp20 <- tmp[tmp$K == 20,]#
+        tmp40 <- tmp[tmp$K == 40,]#
+        # est <- c("mse_dcvtmle1","mse_donestep1","mse_emp1","mse_bootstrap")#
+        grbg <- as.matrix(rbind(tmp5[,est],tmp10[,est],tmp20[,est],tmp40[,est]))#
+        if(absolute_val){#
+          grbg <- abs(grbg)#
+        }#
+        if(rm_last){#
+          grbg[2:4,4] <- NA#
+        }#
+        row.names(grbg) <- c(5,10,20,40)#
+        if(n == 50){#
+          leg.text <- est_labels#
+          sp <- c(0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0)#
+        }else{#
+          leg.text <- FALSE#
+          sp <- c(0,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0)#
+        }#
+        xl <- c(0, 14 + sum(sp))#
+        if(transpose){#
+          grbg <- t(grbg)#
+        }#
+        if(!is.null(relative_est)){#
+          grbg <- grbg / grbg[paste(relative_K),relative_est]#
+        }#
+        txt <- c(5,10,20,40)#
+        if(n == 50) txt <- c(5,10,20,"",5,10,20,40,5,10,20,40)#
+        tmp <- barplot(grbg, legend.text = FALSE, #
+          beside=TRUE, log = log, yaxt = "n", names.arg = rep("",4), col = col, #
+          space = sp, xlim = xl, ... )#
+#
+        if(grid){#
+          grid(nx = nx_grid, ny = ny_grid, lty = 1, col = "gray75", equilogs = FALSE)#
+          par(new = TRUE)#
+          tmp <- barplot(grbg, legend.text = FALSE, #
+          beside=TRUE, log = log, yaxt = "n", names.arg = rep("",4), col = col, #
+          space = sp, xlim = xl, ... )#
+        }#
+        mtext(side = 1, outer = FALSE, line = 0.02, text = txt, cex =0.5, #
+        at = c(tmp[,1],tmp[,2],tmp[,3]))#
+        mtext(side = 1, outer = FALSE, line = 0.02, text = "K = ", cex =0.5, #
+              at = par()$usr[1])#
+        if(add_text){#
+          # grbg2 <- format(grbg, digits = 2, zero.print = TRUE, scientific = FALSE)#
+          grbg2 <- formatC(grbg, digits = 2, format = "f")#
+          grbg2[grbg > 10] <- ">10"#
+          grbg2[grepl("N",grbg2)] <- ""          #
+          text(x = tmp, y = 2.2*10^par()$usr[3], srt = 90, grbg2)#
+               # adj = c(0,0.001),#
+        }#
+        if(n == 50 & add_legend){#
+          legend(x = "topright", fill = unique(col), legend = leg.text, ncol = 2)#
+        }#
+        if(n == 50){#
+          axis(side = 2)#
+          par(las = 0)#
+          mtext(outer = FALSE, side = 2, line = 3, yaxis_label, cex = 0.75)#
+          # mtext(outer = FALSE, side = 2, line = 4.5, pred_algo, cex = 1)#
+        }else{#
+          par(las = 0)#
+          axis(side = 2, labels = FALSE)#
+        }#
+        if(print_n){#
+          mtext(outer = FALSE, side = 3, line = 1.5, paste0("n = ", n))#
+        }#
+        if(add_ratio){#
+        }#
+        if(!is.null(relative_est)){#
+          abline(h = 1, lty = 3)#
+        }#
+      }#
+    }#
+    pdf("~/Dropbox/Emory/cross-validated-prediction-metrics/glm_cvtn.pdf",#
+        height = 6, width = 11)#
+    layout(matrix(1:12, nrow = 3, ncol = 4,  byrow = TRUE))#
+    par(mar = c(1.6, 0.6, 1.6, 0.6), mgp = c(2.1, 0.5, 0),#
+        oma = c(2.1, 5.1, 2.1, 2.1))#
+    make_one_box_plot_row(rslt = glm_rslt, print_n = TRUE, #
+                          est = c("bias_emp1","bias_dcvtmle1",#
+                                        "bias_donestep1","bias_bootstrap"),#
+                          grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                          add_legend = TRUE,#
+                                est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                ylim = c(0.000001,10), yaxis_label = "Absolute Bias",#
+                                col = my_col[sort(rep(1:4,4))])#
+    make_one_box_plot_row(rslt = glm_rslt, #
+                                grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                              est = c("var_emp1","var_dcvtmle1",#
+                                            "var_donestep1","var_bootstrap"),#
+                                    est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                    ylim = c(0.000001,10), yaxis_label = "Variance",#
+                                    col = my_col[sort(rep(1:4,4))])#
+    make_one_box_plot_row(rslt = glm_rslt, #
+                              est = c("mse_emp1","mse_dcvtmle1",#
+                                            "mse_donestep1","mse_bootstrap"),#
+                                relative_est = "mse_emp1",#
+                                relative_K = 5,    add_text = TRUE,#
+                                grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                                    est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                    ylim = c(0.01,5), yaxis_label = "Relative MSE",#
+                                    col = my_col[sort(rep(1:4,4))])#
+    dev.off()
+pdf("~/Dropbox/Emory/cross-validated-prediction-metrics/rf_cvtn.pdf",#
+        height = 6, width = 11)#
+    layout(matrix(1:12, nrow = 3, ncol = 4,  byrow = TRUE))#
+    par(mar = c(1.6, 0.6, 1.6, 0.6), mgp = c(2.1, 0.5, 0),#
+        oma = c(2.1, 5.1, 2.1, 2.1))#
+    make_one_box_plot_row(rslt = randomforest_rslt, print_n = TRUE, #
+                          est = c("bias_emp1","bias_dcvtmle1",#
+                                        "bias_donestep1","bias_bootstrap"),#
+                          grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                          add_legend = TRUE,#
+                                est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                ylim = c(0.000001,10), yaxis_label = "Absolute Bias",#
+                                col = my_col[sort(rep(1:4,4))])#
+    make_one_box_plot_row(rslt = randomforest_rslt, #
+                                grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                              est = c("var_emp1","var_dcvtmle1",#
+                                            "var_donestep1","var_bootstrap"),#
+                                    est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                    ylim = c(0.000001,10), yaxis_label = "Variance",#
+                                    col = my_col[sort(rep(1:4,4))])#
+    make_one_box_plot_row(rslt = randomforest_rslt, #
+                              est = c("mse_emp1","mse_dcvtmle1",#
+                                            "mse_donestep1","mse_bootstrap"),#
+                                relative_est = "mse_emp1",#
+                                relative_K = 5,add_text = TRUE,#
+                                grid = TRUE, ny_grid = NULL, nx_grid = 0,                           #
+                                    est_label = c("CVEMP", "CVTMLE","CVOS","BOOT"),#
+                                    ylim = c(0.01,5), yaxis_label = "Relative MSE",#
+                                    col = my_col[sort(rep(1:4,4))])#
+    dev.off()
+setwd("~/Dropbox/R/cvtmleauc/sandbox/simulation")#
+    load("allOut_cvauc.RData")#
+#
+    get_sim_rslt_auc <- function(out, parm, wrapper, truth = "truth",#
+                             estimators = c("dcvtmle1","donestep1",#
+                                     "cvtmle1","onestep1","emp1",#
+                                     "dcvtmle5","donestep5",#
+                                     "cvtmle5","onestep5","emp5",#
+                                     "dcvtmle10","donestep10",#
+                                     "cvtmle10","onestep10","emp10",#
+                                     "dcvtmle20","donestep20",#
+                                     "cvtmle20","onestep20","emp20",#
+                                     "bootstrap", "lpo"#
+                                     ), ...){#
+       b <- bp <- v <- m <- cv <- co <- mad <- NULL#
+      for(i in seq_len(length(parm[,1]))){#
+        x <- out[out$n == parm$n[i] & out$K == parm$K[i] & out$wrapper == wrapper,]#
+        b <- rbind(b, colMeans(x[,paste0("est_",estimators)] - x[,truth], na.rm = TRUE))#
+        bp <- rbind(bp, colMeans((x[,paste0("est_",estimators)] - x[,truth])/x[,truth], na.rm = TRUE))#
+        v <- rbind(v, apply(x[,paste0("est_",estimators)], 2, var, na.rm = TRUE))#
+        cv <- rbind(cv, apply(x[,paste0("est_",estimators)], 2, function(y){#
+          sd(y, na.rm = TRUE) / mean(y, na.rm = TRUE)#
+        }))#
+        m <- rbind(m, colMeans((x[,paste0("est_",estimators)] - as.numeric(x[,truth]))^2, na.rm = TRUE))#
+        mad <- rbind(mad, apply(x[,paste0("est_",estimators)], 2, function(y){ #
+          median(y - as.numeric(x[,truth]), na.rm = TRUE)#
+        }))#
+        # coverage#
+        # coverage <- rep(NA, length(estimators))#
+        # ct <- 0#
+        # for(est in estimators){#
+        #   ct <- ct + 1#
+        #   coverage[ct] <- mean(x[,paste0("est_",est)] - 1.96 * x[,paste0("se_",est)] < x[,truth] & #
+        #                   x[,paste0("est_",est)] + 1.96 * x[,paste0("se_",est)] > x[,truth], na.rm = TRUE)#
+        # }#
+        # co <- rbind(co, coverage)#
+      }#
+      parm <- cbind(parm, b, v, m, mad, cv, bp) #, #
+                    # co)#
+      colnames(parm) <- c("n", "K", paste0("bias_", estimators),#
+                          paste0("var_", estimators),#
+                          paste0("mse_", estimators),#
+                          paste0("mad_", estimators),#
+                          paste0("cv_", estimators),#
+                          paste0("bp_", estimators)#
+                          ) #,#
+      return(parm)#
+    }#
+    parm <- expand.grid(n = c(50, 100, 250, 500),#
+                        K = c(5, 10, 20, 40))#
+    glm_rslt_auc <- get_sim_rslt_auc(out, parm, wrapper = "glm_wrapper")#
+    randomforest_rslt_auc <- get_sim_rslt_auc(out, parm, wrapper = "randomforest_wrapper")
+head(out)
+head(out[out$K == 40 & out$n == 50])
+head(out[out$K == 40 & out$n == 50, ])
+head(out[out$K == 40 & out$n == 50, ], 50)
+load("~/cvtmleauc/scratch/redo_parm_aucnewest.RData")
+524/4
+6^4
+load("/Users/dbenkes/Downloads/03-sim_res-ineff_tmle-pi_hal.rds")
+ls()
+sim
+library(data.table)#
+library(tidyverse)#
+#
+this_sim <- readRDS("/Users/dbenkes/Downloads/03-sim_res-ineff_tmle-pi_hal.rds")#
+sim_n1 <- this_sim[[1]]  # this will be a data.table of nrow = 1000, for simulation results from the smallest sample size#
+sim_n2 <- this_sim[[2]]  # this will be a data.table of nrow = 1000, for simulation results from the second largest sample size#
+sim_n3 <- this_sim[[3]]  # this will be a data.table of nrow = 1000, for simulation results from the largest sample size
+sim_n1
+sim_n2
+sim_n3
+get_truth <- function(n_obs = 1e6,     # sample size#
+                       w_mean = 3,       # mean of W when Gaussian#
+                       w_prob = 0.6,     # proportion of W = 1 in group#
+                       tx_mult = 2,      # multiplier effect of W=1 on treatment#
+                       delta = 0.5) {#
+  # baseline covariate -- simple, binary#
+  W <- cbind(rnorm(n_obs, w_mean, sd = 1), rbinom(n_obs, 1, w_prob),#
+             rbinom(n_obs, 1, w_prob / 2))#
+#
+  ## create treatment based on binary baseline W#
+  A <- rnorm(n_obs, mean = tx_mult * rowSums(W[, -1]), sd = 1)#
+#
+  # create outcome as a function of A, W + white noise#
+  Qbar_Aplusdelta_W <- as.numeric(plogis(rowMeans(W) - (A + delta)))#
+#
+  return(mean(Qbar_Aplusdelta_W))#
+}
+get_truth()
+get_truth <- function(n_obs = 1e6,     # sample size#
+                       w_mean = 3,       # mean of W when Gaussian#
+                       w_prob = 0.6,     # proportion of W = 1 in group#
+                       tx_mult = 2,      # multiplier effect of W=1 on treatment#
+                       delta = 0.5) {#
+  # baseline covariate -- simple, binary#
+  W <- cbind(rnorm(n_obs, w_mean, sd = 1), rbinom(n_obs, 1, w_prob),#
+             rbinom(n_obs, 1, w_prob / 2))#
+#
+  ## create treatment based on binary baseline W#
+  A <- rnorm(n_obs, mean = tx_mult * rowSums(W[, -1]), sd = 1)#
+#
+  # create outcome as a function of A, W + white noise#
+  Qbar_Aplusdelta_W <- as.numeric(plogis(rowMeans(W) - (A + delta)))#
+#
+  return(mean(Qbar_Aplusdelta_W))#
+}
+get_truth()
+mean(sim_n3$param_est)
+this_sim <- readRDS("/Users/dbenkes/Downloads/03-sim_res-ineff_tmle-pi_glm.rds")
+this_sim <- readRDS("/Users/dbenkes/Downloads/04-sim_res-ineff_tmle-pi_glm.rds")
+sim_n1 <- this_sim[[1]]  # this will be a data.table of nrow = 1000, for simulation results from the smallest sample size#
+sim_n2 <- this_sim[[2]]  # this will be a data.table of nrow = 1000, for simulation results from the second largest sample size#
+sim_n3 <- this_sim[[3]]  # this will be a data.table of nrow = 1000, for simulation results from the largest sample size
+mean(sim_n3$param_est)
+debug(get_truth)
+get_truth()
+head(W)
+head(A)
+head(Qbar_Aplusdelta_W)
+head(rowMeans(W))
+1/3 * (sum(W[1,]))
+head(W)
+Y <- rbinom(n_obs, 1, Qbar_Aplusdelta_W)
+head(Y)
+head(rowMeans(W - Y))
+head(Y)
+head(W - Y)
+get_truth <- function(n_obs = 1e6,     # sample size#
+                       w_mean = 3,       # mean of W when Gaussian#
+                       w_prob = 0.6,     # proportion of W = 1 in group#
+                       tx_mult = 2,      # multiplier effect of W=1 on treatment#
+                       delta = 0.5) {#
+  # baseline covariate -- simple, binary#
+  W <- cbind(rnorm(n_obs, w_mean, sd = 1), rbinom(n_obs, 1, w_prob),#
+             rbinom(n_obs, 1, w_prob / 2))#
+#
+  ## create treatment based on binary baseline W#
+  A <- rnorm(n_obs, mean = tx_mult * rowSums(W[, -1]), sd = 1)#
+#
+  # create outcome as a function of A, W + white noise#
+  Qbar_Aplusdelta_W <- as.numeric(plogis(rowMeans(W) - (A + delta)))#
+#
+  return(mean(Qbar_Aplusdelta_W))#
+}
+Q
+get_truth <- function(n_obs = 1e6,     # sample size#
+                       w_mean = 3,       # mean of W when Gaussian#
+                       w_prob = 0.6,     # proportion of W = 1 in group#
+                       tx_mult = 2,      # multiplier effect of W=1 on treatment#
+                       delta = 0.5) {#
+  # baseline covariate -- simple, binary#
+  W <- cbind(rnorm(n_obs, w_mean, sd = 1), rbinom(n_obs, 1, w_prob),#
+             rbinom(n_obs, 1, w_prob / 2))#
+#
+  ## create treatment based on binary baseline W#
+  A <- rnorm(n_obs, mean = tx_mult * rowSums(W[, -1]), sd = 1)#
+#
+  # create outcome as a function of A, W + white noise#
+  Qbar_Aplusdelta_W <- as.numeric(plogis(rowMeans(W) - (A + delta)))#
+#
+  return(mean(Qbar_Aplusdelta_W))#
+}
+get_truth()
+get_truth()
+get_truth()
+get_truth()
+get_truth()
+get_truth()
+get_truth()
+get_truth()
+do_one_sim <- function(n_obs = 1000,     # sample size#
+                       w_mean = 3,       # mean of W when Gaussian#
+                       w_prob = 0.6,     # proportion of W = 1 in group#
+                       tx_mult = 2,      # multiplier effect of W=1 on treatment#
+                       delta = 0.5,      # shift parameter#
+                       pi_fit = "hal",   # use "glm" or "hal" to fit TMLE#
+                       ipcw_eff = TRUE   # invocation of efficienct IPCW-TMLE#
+                      ) {#
+  # baseline covariate -- simple, binary#
+  W <- cbind(rnorm(n_obs, w_mean, sd = 1), rbinom(n_obs, 1, w_prob),#
+             rbinom(n_obs, 1, w_prob / 2))#
+#
+  ## create treatment based on binary baseline W#
+  A <- rnorm(n_obs, mean = tx_mult * rowSums(W[, -1]), sd = 1)#
+#
+  # create outcome as a function of A, W + white noise#
+  Y <- rbinom(n_obs, 1, as.numeric(plogis(rowMeans(W) - A)))#
+#
+  # censoring (multi-stage sample) process#
+  C <- rbinom(n_obs, 1, plogis(rowMeans(W - Y)))#
+#
+  # subset to observed data#
+  X <- as.data.table(cbind(W, A, Y, C))#
+  setnames(X, c(paste0("W", seq_len(ncol(W))), "A", "Y", "Delta"))#
+  O <- X %>%#
+    dplyr::filter(Delta == 1) %>%#
+    dplyr::select(-Delta)#
+#
+  # Compute the MLEs for computing the treatment mechanism densities#
+  g_data <- O %>%#
+    dplyr::select(-Y)#
+  glm_fit <- glm(A ~ . , data = g_data)#
+  beta_n <- matrix(glm_fit$coefficients, ncol = 1)#
+  sigma_n <- sd(O$A) # MLE of sigma#
+  w_times_beta_n <- as.matrix(cbind(1, g_data[,#
+                                    str_detect(colnames(g_data), "W")])) %*%#
+    beta_n#
+#
+  # Compute the densities for the treatment mechanism via the MLE#
+  gn_downshift <- dnorm(O$A - delta, mean = w_times_beta_n, sd = sigma_n)#
+  gn_upshift <- dnorm(O$A + delta, mean = w_times_beta_n, sd = sigma_n)#
+  gn_noshift <- dnorm(O$A, mean = w_times_beta_n, sd = sigma_n)#
+  gn_mle <- as.data.table(cbind(gn_downshift, gn_noshift, gn_upshift))#
+  setnames(gn_mle, c("downshift", "noshift", "upshift"))#
+#
+  if (pi_fit == "hal") {#
+    # fit censoring mechanism using HAL instead of SL#
+    pi_mech <- fit_hal(Y = C, X = cbind(W, Y),#
+                       degrees = 1,#
+                       standardize = FALSE,#
+                       family = "binomial",#
+                       fit_type = "glmnet",#
+                       #lambda = exp(seq(3, -50, length = 2000)),#
+                       yolo = FALSE)#
+    pi_mech_pred <- predict(pi_mech, new_data = cbind(W, Y))#
+    ipc_weights_out <- (as.numeric(C == 1) / pi_mech_pred)[C == 1]#
+    ipcw_out <- list(pi_mech = pi_mech_pred, ipc_weights = ipc_weights_out)#
+  }#
+#
+  #if (q_fit == "hal") {#
+    ## fit outcome regression using HAL instead of SL#
+    #Qn_hal <- fit_hal(Y = O$Y, X = cbind(O$A, O$W),#
+                      #degrees = 1,#
+                      #standardize = FALSE,#
+                      #family = "binomial",#
+                      #fit_type = "glmnet",#
+                      ##lambda = exp(seq(3, -50, length = 2000)),#
+                      #yolo = FALSE)#
+    #Qn_fit_noshift <- predict(Qn_hal, new_data = cbind(O$A, O$W))#
+    #Qn_fit_upshift <- predict(Qn_hal, new_data = cbind(O$A + delta, O$W))#
+    #Qn_hal_fit <- as.data.table(cbind(Qn_fit_noshift, Qn_fit_upshift))#
+    #setnames(Qn_hal_fit, c("noshift", "upshift"))#
+  #}#
+#
+  # set GLM or HAL fit types for missingness and outcome regressions#
+  if (pi_fit == "hal") {#
+    ipcw_fit_args_in <- list(fit_type = "fit_spec")#
+    ipcw_fit_spec_in <- ipcw_out#
+  } else if (pi_fit == "glm") {#
+    ipcw_fit_args_in <- list(fit_type = "glm")#
+    ipcw_fit_spec_in <- NULL#
+  }#
+  #if (q_fit == "hal") {#
+    #Q_fit_args_in <- list(fit_type = "fit_spec")#
+    #Qn_fit_spec_in <- Qn_hal_fit#
+  #} else if (q_fit == "glm") {#
+    #Q_fit_args_in <- list(fit_type = "glm", glm_formula = "Y ~ .")#
+    #Qn_fit_spec_in <- NULL#
+  #}#
+#
+  # use wrapper function to perform just the targeting step of the TMLE#
+  tmle_shift <- tmle_txshift(W = W, A = A, Y = Y, delta = delta,#
+                             C = C, V = c("W", "Y"),#
+                             fluc_method = "standard",#
+                             g_fit_args = list(fit_type = "fit_spec"),#
+                             gn_fit_spec = gn_mle,#
+                             ipcw_fit_args = ipcw_fit_args_in,#
+                             ipcw_fit_spec = ipcw_fit_spec_in,#
+                             Q_fit_args = list(fit_type = "glm",#
+                                               glm_formula = "Y ~ ."),#
+                             ipcw_efficiency = ipcw_eff#
+                            )#
+  # compute inference and create output object#
+  ci <- confint(tmle_shift)#
+  out <- as.data.table(t(c(ci, tmle_shift$var)))#
+  setnames(out, c(colnames(out)[-4], "var"))#
+  return(out)#
+}
+install_github("nhejazi/txshift")
+install_github("nhejazi/shifttx")
+install_github("benkeser/shifttx")
+install_github("nhejazi/txshift")
+?install_github
+install_github("nhejazi/txshift", auth_token = "3fb79cf39b55160032fce8553e0f5d0cb07cbb65")
+debug(do_one_sim)
+do_one_sim()
+table(Y)
+library(magritr)
+install.packages("magritr")
+install.packages("magrittr")
+library(magrittr)
+do_one_sim()
+glm_fit
+library(dplyr)
+do_one_sim()
+library(stringr)
+do_one_sim()
+library(hal9001)
+do_one_sim()
+debug(tmle_txshift)
+library(shifttx)
+library(txshift)
+do_one_sim()
+Q
+do_one_sim(pi_fit = "glm")
+debug(tmle_txshift)
+debug(est_ipcw)
+ipcw_reg
+debug(est_Q)
+head(y_star)
+fit_Qn
+mean(pred_star_Qn_shifted)
+mean(pred_star_Qn)
+mean(pred_star_Qn_shifted)
+debug(ipcw_tmle_proc)
+debug(fit_fluc)
+head(y_star)
+head(logit_Qn)
+mean(Qn_scaled$noshift)
+mod_fluc
+mean(Qn_shift_star_pred)
+debug(tmle_eif_ipcw)
+psi
+mean(eif)
+Q
+do_one_sim(pi_fit = "glm", ipcw_eff = FALSE)
+ipcw_reg
+head(y_star)
+fit_Qn
+mean(pred_star_Qn_shifted)
+mod_fluc
+mean(Qn_shift_star_pred)
+ipcw_efficiency
+tmle_eif_out
+tmle_eif
+Q
+debug(tmle_eif)
+do_one_sim(pi_fit = "glm", ipcw_eff = FALSE)
+c
+c
+c
+c
+c
+param_obs_est <- rep(0, length(Delta))#
+  param_obs_est[Delta == 1] <- ipc_weights_norm * fluc_mod_out$Qn_shift_star#
+  psi <- sum(param_obs_est)
+Q
+devtools::load_all("~/Dropbox/R/txshift")
+debug(tmle_txshift)
+do_one_sim(pi_fit = "glm", ipcw_eff = FALSE)
+devtools::load_all("~/Dropbox/R/txshift")
+debug(tmle_txshift)
+do_one_sim(pi_fit = "glm", ipcw_eff = FALSE)
+tmle_shift
