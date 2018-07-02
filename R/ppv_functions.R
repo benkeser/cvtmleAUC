@@ -192,11 +192,12 @@ cvtn_cvtmle <- function(Y, X, K = 20, sens = 0.95, learner = "glm_wrapper",
   F0nc0 <- mean(x$psi_nBn_testx[x$test_y == 0] <= c0)
   FYnc0 <- ifelse(x$test_y == 1, F1nc0, F0nc0)
   Psi <- gn * F1nc0 + (1-gn) * F0nc0
-  DY <- ifelse(x$test_y == 1, F1nc0, F0nc0) - Psi
+  DY <- FYnc0 - Psi
   # get density estimate
   dens <- tryCatch({.getDensity(x = x, c0 = c0, 
                       bounded_kernel = FALSE,
                       x_name = "psi_nBn_testx", 
+                      y_name = "test_y",
                       nested_cv = FALSE, prediction_list = NULL, 
                       folds = NULL)}, error = function(e){
     list(f_0_c0 = 1, f_10_c0 = 1)
@@ -266,13 +267,14 @@ cvtn_cvtmle <- function(Y, X, K = 20, sens = 0.95, learner = "glm_wrapper",
 #' @importFrom bde bde
 .getDensity <- function(x, c0, bounded_kernel = FALSE,
                         x_name = "psi_nBn_trainx", 
+                        y_name = "train_y",
                         nested_cv = FALSE, prediction_list = NULL, 
                         folds = NULL, maxDens = 1e3, ... ){
   if(!nested_cv){
     if(!bounded_kernel){
       if(length(unique(x[[x_name]][x$train_y == 1])) > 1){
         # density given y = 1
-        fitbw <- np::npudensbw(x[[x_name]][x$train_y == 1])
+        fitbw <- np::npudensbw(x[[x_name]][x[[y_name]] == 1])
         fit <- np::npudens(fitbw)
         # estimate at c0
         f_10_c0 <- stats::predict(fit, edat = c0)

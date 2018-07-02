@@ -39,7 +39,7 @@ if [[ -z $RETRYFAILED ]]; then
     echo "  submitting ${SCRIPT} prepare in ${MYSCRATCH}..." 
     sbatch --dependency=singleton --job-name=${ANALYSIS} \
            --partition=${PARTITION} --time=0-3 --requeue \
-           --exclude=gizmoe[1-23] \           
+           --exclude=gizmoe[1-23] \
            --mail-type=FAIL --mail-user="${username}{MAILDOM}" \
            --output="${MYSCRATCH}/out/${ANALYSIS}.prepare.%J" \
            --wrap="${SCRIPT} prepare 0 $3 $4 $5 $6 $7 $8 $9"
@@ -77,7 +77,7 @@ if [[ -z $RETRYFAILED ]]; then
     echo "  submitting control job with args '$@' "
     echo "    that waits and resubmits failed jobs..."
     sbatch --dependency=singleton --job-name=${ANALYSIS} \
-           --exclude=gizmoe[1-23] \    
+           --exclude=gizmoe[1-23] \
            --partition=${PARTITION} --requeue --time=0-4 \
            --mail-type=FAIL --mail-user="${username}${MAILDOM}" \
            --output="${MYSCRATCH}/out/${ANALYSIS}.correct.%J" \

@@ -843,6 +843,7 @@ F_nBn_star_nested_cv <- function(psi_x, y, epsilon = 0,
   if(parallel){
     stop("Parallel processing code needs to be re-written.")
   }else{
+    # TO DO: make clear that this gets called if nested_cv = FALSE
     if(nested_K == K - 1){
       predFitList <- lapply(valid_folds ,FUN = .doFit, tmpX = X, Y = Y, folds = folds, learner = learner)
     }else if(nested_cv & nested_K != K - 1){

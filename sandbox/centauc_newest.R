@@ -466,7 +466,7 @@ if(FALSE){
                                 # relative_K = 5,
                                 # relative_est = "mad_emp1",
                                 est_label = c("CV-EMP", "CVTMLE","CVOS","BOOT","LPO"),
-                                ylim = c(0.0001,0.001), yaxis_label = "Mean squared-error",
+                                ylim = c(0.0001,0.1), yaxis_label = "Mean squared-error",
                                 col = my_col[sort(rep(1:5,4))])
 
     # bias by CV Repeats for CVTMLE

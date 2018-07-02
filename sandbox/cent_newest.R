@@ -285,6 +285,9 @@ if(FALSE){
   load(paste0("allOut_",sim,".RData"))
     # load("~/cvtmleauc/out/allOut_new.RData")
 
+    library(RColorBrewer)
+    my_col <- brewer.pal(9,"Greys")[c(1,2,3,4,5,6)]
+
     get_sim_rslt <- function(out, parm, wrapper, truth = "truth",
                              estimators = c("dcvtmle1","donestep1",
                                      "cvtmle1","onestep1","emp1",
@@ -339,135 +342,6 @@ if(FALSE){
     #---------------------------------
     # bar plots
     #---------------------------------
-
-    make_side_by_side_bar_plots <- function(glm_rslt, randomforest_rslt,
-                                            est, est_labels, rm_last = TRUE,
-                                            yaxis_label, add_ratio = TRUE, 
-                                            xaxis_label = "Number CV Folds",
-                                            transpose = FALSE, 
-                                            log = "y",
-                                            relative_est = NULL,
-                                            relative_K = NULL, 
-                                            absolute_val = TRUE, col, ...){
-      layout(matrix(1:8, nrow = 2, ncol = 4,  byrow = TRUE))
-      par(mar = c(1.6, 0.6, 1.6, 0.6), mgp = c(2.1, 0.5, 0),
-          oma = c(2.1, 5.1, 2.1, 2.1))
-      for(n in c(50, 100, 250, 500)){
-        par(las = 1)
-        tmp <- glm_rslt[glm_rslt$n == n, ]
-        tmp5 <- tmp[tmp$K == 5,]
-        tmp10 <- tmp[tmp$K == 10,]
-        tmp20 <- tmp[tmp$K == 20,]
-        tmp40 <- tmp[tmp$K == 40,]
-        # est <- c("mse_dcvtmle1","mse_donestep1","mse_emp1","mse_bootstrap")
-        grbg <- as.matrix(rbind(tmp5[,est],tmp10[,est],tmp20[,est],tmp40[,est]))
-        if(absolute_val){
-          grbg <- abs(grbg)
-        }
-        if(rm_last){
-          grbg[2:4,4] <- NA
-        }
-        row.names(grbg) <- c(5,10,20,40)
-        if(n == 50){
-          leg.text <- est_labels
-          sp <- c(0,0,0,0,0,0,0,0,1,0,0,0,1,0)
-        }else{
-          leg.text <- FALSE
-          sp <- c(0,0,0,0,1,0,0,0,1,0,0,0,1,0)
-        }
-        if(transpose){
-          grbg <- t(grbg)
-        }
-        if(!is.null(relative_est)){
-          grbg <- grbg / grbg[paste(relative_K),relative_est]
-        }
-        
-        txt <- c(5,10,20,40)
-        if(n == 50) txt <- c(5,10,20,"",5,10,20,40,5,10,20,40)
-      
-        tmp <- barplot(grbg, legend.text = FALSE, 
-          beside=TRUE, log = log, yaxt = "n", names.arg = rep("",4), col = col, 
-          space = sp, ... )
-
-        mtext(side = 1, outer = FALSE, line = 0.02, text = txt, cex =0.5, 
-        at = c(tmp[,1],tmp[,2],tmp[,3]))
-      
-        mtext(side = 1, outer = FALSE, line = 0.02, text = "K = ", cex =0.5, 
-              at = par()$usr[1])
-      
-        if(n == 50){
-          legend(x = "topright", fill = unique(col), legend = leg.text, ncol = 2)
-        }
-      
-        if(n == 50){
-          axis(side = 2)
-          par(las = 0)
-          mtext(outer = FALSE, side = 2, line = 3, yaxis_label, cex = 0.75)
-          mtext(outer = FALSE, side = 2, line = 4.5, "Logistic Regression", cex = 1)
-        }else{
-          par(las = 0)
-          axis(side = 2, labels = FALSE)
-        }
-        mtext(outer = FALSE, side = 3, line = 1.5, paste0("n = ", n))
-
-        if(add_ratio){
-        }
-        if(!is.null(relative_est)){
-          abline(h = 1, lty = 3)
-        }
-      }
-      for(n in c(50, 100, 250, 500)){
-        par(las = 1)
-        tmp <- randomforest_rslt[randomforest_rslt$n == n, ]
-        tmp5 <- tmp[tmp$K == 5,]
-        tmp10 <- tmp[tmp$K == 10,]
-        tmp20 <- tmp[tmp$K == 20,]
-        tmp40 <- tmp[tmp$K == 40,]
-        # est <- c("mse_dcvtmle1","mse_donestep1","mse_emp1","mse_bootstrap")
-        grbg <- as.matrix(rbind(tmp5[,est],tmp10[,est],tmp20[,est],tmp40[,est]))
-        if(absolute_val){
-          grbg <- abs(grbg)
-        }
-        if(rm_last){
-          grbg[2:4,4] <- NA
-        }
-        row.names(grbg) <- c(5,10,20,40)
-        if(transpose){
-          grbg <- t(grbg)
-        }
-        if(!is.null(relative_est)){
-          grbg <- grbg / grbg[paste(relative_K),relative_est]
-        }
-        txt <- c(5,10,20,40)
-        if(n == 50){
-          txt <- c(5,10,20,"",5,10,20,40,5,10,20,40)
-          sp <- c(0,0,0,0,0,0,0,0,1,0,0,0,1,0)
-        }else{
-          sp <- c(0,0,0,0,1,0,0,0,1,0,0,0,1,0)
-        }
-        tmp <- barplot(grbg,  beside=TRUE, log = log, yaxt = "n", names.arg = rep("",4), 
-                       col = col, space = sp, ...)
-        mtext(side = 1, outer = FALSE, line = 0.02, text = txt, cex =0.5, 
-              at = c(tmp[,1],tmp[,2],tmp[,3]))        
-        mtext(side = 1, outer = FALSE, line = 0.02, text = "K = ", cex =0.5, 
-              at = par()$usr[1])
-        # mtext(side = 1, outer = FALSE, line = 0.02, text = c(5,10,20,40), cex =0.5, 
-        #       at = c(mean(tmp[2:3,1]),mean(tmp[2:3,2]),mean(tmp[2:3,3])))
-        if(n == 50){
-          axis(side = 2)
-          par(las = 0)
-          mtext(outer = FALSE, side = 2, line = 3, yaxis_label, cex = 0.75)
-          mtext(outer = FALSE, side = 2, line = 4.5, "Random Forest", cex = 1)
-        }else{
-          par(las = 0)
-          axis(side = 2, labels = FALSE)
-        }
-        if(!is.null(relative_est)){
-          abline(h = 1, lty = 3)
-        }
-      }
-    }
-
 
     make_one_box_plot_row <- function(rslt, metric = "bias", 
                                       est, add_legend = FALSE, 
@@ -787,9 +661,6 @@ if(FALSE){
         }
       }
     }
-
-    library(RColorBrewer)
-    my_col <- brewer.pal(9,"Greys")[c(1,2,3,4,5,6)]
 
     pdf("~/Dropbox/Emory/cross-validated-prediction-metrics/glm_cvauc.pdf",
         height = 6, width = 12)
@@ -1293,4 +1164,135 @@ if(FALSE){
             legend.breaks = c(0.7, 0.8, 0.9, 1),
             title = "Coverage of nominal 95% CI Empirical")
   dev.off()
+
+  
+    make_side_by_side_bar_plots <- function(glm_rslt, randomforest_rslt,
+                                            est, est_labels, rm_last = TRUE,
+                                            yaxis_label, add_ratio = TRUE, 
+                                            xaxis_label = "Number CV Folds",
+                                            transpose = FALSE, 
+                                            log = "y",
+                                            relative_est = NULL,
+                                            relative_K = NULL, 
+                                            absolute_val = TRUE, col, ...){
+      layout(matrix(1:8, nrow = 2, ncol = 4,  byrow = TRUE))
+      par(mar = c(1.6, 0.6, 1.6, 0.6), mgp = c(2.1, 0.5, 0),
+          oma = c(2.1, 5.1, 2.1, 2.1))
+      for(n in c(50, 100, 250, 500)){
+        par(las = 1)
+        tmp <- glm_rslt[glm_rslt$n == n, ]
+        tmp5 <- tmp[tmp$K == 5,]
+        tmp10 <- tmp[tmp$K == 10,]
+        tmp20 <- tmp[tmp$K == 20,]
+        tmp40 <- tmp[tmp$K == 40,]
+        # est <- c("mse_dcvtmle1","mse_donestep1","mse_emp1","mse_bootstrap")
+        grbg <- as.matrix(rbind(tmp5[,est],tmp10[,est],tmp20[,est],tmp40[,est]))
+        if(absolute_val){
+          grbg <- abs(grbg)
+        }
+        if(rm_last){
+          grbg[2:4,4] <- NA
+        }
+        row.names(grbg) <- c(5,10,20,40)
+        if(n == 50){
+          leg.text <- est_labels
+          sp <- c(0,0,0,0,0,0,0,0,1,0,0,0,1,0)
+        }else{
+          leg.text <- FALSE
+          sp <- c(0,0,0,0,1,0,0,0,1,0,0,0,1,0)
+        }
+        if(transpose){
+          grbg <- t(grbg)
+        }
+        if(!is.null(relative_est)){
+          grbg <- grbg / grbg[paste(relative_K),relative_est]
+        }
+        
+        txt <- c(5,10,20,40)
+        if(n == 50) txt <- c(5,10,20,"",5,10,20,40,5,10,20,40)
+      
+        tmp <- barplot(grbg, legend.text = FALSE, 
+          beside=TRUE, log = log, yaxt = "n", names.arg = rep("",4), col = col, 
+          space = sp, ... )
+
+        mtext(side = 1, outer = FALSE, line = 0.02, text = txt, cex =0.5, 
+        at = c(tmp[,1],tmp[,2],tmp[,3]))
+      
+        mtext(side = 1, outer = FALSE, line = 0.02, text = "K = ", cex =0.5, 
+              at = par()$usr[1])
+      
+        if(n == 50){
+          legend(x = "topright", fill = unique(col), legend = leg.text, ncol = 2)
+        }
+      
+        if(n == 50){
+          axis(side = 2)
+          par(las = 0)
+          mtext(outer = FALSE, side = 2, line = 3, yaxis_label, cex = 0.75)
+          mtext(outer = FALSE, side = 2, line = 4.5, "Logistic Regression", cex = 1)
+        }else{
+          par(las = 0)
+          axis(side = 2, labels = FALSE)
+        }
+        mtext(outer = FALSE, side = 3, line = 1.5, paste0("n = ", n))
+
+        if(add_ratio){
+        }
+        if(!is.null(relative_est)){
+          abline(h = 1, lty = 3)
+        }
+      }
+      for(n in c(50, 100, 250, 500)){
+        par(las = 1)
+        tmp <- randomforest_rslt[randomforest_rslt$n == n, ]
+        tmp5 <- tmp[tmp$K == 5,]
+        tmp10 <- tmp[tmp$K == 10,]
+        tmp20 <- tmp[tmp$K == 20,]
+        tmp40 <- tmp[tmp$K == 40,]
+        # est <- c("mse_dcvtmle1","mse_donestep1","mse_emp1","mse_bootstrap")
+        grbg <- as.matrix(rbind(tmp5[,est],tmp10[,est],tmp20[,est],tmp40[,est]))
+        if(absolute_val){
+          grbg <- abs(grbg)
+        }
+        if(rm_last){
+          grbg[2:4,4] <- NA
+        }
+        row.names(grbg) <- c(5,10,20,40)
+        if(transpose){
+          grbg <- t(grbg)
+        }
+        if(!is.null(relative_est)){
+          grbg <- grbg / grbg[paste(relative_K),relative_est]
+        }
+        txt <- c(5,10,20,40)
+        if(n == 50){
+          txt <- c(5,10,20,"",5,10,20,40,5,10,20,40)
+          sp <- c(0,0,0,0,0,0,0,0,1,0,0,0,1,0)
+        }else{
+          sp <- c(0,0,0,0,1,0,0,0,1,0,0,0,1,0)
+        }
+        tmp <- barplot(grbg,  beside=TRUE, log = log, yaxt = "n", names.arg = rep("",4), 
+                       col = col, space = sp, ...)
+        mtext(side = 1, outer = FALSE, line = 0.02, text = txt, cex =0.5, 
+              at = c(tmp[,1],tmp[,2],tmp[,3]))        
+        mtext(side = 1, outer = FALSE, line = 0.02, text = "K = ", cex =0.5, 
+              at = par()$usr[1])
+        # mtext(side = 1, outer = FALSE, line = 0.02, text = c(5,10,20,40), cex =0.5, 
+        #       at = c(mean(tmp[2:3,1]),mean(tmp[2:3,2]),mean(tmp[2:3,3])))
+        if(n == 50){
+          axis(side = 2)
+          par(las = 0)
+          mtext(outer = FALSE, side = 2, line = 3, yaxis_label, cex = 0.75)
+          mtext(outer = FALSE, side = 2, line = 4.5, "Random Forest", cex = 1)
+        }else{
+          par(las = 0)
+          axis(side = 2, labels = FALSE)
+        }
+        if(!is.null(relative_est)){
+          abline(h = 1, lty = 3)
+        }
+      }
+    }
+
+
 }
