@@ -122,7 +122,7 @@ cvauc_cvtmle <- function(Y, X, K = 20, learner = "glm_wrapper",
       ##############
       # make weight for loss function
       full_long_data$targeting_weight_0 <- 
-        as.numeric(full_long_data$Y == 0)/(2*full_long_data$gn) * full_long_data$dFn 
+        as.numeric(full_long_data$Y == 0)/(full_long_data$gn) * full_long_data$dFn 
       # fit intercept only model with weights
       suppressWarnings(
         fluc_mod_0 <- glm(outcome ~ offset(logit_Fn), family = binomial(),
@@ -164,7 +164,7 @@ cvauc_cvtmle <- function(Y, X, K = 20, learner = "glm_wrapper",
 
       # make weight for loss function
       full_long_data$targeting_weight_1 <- 
-        as.numeric(full_long_data$Y == 1)/(2*full_long_data$gn) * full_long_data$dFn 
+        as.numeric(full_long_data$Y == 1)/(full_long_data$gn) * full_long_data$dFn 
       # fit intercept only model with weights
       suppressWarnings(
         fluc_mod_1 <- glm(outcome ~ offset(logit_Fn), family = binomial(),
