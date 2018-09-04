@@ -146,7 +146,7 @@ stepglm_wrapper <- function(train, test){
 #' @examples
 #' # TO DO: Add
 glmnet_wrapper <- function(train, test, lambda.select = "ncoef", 
-                           ncoef = trunc(min(c(sum(train$Y)/10, sum(1 - train$Y)/10))){
+                           ncoef = trunc(min(c(sum(train$Y)/10, sum(1 - train$Y)/10)))){
     x <- model.matrix(~ -1 + ., data = train$X)
     if(lambda.select == "cv"){
         glmnet_fit <- glmnet::cv.glmnet(x = x, y = train$Y,
