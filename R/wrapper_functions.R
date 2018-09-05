@@ -146,7 +146,7 @@ stepglm_wrapper <- function(train, test){
 #' @examples
 #' # TO DO: Add
 glmnet_wrapper <- function(train, test, lambda.select = "ncoef", 
-                           ncoef = trunc(min(c(sum(train$Y)/10, sum(1 - train$Y)/10)))){
+                           ncoef = max(c(1,trunc(min(c(sum(train$Y)/10, sum(1 - train$Y)/10)))))){
     x <- model.matrix(~ -1 + ., data = train$X)
     if(lambda.select == "cv"){
         glmnet_fit <- glmnet::cv.glmnet(x = x, y = train$Y,
@@ -157,10 +157,12 @@ glmnet_wrapper <- function(train, test, lambda.select = "ncoef",
           stats::predict(glmnet_fit, newx = newx, type = "response", s = "lambda.min")
         }
     }else if (lambda.select == "ncoef"){
-        glmnet_fit <- glmnet::glmnet(x = x, y = train$Y,
-            lambda = NULL, family = "binomial", alpha = 1, nlambda = 100)
+        glmnet_fit <- glmnet::glmnet(x = x, y = train$Y, 
+            lambda = NULL, family = "binomial", alpha = 1, nlambda = 5000)
         n_nonzero_coef <- apply(glmnet_fit$beta, 2, function(x){ sum(abs(x) > 0) })
-        lambda_idx <- which.min(abs(n_nonzero_coef - ncoef))[1]
+        all_lambda_idx <- which.min(abs(n_nonzero_coef - ncoef))
+        # if multiple, take the middle one
+        lambda_idx <- all_lambda_idx[ceiling(length(all_lambda_idx/2))]
         lambda_select <- glmnet_fit$lambda[lambda_idx]
         glmnet_fit$my_lambda <- lambda_select
         Psi_nBn_0 <- function(x){
@@ -220,7 +222,7 @@ glmnet_wrapper <- function(train, test, lambda.select = "ncoef",
 #' # TO DO: Add
 #' 
 xgboost_wrapper <- function(test, train, ntrees = 500, 
-    max_depth = 4, shrinkage = 0.1, minobspernode = 10, params = list(), 
+    max_depth = 4, shrinkage = 0.1, minobspernode = 2, params = list(), 
     nthread = 1, verbose = 0, save_period = NULL){
     x <- model.matrix(~. - 1, data = train$X)
     xgmat <- xgboost::xgb.DMatrix(data = x, label = train$Y)
