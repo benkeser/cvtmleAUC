@@ -914,12 +914,16 @@ F_nBn_star_nested_cv <- function(psi_x, y, epsilon = 0,
 #' @export
 
 leave_pair_out_auc <- function(Y, X, learner = "glm_wrapper", 
-                         seed = 1234,
+                         seed = 1234, max_pairs = NULL, 
                          nested_cv = FALSE,
                          parallel = FALSE, ...){
   case_idx <- which(Y == 1)
   control_idx <- which(Y == 0)
   grid_idx <- expand.grid(case = case_idx, control = control_idx)
+  if(!is.null(max_pairs) & nrow(grid_idx) > max_pairs){
+    # randomly select max_pairs pairs
+    grid_idx <- grid_idx[sample(1:nrow(grid_idx), size = max_pairs, replace = FALSE),]
+  }
   folds <- split(grid_idx, seq_len(nrow(grid_idx)))
 
   prediction_list <- .getPredictions(learner = learner, Y = Y, X = X, 
