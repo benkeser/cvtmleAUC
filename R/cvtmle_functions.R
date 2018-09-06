@@ -920,9 +920,11 @@ leave_pair_out_auc <- function(Y, X, learner = "glm_wrapper",
   case_idx <- which(Y == 1)
   control_idx <- which(Y == 0)
   grid_idx <- expand.grid(case = case_idx, control = control_idx)
-  if(!is.null(max_pairs) & nrow(grid_idx) > max_pairs){
-    # randomly select max_pairs pairs
-    grid_idx <- grid_idx[sample(1:nrow(grid_idx), size = max_pairs, replace = FALSE),]
+  if(!is.null(max_pairs)){
+    if(nrow(grid_idx) > max_pairs){
+      # randomly select max_pairs pairs
+      grid_idx <- grid_idx[sample(1:nrow(grid_idx), size = max_pairs, replace = FALSE),]
+    }
   }
   folds <- split(grid_idx, seq_len(nrow(grid_idx)))
 
