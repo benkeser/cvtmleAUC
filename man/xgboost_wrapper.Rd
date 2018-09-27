@@ -4,9 +4,9 @@
 \alias{xgboost_wrapper}
 \title{Wrapper for fitting xgboost}
 \usage{
-xgboost_wrapper(test, train, ntrees = 500, max_depth = 4, shrinkage = 0.1,
-  minobspernode = 10, params = list(), nthread = 1, verbose = 0,
-  save_period = NULL)
+xgboost_wrapper(test, train, ntrees = 500, max_depth = 4,
+  shrinkage = 0.1, minobspernode = 2, params = list(), nthread = 1,
+  verbose = 0, save_period = NULL)
 }
 \arguments{
 \item{test}{...}

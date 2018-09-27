@@ -4,9 +4,9 @@
 \alias{cvauc_cvtmle}
 \title{Compute CVTML estimates of cross-validated AUC}
 \usage{
-cvauc_cvtmle(Y, X, K = 20, learner = "glm_wrapper", nested_cv = FALSE,
-  nested_K = K - 1, parallel = FALSE, maxIter = 10, icTol = 1/length(Y),
-  prediction_list = NULL, ...)
+cvauc_cvtmle(Y, X, K = 20, learner = "glm_wrapper",
+  nested_cv = FALSE, nested_K = K - 1, parallel = FALSE,
+  maxIter = 10, icTol = 1/length(Y), prediction_list = NULL, ...)
 }
 \arguments{
 \item{Y}{The outcome}

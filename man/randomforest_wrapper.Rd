@@ -5,7 +5,8 @@
 \title{Wrapper for fitting a main terms random forest}
 \usage{
 randomforest_wrapper(train, test, mtry = floor(sqrt(ncol(train$X))),
-  ntree = 1000, nodesize = 1, maxnodes = NULL, importance = FALSE, ...)
+  ntree = 1000, nodesize = 1, maxnodes = NULL, importance = FALSE,
+  ...)
 }
 \arguments{
 \item{train}{...}

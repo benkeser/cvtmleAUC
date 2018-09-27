@@ -5,7 +5,8 @@
 \title{Wrapper for fitting svm}
 \usage{
 svm_wrapper(test, train, type.class = "nu-classification",
-  kernel = "radial", nu = 0.5, degree = 3, cost = 1, coef0 = 0, ...)
+  kernel = "radial", nu = 0.5, degree = 3, cost = 1, coef0 = 0,
+  ...)
 }
 \arguments{
 \item{test}{...}

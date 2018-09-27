@@ -5,7 +5,7 @@
 \title{Function to do leave pair out AUC computation}
 \usage{
 leave_pair_out_auc(Y, X, learner = "glm_wrapper", seed = 1234,
-  nested_cv = FALSE, parallel = FALSE, ...)
+  max_pairs = NULL, nested_cv = FALSE, parallel = FALSE, ...)
 }
 \arguments{
 \item{Y}{The outcome}

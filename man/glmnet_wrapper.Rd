@@ -4,7 +4,8 @@
 \alias{glmnet_wrapper}
 \title{Wrapper for fitting lasso}
 \usage{
-glmnet_wrapper(train, test, lambda.select = "ncoef", ncoef = 5)
+glmnet_wrapper(train, test, lambda.select = "ncoef", ncoef = max(c(1,
+  trunc(min(c(sum(train$Y)/10, sum(1 - train$Y)/10))))))
 }
 \arguments{
 \item{train}{...}

@@ -972,3 +972,62 @@ boot_corrected_auc <- function(Y, X, B = 500, learner = "glm_wrapper",
   corrected_auc <- naive_auc - mean_optimism
   return(list(auc = corrected_auc))
 }
+
+
+#' @export
+both_632boot <- function(Y, X, B = 500, learner = "glm_wrapper", 
+                         seed = 1234, sens = 0.95, 
+                         nested_cv = FALSE,
+                         parallel = FALSE, ...){
+  n <- length(Y)  
+  full_fit <- do.call(learner, args=list(train = list(Y = Y, X = X),
+                                      test = list(Y = Y, X = X)))
+  naive_auc <- cvAUC::cvAUC(predictions = full_fit$psi_nBn_testx,
+                            labels = Y)$cvAUC          
+  full_c0 <- quantile(full_fit$psi_nBn_testx[full_fit$train_y == 1], p = 1 - sens)
+  full_est <- mean(full_fit$psi_nBn_testx <= full_c0)
+
+  one_boot <- function(Y, X, n){
+    idx <- sample(seq_len(n), replace = TRUE)
+    train_Y <- Y[idx]
+    train_X <- X[idx, , drop = FALSE]
+    fit <- do.call(learner, args=list(train = list(Y = train_Y, X = train_X),
+                                      test = list(Y = Y, X = X)))
+    oob_idx <- which(!(1:n %in% idx))
+    auc_out <- tryCatch({cvAUC::cvAUC(predictions = fit$psi_nBn_testx[oob_idx],
+                              labels = fit$test_y[oob_idx])$cvAUC}, error = function(e){
+                                return(NA)})
+    oob_c0 <- quantile(fit$psi_nBn_testx[oob_idx][fit$train_y[oob_idx] == 1], p = 1 - sens)
+    scrnp_out <- mean(fit$psi_nBn_testx[oob_idx] <= oob_c0)
+    return(c(auc_out,scrnp_out))
+  }
+  
+  all_boot <- replicate(B, one_boot(Y = Y, X = X, n = n))
+  # get overfitting index
+  # average boot auc
+  auc_b <- mean(all_boot[1,], na.rm = TRUE)
+  # first copy each prediction n times
+  long_pred <- rep(full_fit$psi_nBn_testx, each = n)
+  # now copy observed outcomes n times 
+  long_y <- rep(Y, n)
+  # get "overfit" correction factor
+  g <- cvAUC::cvAUC(predictions = long_pred, labels = long_y)$cvAUC
+  # define relative overfitting rate
+  R <- (auc_b - naive_auc)/(g - naive_auc)
+  # 632 weight
+  w <- 0.632 / (1 - 0.368*R)
+  # weighted estimate
+  corrected_auc <- (1 - w)*naive_auc + w * auc_b
+
+  long_c0 <- quantile(long_pred[long_y == 1], p = 1 - sens)
+  scrnp_b <- mean(all_boot[2,], na.rm = TRUE)
+  g <- mean(long_pred <= long_c0)
+  # relative overfitting rate
+  R <- (scrnp_b - full_est)/(g - full_est)
+  # 632 weight
+  w <- 0.632 / (1 - 0.368*R)
+  # weighted estimate
+  corrected_scrnp <- (1 - w)*full_est + w * scrnp_b
+
+  return(list(auc = corrected_auc, scrnp = corrected_scrnp))
+}
